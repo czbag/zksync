@@ -1,0 +1,4 @@
+loguru==0.7.0
+questionary==1.10.0
+requests==2.31.0
+web3==6.7.0

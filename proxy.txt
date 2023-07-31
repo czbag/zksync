@@ -1,0 +1,2 @@
+// Proxy format – login:pass@ip:port | Remove the line before running the program
+//admin:admin@127.0.0.1:1000

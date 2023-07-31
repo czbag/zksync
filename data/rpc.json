@@ -1,0 +1,37 @@
+{
+  "ethereum": {
+    "rpc": [
+      "https://rpc.ankr.com/eth"
+    ],
+    "explorer": "https://etherscan.io/tx/",
+    "token": "ETH"
+  },
+  "arbitrum": {
+    "rpc": [
+      "https://rpc.ankr.com/arbitrum"
+    ],
+    "explorer": "https://arbiscan.io/tx/",
+    "token": "ETH"
+  },
+  "optimism": {
+    "rpc": [
+      "https://rpc.ankr.com/optimism"
+    ],
+    "explorer": "https://optimistic.etherscan.io/tx/",
+    "token": "ETH"
+  },
+  "polygon_zkevm": {
+    "rpc": [
+      "https://rpc.ankr.com/polygon_zkevm"
+    ],
+    "explorer": "https://zkevm.polygonscan.com/tx/",
+    "token": "ETH"
+  },
+  "zksync": {
+    "rpc": [
+      "https://mainnet.era.zksync.io"
+    ],
+    "explorer": "https://explorer.zksync.io/tx/",
+    "token": "ETH"
+  }
+}
