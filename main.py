@@ -21,6 +21,7 @@ def get_module():
             Choice("Make swap on Mute", "swap_mute"),
             Choice("Make swap on Space.fi", "swap_spacefi"),
             Choice("Make swap on PancakeSwap", "swap_pancake"),
+            Choice("Deploy contract and mint token", "deploy_contract"),
             Choice("Use custom routes", "use_routes"),
             Choice("Exit", "exit"),
         ],
@@ -45,6 +46,8 @@ def start_module(module, key, proxy):
         swap_spacefi(key, proxy)
     elif module == "swap_pancake":
         swap_pancake(key, proxy)
+    elif module == "deploy_contract":
+        deploy_contract_zksync(key, proxy)
 
 
 def main(module, key):

@@ -1,10 +1,8 @@
 import json
+from pathlib import Path
 
 with open('data/rpc.json') as file:
     RPC = json.load(file)
-
-with open('data/abi/zksync_bridge.json') as file:
-    ZKSYNC_BRIDGE_ABI = json.load(file)
 
 with open('data/abi/erc20_abi.json') as file:
     ERC20_ABI = json.load(file)
@@ -27,7 +25,7 @@ with open("data/abi/mute/router.json", "r") as file:
 with open("data/abi/pancake/router.json", "r") as file:
     PANCAKE_ROUTER_ABI = json.load(file)
 
-ZKSYNC_BRIDGE = "0x32400084c286cf3e17e7b677ea9583e60a000324"
+CONTRACT_PATH = Path("data/deploy/Token.json")
 
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 
