@@ -29,7 +29,7 @@
   },
   "zksync": {
     "rpc": [
-      "https://mainnet.era.zksync.io"
+      "https://rpc.ankr.com/zksync_era"
     ],
     "explorer": "https://explorer.zksync.io/tx/",
     "token": "ETH"

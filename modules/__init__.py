@@ -5,3 +5,4 @@ from .syncswap import SyncSwap
 from .spacefi import SpaceFi
 from .mute import Mute
 from .pancake import Pancake
+from .dmail import Dmail

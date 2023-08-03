@@ -21,10 +21,10 @@ MAX_GWEI = 40
 # ROUTES SETTINGS
 """
 You can use these methods: 
-bridge_zksync, bridge_orbiter, swap_syncswap, swap_mute, swap_spacefi, swap_pancake, deploy_contract
+bridge_zksync, bridge_orbiter, swap_syncswap, swap_mute, swap_spacefi, swap_pancake, deploy_contract, send_mail
 """
 RANDOM_ROUTES = False
-ROUTES = ["swap_pancake", "deploy_contract", "swap_syncswap"]
+ROUTES = ["send_mail", "swap_syncswap"]
 ROUTE_SLEEP_FROM = 10
 ROUTE_SLEEP_TO = 20
 
@@ -151,6 +151,15 @@ def swap_pancake(key, proxy):
 
 
 def deploy_contract_zksync(key, proxy):
+    """
+    Deploy contract token and mint
+    ______________________________________________________
+    token_name – Any token name
+    token_symbol – Any token symbol
+    ______________________________________________________
+    min_mint – Amount of mint 2
+    amount – Amount of mint 1000
+    """
     token_name = "Test"
     token_symbol = "Test"
 
@@ -159,3 +168,11 @@ def deploy_contract_zksync(key, proxy):
 
     zksync = ZkSync(key, proxy)
     zksync.deploy_contract(token_name, token_symbol, min_mint, max_mint)
+
+
+def send_mail(key, proxy):
+    """
+    Send email on your account from Dmail don't need email, subject or message
+    """
+    zksync = Dmail(key, proxy)
+    zksync.send_mail()

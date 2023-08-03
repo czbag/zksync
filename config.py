@@ -25,6 +25,9 @@ with open("data/abi/mute/router.json", "r") as file:
 with open("data/abi/pancake/router.json", "r") as file:
     PANCAKE_ROUTER_ABI = json.load(file)
 
+with open("data/abi/dmail/abi.json", "r") as file:
+    DMAIL_ABI = json.load(file)
+
 CONTRACT_PATH = Path("data/deploy/Token.json")
 
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
@@ -54,3 +57,5 @@ PANCAKE_CONTRACTS = {
 SYNCSWAP_POOL = "0x80115c708E12eDd42E504c1cD52Aea96C547c05c"
 
 ORBITER_CONTRACT = "0x80C67432656d59144cEFf962E8fAF8926599bCF8"
+
+DMAIL_CONTRACT = "0x981F198286E40F9979274E0876636E9144B8FB8E"
