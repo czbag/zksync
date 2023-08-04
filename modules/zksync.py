@@ -18,7 +18,7 @@ from .account import Account
 
 class ZkSync(Account):
     def __init__(self, private_key: str, proxy: str) -> None:
-        super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
+        super().__init__(private_key=private_key, proxy=proxy, chain="ethereum")
         request_kwargs = {}
         if proxy:
             request_kwargs = {"proxies": {"https": f"http://{proxy}"}}
