@@ -16,6 +16,7 @@ def get_module():
         "Select a method to get started",
         choices=[
             Choice("Make bridge ZkSync", "bridge_zksync"),
+            Choice("Make withdraw from ZkSync", "withdraw_zksync"),
             Choice("Make bridge on Orbiter", "bridge_orbiter"),
             Choice("Make swap on SyncSwap", "swap_syncswap"),
             Choice("Make swap on Mute", "swap_mute"),
@@ -37,6 +38,8 @@ def get_module():
 def start_module(module, key, proxy):
     if module == "bridge_zksync":
         bridge_zksync(key, proxy)
+    elif module == "withdraw_zksync":
+        withdraw_zksync(key, proxy)
     elif module == "bridge_orbiter":
         bridge_orbiter(key, proxy)
     elif module == "swap_syncswap":

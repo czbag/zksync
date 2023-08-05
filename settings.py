@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from modules import *
 
 # RANDOM WALLETS MODE
@@ -21,7 +19,8 @@ MAX_GWEI = 40
 # ROUTES SETTINGS
 """
 You can use these methods: 
-bridge_zksync, bridge_orbiter, swap_syncswap, swap_mute, swap_spacefi, swap_pancake, deploy_contract, send_mail
+bridge_zksync, withdraw_zksync, bridge_orbiter, swap_syncswap, 
+swap_mute, swap_spacefi, swap_pancake, deploy_contract, send_mail
 """
 RANDOM_ROUTES = False
 ROUTES = ["send_mail", "swap_syncswap"]
@@ -40,8 +39,23 @@ def bridge_zksync(key, proxy):
     max_bridge = 0.002
     decimal = 4
 
-    zksync = ZkSync(key, proxy)
+    zksync = ZkSync(key, proxy, "ethereum")
     zksync.deposit(min_bridge, max_bridge, decimal)
+
+
+def withdraw_zksync(key, proxy):
+    """
+    Deposit from official bridge
+    ______________________________________________________
+    amount – Amount of bridge (2, 5), type in uniform(2, 5) | number after uniform() – decimal point
+    """
+
+    min_bridge = 0.001
+    max_bridge = 0.002
+    decimal = 4
+
+    zksync = ZkSync(key, proxy, "zksync")
+    zksync.withdraw(min_bridge, max_bridge, decimal)
 
 
 def bridge_orbiter(key, proxy):
@@ -166,7 +180,7 @@ def deploy_contract_zksync(key, proxy):
     min_mint = 10
     max_mint = 1000
 
-    zksync = ZkSync(key, proxy)
+    zksync = ZkSync(key, proxy, "zksync")
     zksync.deploy_contract(token_name, token_symbol, min_mint, max_mint)
 
 

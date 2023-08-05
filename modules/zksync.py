@@ -10,15 +10,15 @@ from zksync2.provider.eth_provider import EthereumProvider
 from zksync2.module.module_builder import ZkSyncBuilder
 from zksync2.core.types import Token, EthBlockParams
 from zksync2.signer.eth_signer import PrivateKeyEthSigner
-from zksync2.transaction.transaction_builders import TxCreate2Contract
+from zksync2.transaction.transaction_builders import TxCreate2Contract, TxWithdraw
 
 from config import RPC, CONTRACT_PATH
 from .account import Account
 
 
 class ZkSync(Account):
-    def __init__(self, private_key: str, proxy: str) -> None:
-        super().__init__(private_key=private_key, proxy=proxy, chain="ethereum")
+    def __init__(self, private_key: str, proxy: str, chain: str) -> None:
+        super().__init__(private_key=private_key, proxy=proxy, chain=chain)
         request_kwargs = {}
         if proxy:
             request_kwargs = {"proxies": {"https": f"http://{proxy}"}}
@@ -52,6 +52,29 @@ class ZkSync(Account):
             )
         except:
             logger.error("Deposit transaction on L1 network failed")
+
+    def withdraw(self, min_bridge: float, max_bridge: float, decimal: int):
+        amount = round(random.uniform(min_bridge, max_bridge), decimal)
+
+        logger.info(f"[{self.address}] Bridge to Ethereum | {amount} ETH")
+
+        withdrawal_tx = TxWithdraw(web3=self.zk_w3,
+                                   token=Token.create_eth(),
+                                   amount=Web3.to_wei(amount, "ether"),
+                                   gas_limit=2000000,
+                                   account=self.account)
+
+        estimated_gas = self.zk_w3.zksync.eth_estimate_gas(withdrawal_tx.tx)
+
+        tx = withdrawal_tx.estimated_gas(estimated_gas)
+        signed = self.account.sign_transaction(tx)
+        raw_tx_hash = self.zk_w3.zksync.send_raw_transaction(signed.rawTransaction)
+        tx_hash = self.zk_w3.to_hex(raw_tx_hash)
+
+        logger.success(
+            f"[{self.address}] Bridged from ZkSync to Ethereum {amount} ETH is successfully – " +
+            f"{self.explorer}{tx_hash}"
+        )
 
     def mint(self, contract_address: str, amount: int):
         logger.info(f"[{self.address}] Starting to mint token")
