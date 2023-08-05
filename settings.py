@@ -20,7 +20,7 @@ MAX_GWEI = 40
 """
 You can use these methods: 
 bridge_zksync, withdraw_zksync, bridge_orbiter, swap_syncswap, 
-swap_mute, swap_spacefi, swap_pancake, deploy_contract, send_mail
+swap_mute, swap_spacefi, swap_pancake, deploy_contract, send_mail, mint_nft
 """
 RANDOM_ROUTES = False
 ROUTES = ["send_mail", "swap_syncswap"]
