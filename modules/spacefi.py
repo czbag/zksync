@@ -20,7 +20,7 @@ class SpaceFi(Account):
             "nonce": self.w3.eth.get_transaction_count(self.address)
         }
 
-    def swap_to_token(self, from_token, to_token, amount):
+    def swap_to_token(self, from_token: str, to_token: str, amount: int):
         amount = Web3.to_wei(amount, "ether")
         balance = self.w3.eth.get_balance(self.address)
         self.tx.update({"value": amount})
@@ -35,7 +35,7 @@ class SpaceFi(Account):
 
         return amount, balance, contract_txn
 
-    def swap_to_eth(self, from_token, to_token, amount):
+    def swap_to_eth(self, from_token: str, to_token: str, amount: int):
         token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[from_token])
         token_contract = self.get_contract(Web3.to_checksum_address(token_address))
         amount = int(amount * 10 ** token_contract.functions.decimals().call())

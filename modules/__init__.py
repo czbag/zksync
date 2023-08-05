@@ -6,3 +6,4 @@ from .spacefi import SpaceFi
 from .mute import Mute
 from .pancake import Pancake
 from .dmail import Dmail
+from .minter import Minter

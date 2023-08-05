@@ -22,6 +22,7 @@ def get_module():
             Choice("Make swap on Mute", "swap_mute"),
             Choice("Make swap on Space.fi", "swap_spacefi"),
             Choice("Make swap on PancakeSwap", "swap_pancake"),
+            Choice("Mint NFT", "mint_nft"),
             Choice("Deploy contract and mint token", "deploy_contract"),
             Choice("Dmail sending mail", "send_mail"),
             Choice("Use custom routes", "use_routes"),
@@ -53,7 +54,11 @@ def start_module(module, key, proxy):
     elif module == "deploy_contract":
         deploy_contract_zksync(key, proxy)
     elif module == "send_mail":
-        send_mail(key, proxy)
+        dmail = Dmail(key, proxy)
+        dmail.send_mail()
+    elif module == "mint_nft":
+        mint_nft = Minter(key, proxy)
+        mint_nft.mint()
 
 
 def main(module, key):

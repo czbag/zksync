@@ -160,8 +160,8 @@ def swap_pancake(key, proxy):
     max_swap = 0.002
     decimal = 4
 
-    spacefi = Pancake(key, proxy)
-    spacefi.swap(from_token, to_token, min_swap, max_swap, decimal)
+    pancake = Pancake(key, proxy)
+    pancake.swap(from_token, to_token, min_swap, max_swap, decimal)
 
 
 def deploy_contract_zksync(key, proxy):
@@ -182,11 +182,3 @@ def deploy_contract_zksync(key, proxy):
 
     zksync = ZkSync(key, proxy, "zksync")
     zksync.deploy_contract(token_name, token_symbol, min_mint, max_mint)
-
-
-def send_mail(key, proxy):
-    """
-    Send email on your account from Dmail don't need email, subject or message
-    """
-    zksync = Dmail(key, proxy)
-    zksync.send_mail()
