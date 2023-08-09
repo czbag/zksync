@@ -92,11 +92,11 @@ if __name__ == '__main__':
     if RANDOM_WALLET:
         random.shuffle(ACCOUNTS)
 
-    if RANDOM_ROUTES:
-        random.shuffle(ROUTES)
-
     for j, key in enumerate(ACCOUNTS):
         if module == "use_routes":
+            if RANDOM_ROUTES:
+                random.shuffle(ROUTES)
+
             for route in ROUTES:
                 main(route, key)
                 time.sleep(random.randint(ROUTE_SLEEP_FROM, ROUTE_SLEEP_TO))
