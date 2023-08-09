@@ -25,11 +25,23 @@ with open("data/abi/mute/router.json", "r") as file:
 with open("data/abi/pancake/router.json", "r") as file:
     PANCAKE_ROUTER_ABI = json.load(file)
 
+with open("data/abi/woofi/router.json", "r") as file:
+    WOOFI_ROUTER_ABI = json.load(file)
+
+with open("data/abi/bungee/abi.json", "r") as file:
+    BUNGEE_ABI = json.load(file)
+
 with open("data/abi/dmail/abi.json", "r") as file:
     DMAIL_ABI = json.load(file)
 
 with open("data/abi/minter/abi.json", "r") as file:
     MINTER_ABI = json.load(file)
+
+with open("data/abi/l2telegraph/send_message.json", "r") as file:
+    L2TELEGRAPH_MESSAGE_ABI = json.load(file)
+
+with open("data/abi/l2telegraph/bridge_nft.json", "r") as file:
+    L2TELEGRAPH_NFT_ABI = json.load(file)
 
 CONTRACT_PATH = Path("data/deploy/Token.json")
 
@@ -57,6 +69,10 @@ PANCAKE_CONTRACTS = {
     "router": "0x5aEaF2883FBf30f3D62471154eDa3C0c1b05942d"
 }
 
+WOOFI_CONTRACTS = {
+    "router": "0xfd505702b37Ae9b626952Eb2DD736d9045876417"
+}
+
 SYNCSWAP_POOL = "0x80115c708E12eDd42E504c1cD52Aea96C547c05c"
 
 ORBITER_CONTRACT = "0x80C67432656d59144cEFf962E8fAF8926599bCF8"
@@ -64,3 +80,8 @@ ORBITER_CONTRACT = "0x80C67432656d59144cEFf962E8fAF8926599bCF8"
 DMAIL_CONTRACT = "0x981F198286E40F9979274E0876636E9144B8FB8E"
 
 MINTER_CONTRACT = "0x31DCD96f29BD32F3a1856247846E9d2f95C2b639"
+
+L2TELEGRAPH_MESSAGE_CONTRACT = "0x0d4a6d5964f3b618d8e46bcfbf2792b0d769fbda"
+L2TELEGRAPH_NFT_CONTRACT = "0xD43A183C97dB9174962607A8b6552CE320eAc5aA"
+
+BUNGEE_CONTRACT = "0x7ee459d7fde8b4a3c22b9c8c7aa52abaddd9ffd5"

@@ -3,12 +3,11 @@ import time
 
 from loguru import logger
 from web3 import Web3
-from config import SYNCSWAP_ROUTER_ABI, ZERO_ADDRESS, SYNCSWAP_CONTRACTS, SYNCSWAP_POOL, ZKSYNC_TOKENS
+from config import WOOFI_CONTRACTS, WOOFI_ROUTER_ABI, ZKSYNC_TOKENS
 from .account import Account
-from eth_abi import abi
 
 
-class SyncSwap(Account):
+class WooFi(Account):
     def __init__(self, private_key: str, proxy: str) -> None:
         super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
 
@@ -17,7 +16,7 @@ class SyncSwap(Account):
 
         logger.info(f"[{self.address}] Swap – {from_token} -> {to_token} | {amount} {from_token}")
 
-        swap_contract = self.get_contract(SYNCSWAP_CONTRACTS["router"], SYNCSWAP_ROUTER_ABI)
+        swap_contract = self.get_contract(WOOFI_CONTRACTS["router"], WOOFI_ROUTER_ABI)
 
         tx = {
             "from": self.address,
@@ -27,36 +26,30 @@ class SyncSwap(Account):
         }
 
         if from_token == "ETH":
-            token_address = ZERO_ADDRESS
+            from_token_address = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+            to_token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[to_token])
             amount = Web3.to_wei(amount, "ether")
             balance = self.w3.eth.get_balance(self.address)
             tx.update({"value": amount})
         else:
-            token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[from_token])
-            token_contract = self.get_contract(Web3.to_checksum_address(token_address))
+            from_token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[from_token])
+            to_token_address = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+            token_contract = self.get_contract(Web3.to_checksum_address(from_token_address))
             amount = int(amount * 10 ** token_contract.functions.decimals().call())
-            balance = self.get_balance(token_address)["balance_wei"]
+            balance = self.get_balance(from_token_address)["balance_wei"]
 
-            self.approve(amount, token_address, SYNCSWAP_CONTRACTS["router"])
+            self.approve(amount, from_token_address, WOOFI_CONTRACTS["router"])
             tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
 
         if amount < balance:
-            steps = [{
-                "pool": Web3.to_checksum_address(SYNCSWAP_POOL),
-                "data": abi.encode(["address", "address", "uint8"], [token_address, self.address, 1]),
-                "callback": ZERO_ADDRESS,
-                "callbackData": "0x"
-            }]
-
-            deadline = int(time.time()) + 1000000
-
-            paths = [{
-                "steps": steps,
-                "tokenIn": token_address,
-                "amountIn": amount
-            }]
-
-            contract_txn = swap_contract.functions.swap(paths, 0, deadline).build_transaction(tx)
+            contract_txn = swap_contract.functions.swap(
+                from_token_address,
+                to_token_address,
+                amount,
+                0,
+                self.address,
+                self.address
+            ).build_transaction(tx)
 
             signed_txn = self.sign(contract_txn)
 

@@ -9,7 +9,7 @@ from config import ORBITER_CONTRACT
 
 class Orbiter(Account):
     def __init__(self, private_key: str, chain: str, proxy: str) -> None:
-        super().__init__(private_key, chain, proxy)
+        super().__init__(private_key=private_key, proxy=proxy, chain=chain)
 
         self.bridge_codes = {
             "ethereum": 9001,

@@ -32,7 +32,7 @@ class ZkSync(Account):
         logger.info(f"[{self.address}] Bridge to ZkSync | {amount} ETH")
 
         eth_provider = EthereumProvider(self.zk_w3, self.w3, self.account)
-        gas_limit = 700000
+        gas_limit = random.randint(700000, 1000000)
         gas_price = self.w3.eth.gas_price
         operator_tip = eth_provider.get_base_cost(l2_gas_limit=gas_limit, gas_per_pubdata_byte=800, gas_price=gas_price)
 
@@ -61,7 +61,7 @@ class ZkSync(Account):
         withdrawal_tx = TxWithdraw(web3=self.zk_w3,
                                    token=Token.create_eth(),
                                    amount=Web3.to_wei(amount, "ether"),
-                                   gas_limit=2000000,
+                                   gas_limit=random.randint(1900000, 2200000),
                                    account=self.account)
 
         estimated_gas = self.zk_w3.zksync.eth_estimate_gas(withdrawal_tx.tx)
@@ -144,7 +144,7 @@ class ZkSync(Account):
                                              chain_id=self.zk_w3.zksync.chain_id,
                                              nonce=nonce,
                                              from_=self.address,
-                                             gas_limit=3000000,
+                                             gas_limit=random.randint(2900000, 3100000),
                                              gas_price=gas_price,
                                              bytecode=token_contract.bytecode,
                                              salt=random_salt,

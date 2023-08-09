@@ -66,7 +66,7 @@ class Account:
                 "from": self.address,
                 "nonce": self.w3.eth.get_transaction_count(self.address),
                 "gasPrice": Web3.to_wei("0.25", "gwei"),
-                "gas": 3000000
+                "gas": random.randint(2900000, 3100000)
             }
             transaction = contract.functions.approve(
                 contract_address,

@@ -7,7 +7,7 @@ from questionary import Choice
 from config import *
 
 from settings import *
-from utils.gas_cheker import wait_gas
+from utils.gas_checker import wait_gas
 from utils.get_proxy import get_proxy
 
 
@@ -15,18 +15,22 @@ def get_module():
     result = questionary.select(
         "Select a method to get started",
         choices=[
-            Choice("Make bridge ZkSync", "bridge_zksync"),
-            Choice("Make withdraw from ZkSync", "withdraw_zksync"),
-            Choice("Make bridge on Orbiter", "bridge_orbiter"),
-            Choice("Make swap on SyncSwap", "swap_syncswap"),
-            Choice("Make swap on Mute", "swap_mute"),
-            Choice("Make swap on Space.fi", "swap_spacefi"),
-            Choice("Make swap on PancakeSwap", "swap_pancake"),
-            Choice("Mint NFT", "mint_nft"),
-            Choice("Deploy contract and mint token", "deploy_contract"),
-            Choice("Dmail sending mail", "send_mail"),
-            Choice("Use custom routes", "use_routes"),
-            Choice("Exit", "exit"),
+            Choice("1) Make bridge ZkSync", "bridge_zksync"),
+            Choice("2) Make withdraw from ZkSync", "withdraw_zksync"),
+            Choice("3) Make bridge on Orbiter", "bridge_orbiter"),
+            Choice("4) Make swap on SyncSwap", "swap_syncswap"),
+            Choice("5) Make swap on Mute", "swap_mute"),
+            Choice("6) Make swap on Space.fi", "swap_spacefi"),
+            Choice("7) Make swap on PancakeSwap", "swap_pancake"),
+            Choice("8) Make swap on WooFi", "swap_woofi"),
+            Choice("9) Make bungee refuel", "refuel_bungee"),
+            Choice("10) Send message L2Telegraph", "send_message"),
+            Choice("11) Mint and bridge NFT L2Telegraph", "bridge_nft"),
+            Choice("12) Mint NFT", "mint_nft"),
+            Choice("13) Deploy contract and mint token", "deploy_contract"),
+            Choice("14) Dmail sending mail", "send_mail"),
+            Choice("15) Use custom routes", "use_routes"),
+            Choice("16) Exit", "exit"),
         ],
         qmark="🛠 ",
         pointer="✅ "
@@ -51,6 +55,10 @@ def start_module(module, key, proxy):
         swap_spacefi(key, proxy)
     elif module == "swap_pancake":
         swap_pancake(key, proxy)
+    elif module == "swap_woofi":
+        swap_woofi(key, proxy)
+    elif module == "refuel_bungee":
+        bungee_refuel(key, proxy)
     elif module == "deploy_contract":
         deploy_contract_zksync(key, proxy)
     elif module == "send_mail":
@@ -59,6 +67,12 @@ def start_module(module, key, proxy):
     elif module == "mint_nft":
         mint_nft = Minter(key, proxy)
         mint_nft.mint()
+    elif module == "send_message":
+        l2telegraph = L2Telegraph(key, proxy)
+        l2telegraph.send_message()
+    elif module == "bridge_nft":
+        l2telegraph = L2Telegraph(key, proxy)
+        l2telegraph.bridge()
 
 
 def main(module, key):

@@ -9,13 +9,13 @@ from .account import Account
 
 class Pancake(Account):
     def __init__(self, private_key: str, proxy: str) -> None:
-        super().__init__(private_key, "zksync", proxy)
+        super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
 
         self.swap_contract = self.get_contract(PANCAKE_CONTRACTS["router"], PANCAKE_ROUTER_ABI)
         self.deadline = int(time.time()) + 1000000
         self.tx = {
             "from": self.address,
-            "gas": 3000000,
+            "gas": random.randint(2900000, 3100000),
             "gasPrice": Web3.to_wei("0.25", "gwei"),
             "nonce": self.w3.eth.get_transaction_count(self.address)
         }

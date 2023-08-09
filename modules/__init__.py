@@ -5,5 +5,8 @@ from .syncswap import SyncSwap
 from .spacefi import SpaceFi
 from .mute import Mute
 from .pancake import Pancake
+from .woofi import WooFi
+from .bungee import Bungee
 from .dmail import Dmail
 from .minter import Minter
+from .l2telegraph import L2Telegraph

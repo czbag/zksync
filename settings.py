@@ -4,7 +4,7 @@ from modules import *
 RANDOM_WALLET = False  # True or False
 
 # SLEEP MODE
-IS_SLEEP = False  # True or False
+IS_SLEEP = True  # True or False
 
 SLEEP_FROM = 100  # Second
 SLEEP_TO = 1200  # Second
@@ -20,10 +20,12 @@ MAX_GWEI = 40
 """
 You can use these methods: 
 bridge_zksync, withdraw_zksync, bridge_orbiter, swap_syncswap, 
-swap_mute, swap_spacefi, swap_pancake, deploy_contract, send_mail, mint_nft
+swap_mute, swap_spacefi, swap_pancake, swap_woofi, deploy_contract, send_mail, 
+mint_nft, send_message, bridge_nft
+
 """
 RANDOM_ROUTES = False
-ROUTES = ["send_mail", "swap_syncswap"]
+ROUTES = ["send_mail", "mint_nft"]
 ROUTE_SLEEP_FROM = 10
 ROUTE_SLEEP_TO = 20
 
@@ -162,6 +164,44 @@ def swap_pancake(key, proxy):
 
     pancake = Pancake(key, proxy)
     pancake.swap(from_token, to_token, min_swap, max_swap, decimal)
+
+
+def swap_woofi(key, proxy):
+    """
+    Make swap on WooFi
+    ______________________________________________________
+    from_token – Choose SOURCE token ETH/USDC | Select one
+    to_token – Choose DESTINATION token ETH/USDC | Select one
+    ______________________________________________________
+    amount – Amount of swap (2, 5), type in uniform(2, 5) | number after uniform() – decimal point
+    """
+
+    from_token = "USDC"
+    to_token = "ETH"
+
+    min_swap = 4
+    max_swap = 5
+    decimal = 4
+
+    woofi = WooFi(key, proxy)
+    woofi.swap(from_token, to_token, min_swap, max_swap, decimal)
+
+
+def bungee_refuel(key, proxy):
+    """
+    Make refuel on Bungee
+    ______________________________________________________
+    to_chain – Choose DESTINATION chain: BSC, OPTIMISM, GNOSIS, POLYGON, BASE, ARBITRUM, AVALANCHE, AURORA, ZK_EVM
+    ______________________________________________________
+    RANDOM_AMOUNT – True - amount random from min to max | False - use min amount
+    """
+
+    to_chain = "BSC"
+
+    RANDOM_AMOUNT = False
+
+    bungee = Bungee(key, proxy)
+    bungee.refuel(to_chain, RANDOM_AMOUNT)
 
 
 def deploy_contract_zksync(key, proxy):

@@ -1,3 +1,5 @@
+import random
+
 from loguru import logger
 from web3 import Web3
 from config import MINTER_ABI, MINTER_CONTRACT
@@ -11,10 +13,11 @@ class Minter(Account):
         self.contract = self.get_contract(Web3.to_checksum_address(MINTER_CONTRACT), MINTER_ABI)
 
     def mint(self):
+        logger.info(f"[{self.address}] Mint NFT")
         tx = {
             "chainId": self.w3.eth.chain_id,
             "from": self.address,
-            "gas": 1000000,
+            "gas": random.randint(1000000, 1100000),
             "gasPrice": Web3.to_wei("0.25", "gwei"),
             "nonce": self.w3.eth.get_transaction_count(self.address)
         }
