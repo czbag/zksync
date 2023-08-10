@@ -11,7 +11,7 @@ class L2Telegraph(Account):
         super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
 
     def get_estimate_fee(self, contract_address: str, abi: dict):
-        contract = self.get_contract(Web3.to_checksum_address(contract_address), abi)
+        contract = self.get_contract(contract_address, abi)
         fee = contract.functions.estimateFees(
             175,
             self.address,
@@ -42,7 +42,7 @@ class L2Telegraph(Account):
             "value": Web3.to_wei("0.00025", "ether") + l0_fee
         }
 
-        contract = self.get_contract(Web3.to_checksum_address(L2TELEGRAPH_MESSAGE_CONTRACT), L2TELEGRAPH_MESSAGE_ABI)
+        contract = self.get_contract(L2TELEGRAPH_MESSAGE_CONTRACT, L2TELEGRAPH_MESSAGE_ABI)
 
         transaction = contract.functions.sendMessage(
             ' ',
@@ -68,7 +68,7 @@ class L2Telegraph(Account):
             "value": Web3.to_wei("0.0005", "ether")
         }
 
-        contract = self.get_contract(Web3.to_checksum_address(L2TELEGRAPH_NFT_CONTRACT), L2TELEGRAPH_NFT_ABI)
+        contract = self.get_contract(L2TELEGRAPH_NFT_CONTRACT, L2TELEGRAPH_NFT_ABI)
 
         transaction = contract.functions.mint().build_transaction(tx)
 
@@ -97,7 +97,7 @@ class L2Telegraph(Account):
 
         logger.info(f"[{self.address}] Bridge NFT [{nft_id}]")
 
-        contract = self.get_contract(Web3.to_checksum_address(L2TELEGRAPH_NFT_CONTRACT), L2TELEGRAPH_NFT_ABI)
+        contract = self.get_contract(L2TELEGRAPH_NFT_CONTRACT, L2TELEGRAPH_NFT_ABI)
 
         transaction = contract.functions.crossChain(
             175,

@@ -23,14 +23,15 @@ def get_module():
             Choice("6) Make swap on Space.fi", "swap_spacefi"),
             Choice("7) Make swap on PancakeSwap", "swap_pancake"),
             Choice("8) Make swap on WooFi", "swap_woofi"),
-            Choice("9) Make bungee refuel", "refuel_bungee"),
-            Choice("10) Send message L2Telegraph", "send_message"),
-            Choice("11) Mint and bridge NFT L2Telegraph", "bridge_nft"),
-            Choice("12) Mint NFT", "mint_nft"),
-            Choice("13) Deploy contract and mint token", "deploy_contract"),
-            Choice("14) Dmail sending mail", "send_mail"),
-            Choice("15) Use custom routes", "use_routes"),
-            Choice("16) Exit", "exit"),
+            Choice("9) Make swap on Velocore", "swap_velocore"),
+            Choice("10) Make bungee refuel", "refuel_bungee"),
+            Choice("11) Send message L2Telegraph", "send_message"),
+            Choice("12) Mint and bridge NFT L2Telegraph", "bridge_nft"),
+            Choice("13) Mint NFT", "mint_nft"),
+            Choice("14) Deploy contract and mint token", "deploy_contract"),
+            Choice("15) Dmail sending mail", "send_mail"),
+            Choice("16) Use custom routes", "use_routes"),
+            Choice("17) Exit", "exit"),
         ],
         qmark="🛠 ",
         pointer="✅ "
@@ -57,6 +58,8 @@ def start_module(module, key, proxy):
         swap_pancake(key, proxy)
     elif module == "swap_woofi":
         swap_woofi(key, proxy)
+    elif module == "swap_velocore":
+        swap_velocore(key, proxy)
     elif module == "refuel_bungee":
         bungee_refuel(key, proxy)
     elif module == "deploy_contract":

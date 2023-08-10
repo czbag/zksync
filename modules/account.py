@@ -1,6 +1,5 @@
 import time
 import random
-from typing import Optional, Union
 
 from loguru import logger
 from web3 import Web3
@@ -8,7 +7,6 @@ from eth_account import Account as EthereumAccount
 from web3.exceptions import TransactionNotFound
 
 from config import RPC, ERC20_ABI
-from eth_typing import Address, ChecksumAddress
 
 
 class Account:
@@ -26,7 +24,9 @@ class Account:
         self.account = EthereumAccount.from_key(private_key)
         self.address = self.account.address
 
-    def get_contract(self, token_address: Optional[Union[Address, ChecksumAddress]], abi=None):
+    def get_contract(self, token_address: str, abi=None):
+        token_address = Web3.to_checksum_address(token_address)
+
         if abi is None:
             abi = ERC20_ABI
 
@@ -54,6 +54,7 @@ class Account:
         return amount_approved
 
     def approve(self, amount: float, token_address: str, contract_address: str):
+        token_address = Web3.to_checksum_address(token_address)
         contract = self.w3.eth.contract(address=token_address, abi=ERC20_ABI)
 
         allowance_amount = self.check_allowance(token_address, contract_address)
@@ -66,7 +67,7 @@ class Account:
                 "from": self.address,
                 "nonce": self.w3.eth.get_transaction_count(self.address),
                 "gasPrice": Web3.to_wei("0.25", "gwei"),
-                "gas": random.randint(2900000, 3100000)
+                "gas": random.randint(900000, 1100000)
             }
             transaction = contract.functions.approve(
                 contract_address,

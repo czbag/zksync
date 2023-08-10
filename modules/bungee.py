@@ -22,7 +22,7 @@ class Bungee(Account):
     def __init__(self, private_key: str, proxy: str) -> None:
         super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
 
-        self.contract = self.get_contract(Web3.to_checksum_address(BUNGEE_CONTRACT), BUNGEE_ABI)
+        self.contract = self.get_contract(BUNGEE_CONTRACT, BUNGEE_ABI)
         self.chain_ids = {
             "BSC": 56,
             "OPTIMISM": 10,

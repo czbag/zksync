@@ -28,6 +28,9 @@ with open("data/abi/pancake/router.json", "r") as file:
 with open("data/abi/woofi/router.json", "r") as file:
     WOOFI_ROUTER_ABI = json.load(file)
 
+with open("data/abi/velocore/router.json", "r") as file:
+    VELOCORE_ROUTER_ABI = json.load(file)
+
 with open("data/abi/bungee/abi.json", "r") as file:
     BUNGEE_ABI = json.load(file)
 
@@ -54,7 +57,6 @@ ZKSYNC_TOKENS = {
 
 SYNCSWAP_CONTRACTS = {
     "router": "0x2da10A1e27bF85cEdD8FFb1AbBe97e53391C0295",
-    "WETH": "0x5aea5775959fbc2557cc8789bc1bf90a239d9a91",
 }
 
 SPACEFI_CONTRACTS = {
@@ -71,6 +73,10 @@ PANCAKE_CONTRACTS = {
 
 WOOFI_CONTRACTS = {
     "router": "0xfd505702b37Ae9b626952Eb2DD736d9045876417"
+}
+
+VELOCORE_CONTRACTS = {
+    "router": "0xd999e16e68476bc749a28fc14a0c3b6d7073f50c"
 }
 
 SYNCSWAP_POOL = "0x80115c708E12eDd42E504c1cD52Aea96C547c05c"

@@ -34,7 +34,7 @@ class WooFi(Account):
         else:
             from_token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[from_token])
             to_token_address = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
-            token_contract = self.get_contract(Web3.to_checksum_address(from_token_address))
+            token_contract = self.get_contract(from_token_address)
             amount = int(amount * 10 ** token_contract.functions.decimals().call())
             balance = self.get_balance(from_token_address)["balance_wei"]
 

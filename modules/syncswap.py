@@ -33,11 +33,11 @@ class SyncSwap(Account):
             tx.update({"value": amount})
         else:
             token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[from_token])
-            token_contract = self.get_contract(Web3.to_checksum_address(token_address))
+            token_contract = self.get_contract(token_address)
             amount = int(amount * 10 ** token_contract.functions.decimals().call())
             balance = self.get_balance(token_address)["balance_wei"]
 
-            self.approve(amount, token_address, SYNCSWAP_CONTRACTS["router"])
+            self.approve(amount, token_address, Web3.to_checksum_address(SYNCSWAP_CONTRACTS["router"]))
             tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
 
         if amount < balance:

@@ -10,7 +10,7 @@ class Minter(Account):
     def __init__(self, private_key: str, proxy: str) -> None:
         super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
 
-        self.contract = self.get_contract(Web3.to_checksum_address(MINTER_CONTRACT), MINTER_ABI)
+        self.contract = self.get_contract(MINTER_CONTRACT, MINTER_ABI)
 
     def mint(self):
         logger.info(f"[{self.address}] Mint NFT")

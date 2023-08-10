@@ -20,12 +20,12 @@ MAX_GWEI = 40
 """
 You can use these methods: 
 bridge_zksync, withdraw_zksync, bridge_orbiter, swap_syncswap, 
-swap_mute, swap_spacefi, swap_pancake, swap_woofi, deploy_contract, send_mail, 
-mint_nft, send_message, bridge_nft
+swap_mute, swap_spacefi, swap_pancake, swap_woofi, swap_velocore,
+deploy_contract, send_mail, mint_nft, send_message, bridge_nft
 
 """
-RANDOM_ROUTES = False
-ROUTES = ["send_mail", "mint_nft"]
+RANDOM_ROUTES = True
+ROUTES = ["swap_syncswap", "swap_mute"]
 ROUTE_SLEEP_FROM = 10
 ROUTE_SLEEP_TO = 20
 
@@ -113,11 +113,11 @@ def swap_mute(key, proxy):
     amount – Amount of swap (2, 5), type in uniform(2, 5) | number after uniform() – decimal point
     """
 
-    from_token = "USDC"
-    to_token = "ETH"
+    from_token = "ETH"
+    to_token = "USDC"
 
-    min_swap = 1
-    max_swap = 2
+    min_swap = 0.001
+    max_swap = 0.002
     decimal = 4
 
     mute = Mute(key, proxy)
@@ -176,15 +176,36 @@ def swap_woofi(key, proxy):
     amount – Amount of swap (2, 5), type in uniform(2, 5) | number after uniform() – decimal point
     """
 
-    from_token = "USDC"
-    to_token = "ETH"
+    from_token = "ETH"
+    to_token = "USDC"
 
-    min_swap = 4
-    max_swap = 5
+    min_swap = 0.001
+    max_swap = 0.002
     decimal = 4
 
     woofi = WooFi(key, proxy)
     woofi.swap(from_token, to_token, min_swap, max_swap, decimal)
+
+
+def swap_velocore(key, proxy):
+    """
+    Make swap on Velocore
+    ______________________________________________________
+    from_token – Choose SOURCE token ETH/USDC | Select one
+    to_token – Choose DESTINATION token ETH/USDC | Select one
+    ______________________________________________________
+    amount – Amount of swap (2, 5), type in uniform(2, 5) | number after uniform() – decimal point
+    """
+
+    from_token = "ETH"
+    to_token = "USDC"
+
+    min_swap = 0.001
+    max_swap = 0.002
+    decimal = 4
+
+    velocore = Velocore(key, proxy)
+    velocore.swap(from_token, to_token, min_swap, max_swap, decimal)
 
 
 def bungee_refuel(key, proxy):

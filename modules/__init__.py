@@ -6,6 +6,7 @@ from .spacefi import SpaceFi
 from .mute import Mute
 from .pancake import Pancake
 from .woofi import WooFi
+from .velocore import Velocore
 from .bungee import Bungee
 from .dmail import Dmail
 from .minter import Minter

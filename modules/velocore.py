@@ -3,15 +3,15 @@ import time
 
 from loguru import logger
 from web3 import Web3
-from config import PANCAKE_ROUTER_ABI, PANCAKE_CONTRACTS, ZKSYNC_TOKENS
+from config import VELOCORE_ROUTER_ABI, VELOCORE_CONTRACTS, ZKSYNC_TOKENS
 from .account import Account
 
 
-class Pancake(Account):
+class Velocore(Account):
     def __init__(self, private_key: str, proxy: str) -> None:
         super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
 
-        self.swap_contract = self.get_contract(PANCAKE_CONTRACTS["router"], PANCAKE_ROUTER_ABI)
+        self.swap_contract = self.get_contract(VELOCORE_CONTRACTS["router"], VELOCORE_ROUTER_ABI)
         self.deadline = int(time.time()) + 1000000
         self.tx = {
             "from": self.address,
@@ -27,8 +27,13 @@ class Pancake(Account):
 
         contract_txn = self.swap_contract.functions.swapExactETHForTokens(
             0,
-            [Web3.to_checksum_address(ZKSYNC_TOKENS[from_token]),
-             Web3.to_checksum_address(ZKSYNC_TOKENS[to_token])],
+            [
+                [
+                    Web3.to_checksum_address(ZKSYNC_TOKENS[from_token]),
+                    Web3.to_checksum_address(ZKSYNC_TOKENS[to_token]),
+                    False
+                ]
+            ],
             self.address,
             self.deadline
         ).build_transaction(self.tx)
@@ -41,14 +46,19 @@ class Pancake(Account):
         amount = int(amount * 10 ** token_contract.functions.decimals().call())
         balance = self.get_balance(token_address)["balance_wei"]
 
-        self.approve(amount, token_address, PANCAKE_CONTRACTS["router"])
+        self.approve(amount, token_address, Web3.to_checksum_address(VELOCORE_CONTRACTS["router"]))
         self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
 
         contract_txn = self.swap_contract.functions.swapExactTokensForETH(
             amount,
             0,
-            [Web3.to_checksum_address(ZKSYNC_TOKENS[from_token]),
-             Web3.to_checksum_address(ZKSYNC_TOKENS[to_token])],
+            [
+                [
+                    Web3.to_checksum_address(ZKSYNC_TOKENS[from_token]),
+                    Web3.to_checksum_address(ZKSYNC_TOKENS[to_token]),
+                    False
+                ]
+            ],
             self.address,
             self.deadline
         ).build_transaction(self.tx)

@@ -10,7 +10,7 @@ class Dmail(Account):
     def __init__(self, private_key: str, proxy: str) -> None:
         super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
 
-        self.contract = self.get_contract(Web3.to_checksum_address(DMAIL_CONTRACT), DMAIL_ABI)
+        self.contract = self.get_contract(DMAIL_CONTRACT, DMAIL_ABI)
 
     def send_mail(self):
         logger.info(f"[{self.address}] Send email")

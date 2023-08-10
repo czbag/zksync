@@ -37,7 +37,7 @@ class SpaceFi(Account):
 
     def swap_to_eth(self, from_token: str, to_token: str, amount: int):
         token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[from_token])
-        token_contract = self.get_contract(Web3.to_checksum_address(token_address))
+        token_contract = self.get_contract(token_address)
         amount = int(amount * 10 ** token_contract.functions.decimals().call())
         balance = self.get_balance(token_address)["balance_wei"]
 
