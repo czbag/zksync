@@ -13,6 +13,7 @@ def get_bungee_limits() -> Union[dict, bool]:
 
     try:
         limits = [chain_data for chain_data in bungee_data if chain_data["name"] == "zkSync"][0]["limits"]
+
         return limits
     except:
         return False
@@ -39,7 +40,7 @@ class Bungee(Account):
         tx = {
             "from": self.address,
             "gas": random.randint(1000000, 1100000),
-            "gasPrice": Web3.to_wei("0.25", "gwei"),
+            "gasPrice": self.w3.eth.gas_price,
             "nonce": self.w3.eth.get_transaction_count(self.address),
             "value": amount
         }

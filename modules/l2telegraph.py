@@ -10,6 +10,14 @@ class L2Telegraph(Account):
     def __init__(self, private_key: str, proxy: str) -> None:
         super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
 
+        self.tx = {
+            "chainId": self.w3.eth.chain_id,
+            "from": self.address,
+            "gas": random.randint(2900000, 3100000),
+            "gasPrice": self.w3.eth.gas_price,
+            "nonce": self.w3.eth.get_transaction_count(self.address),
+        }
+
     def get_estimate_fee(self, contract_address: str, abi: dict):
         contract = self.get_contract(contract_address, abi)
         fee = contract.functions.estimateFees(
@@ -33,14 +41,7 @@ class L2Telegraph(Account):
 
         l0_fee = self.get_estimate_fee(L2TELEGRAPH_MESSAGE_CONTRACT, L2TELEGRAPH_MESSAGE_ABI)
 
-        tx = {
-            "chainId": self.w3.eth.chain_id,
-            "from": self.address,
-            "gas": random.randint(2900000, 3100000),
-            "gasPrice": Web3.to_wei("0.25", "gwei"),
-            "nonce": self.w3.eth.get_transaction_count(self.address),
-            "value": Web3.to_wei("0.00025", "ether") + l0_fee
-        }
+        self.tx.update({"value": Web3.to_wei("0.00025", "ether") + l0_fee})
 
         contract = self.get_contract(L2TELEGRAPH_MESSAGE_CONTRACT, L2TELEGRAPH_MESSAGE_ABI)
 
@@ -48,7 +49,7 @@ class L2Telegraph(Account):
             ' ',
             175,
             "0x5f26ea1e4d47071a4d9a2c2611c2ae0665d64b6d0d4a6d5964f3b618d8e46bcfbf2792b0d769fbda"
-        ).build_transaction(tx)
+        ).build_transaction(self.tx)
 
         signed_txn = self.sign(transaction)
 
@@ -59,18 +60,11 @@ class L2Telegraph(Account):
     def mint(self):
         logger.info(f"[{self.address}] Mint NFT")
 
-        tx = {
-            "chainId": self.w3.eth.chain_id,
-            "from": self.address,
-            "gas": random.randint(1000000, 1100000),
-            "gasPrice": Web3.to_wei("0.25", "gwei"),
-            "nonce": self.w3.eth.get_transaction_count(self.address),
-            "value": Web3.to_wei("0.0005", "ether")
-        }
+        self.tx.update({"value": Web3.to_wei("0.0005", "ether")})
 
         contract = self.get_contract(L2TELEGRAPH_NFT_CONTRACT, L2TELEGRAPH_NFT_ABI)
 
-        transaction = contract.functions.mint().build_transaction(tx)
+        transaction = contract.functions.mint().build_transaction(self.tx)
 
         signed_txn = self.sign(transaction)
 
@@ -86,14 +80,7 @@ class L2Telegraph(Account):
 
         nft_id = self.mint()
 
-        tx = {
-            "chainId": self.w3.eth.chain_id,
-            "from": self.address,
-            "gas": random.randint(2900000, 3100000),
-            "gasPrice": Web3.to_wei("0.25", "gwei"),
-            "nonce": self.w3.eth.get_transaction_count(self.address),
-            "value": l0_fee
-        }
+        self.tx.update({"value": l0_fee})
 
         logger.info(f"[{self.address}] Bridge NFT [{nft_id}]")
 
@@ -103,7 +90,7 @@ class L2Telegraph(Account):
             175,
             "0x5b10ae182c297ec76fe6fe0e3da7c4797cede02dd43a183c97db9174962607a8b6552ce320eac5aa",
             nft_id
-        ).build_transaction(tx)
+        ).build_transaction(self.tx)
 
         signed_txn = self.sign(transaction)
 

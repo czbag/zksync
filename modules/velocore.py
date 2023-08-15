@@ -12,18 +12,17 @@ class Velocore(Account):
         super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
 
         self.swap_contract = self.get_contract(VELOCORE_CONTRACTS["router"], VELOCORE_ROUTER_ABI)
-        self.deadline = int(time.time()) + 1000000
         self.tx = {
             "from": self.address,
             "gas": random.randint(2900000, 3100000),
-            "gasPrice": Web3.to_wei("0.25", "gwei"),
+            "gasPrice": self.w3.eth.gas_price,
             "nonce": self.w3.eth.get_transaction_count(self.address)
         }
 
     def swap_to_token(self, from_token: str, to_token: str, amount: int):
-        amount = Web3.to_wei(amount, "ether")
-        balance = self.w3.eth.get_balance(self.address)
         self.tx.update({"value": amount})
+
+        deadline = int(time.time()) + 1000000
 
         contract_txn = self.swap_contract.functions.swapExactETHForTokens(
             0,
@@ -35,19 +34,18 @@ class Velocore(Account):
                 ]
             ],
             self.address,
-            self.deadline
+            deadline
         ).build_transaction(self.tx)
 
-        return amount, balance, contract_txn
+        return contract_txn
 
     def swap_to_eth(self, from_token: str, to_token: str, amount: int):
         token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[from_token])
-        token_contract = self.get_contract(token_address)
-        amount = int(amount * 10 ** token_contract.functions.decimals().call())
-        balance = self.get_balance(token_address)["balance_wei"]
 
         self.approve(amount, token_address, Web3.to_checksum_address(VELOCORE_CONTRACTS["router"]))
         self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
+
+        deadline = int(time.time()) + 1000000
 
         contract_txn = self.swap_contract.functions.swapExactTokensForETH(
             amount,
@@ -60,22 +58,29 @@ class Velocore(Account):
                 ]
             ],
             self.address,
-            self.deadline
+            deadline
         ).build_transaction(self.tx)
 
-        return amount, balance, contract_txn
+        return contract_txn
 
-    def swap(self, from_token: str, to_token: str, min_swap: float, max_swap: float, decimal: int):
-        amount = round(random.uniform(min_swap, max_swap), decimal)
+    def swap(
+            self,
+            from_token: str,
+            to_token: str,
+            min_amount: float,
+            max_amount: float,
+            decimal: int,
+            all_amount: bool
+    ):
+        amount_wei, amount, balance = self.get_amount(from_token, min_amount, max_amount, decimal, all_amount)
 
-        logger.info(f"[{self.address}] Swap – {from_token} -> {to_token} | {amount} {from_token}")
+        logger.info(f"[{self.address}] Swap on Velocore – {from_token} -> {to_token} | {amount} {from_token}")
 
-        if from_token == "ETH":
-            amount, balance, contract_txn = self.swap_to_token(from_token, to_token, amount)
-        else:
-            amount, balance, contract_txn = self.swap_to_eth(from_token, to_token, amount)
-
-        if amount < balance:
+        if amount_wei <= balance != 0:
+            if from_token == "ETH":
+                contract_txn = self.swap_to_token(from_token, to_token, amount_wei)
+            else:
+                contract_txn = self.swap_to_eth(from_token, to_token, amount_wei)
 
             signed_txn = self.sign(contract_txn)
 

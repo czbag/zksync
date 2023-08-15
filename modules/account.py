@@ -6,7 +6,7 @@ from web3 import Web3
 from eth_account import Account as EthereumAccount
 from web3.exceptions import TransactionNotFound
 
-from config import RPC, ERC20_ABI
+from config import RPC, ERC20_ABI, ZKSYNC_TOKENS
 
 
 class Account:
@@ -24,37 +24,56 @@ class Account:
         self.account = EthereumAccount.from_key(private_key)
         self.address = self.account.address
 
-    def get_contract(self, token_address: str, abi=None):
-        token_address = Web3.to_checksum_address(token_address)
+    def get_contract(self, contract_address: str, abi=None):
+        contract_address = Web3.to_checksum_address(contract_address)
 
         if abi is None:
             abi = ERC20_ABI
 
-        contract = self.w3.eth.contract(address=token_address, abi=abi)
+        contract = self.w3.eth.contract(address=contract_address, abi=abi)
+
         return contract
 
-    def get_balance(self, token_address=None):
-        if token_address:
-            contract = self.get_contract(token_address)
+    def get_balance(self, contract_address: str) -> dict:
+        contract_address = Web3.to_checksum_address(contract_address)
+        contract = self.get_contract(contract_address)
 
-            symbol = contract.functions.symbol().call()
-            decimal = contract.functions.decimals().call()
-            balance_wei = contract.functions.balanceOf(self.address).call()
+        symbol = contract.functions.symbol().call()
+        decimal = contract.functions.decimals().call()
+        balance_wei = contract.functions.balanceOf(self.address).call()
 
-            balance = balance_wei / 10 ** decimal
+        balance = balance_wei / 10 ** decimal
 
-            return {"balance_wei": balance_wei, "balance": balance, "symbol": symbol, "decimal": decimal}
-        else:
+        return {"balance_wei": balance_wei, "balance": balance, "symbol": symbol, "decimal": decimal}
+
+    def get_amount(self, from_token: str, min_amount: float, max_amount: float, decimal: int, all_amount: bool):
+        random_amount = round(random.uniform(min_amount, max_amount), decimal)
+
+        if from_token == "ETH":
             balance = self.w3.eth.get_balance(self.address)
-            return balance
+            amount_wei = int(balance * 0.9) if all_amount else Web3.to_wei(random_amount, "ether")
+            amount = Web3.from_wei(int(balance * 0.9), "ether") if all_amount else random_amount
+        else:
+            balance = self.get_balance(ZKSYNC_TOKENS[from_token])
+            amount_wei = balance["balance_wei"] if all_amount else int(random_amount * 10 ** balance["decimal"])
+            amount = balance["balance"] if all_amount else random_amount
+            balance = balance["balance_wei"]
+
+        return amount_wei, amount, balance
 
     def check_allowance(self, token_address: str, contract_address: str) -> float:
+        token_address = Web3.to_checksum_address(token_address)
+        contract_address = Web3.to_checksum_address(contract_address)
+
         contract = self.w3.eth.contract(address=token_address, abi=ERC20_ABI)
         amount_approved = contract.functions.allowance(self.address, contract_address).call()
+
         return amount_approved
 
     def approve(self, amount: float, token_address: str, contract_address: str):
         token_address = Web3.to_checksum_address(token_address)
+        contract_address = Web3.to_checksum_address(contract_address)
+
         contract = self.w3.eth.contract(address=token_address, abi=ERC20_ABI)
 
         allowance_amount = self.check_allowance(token_address, contract_address)
@@ -66,16 +85,19 @@ class Account:
                 "chainId": self.w3.eth.chain_id,
                 "from": self.address,
                 "nonce": self.w3.eth.get_transaction_count(self.address),
-                "gasPrice": Web3.to_wei("0.25", "gwei"),
+                "gasPrice": self.w3.eth.gas_price,
                 "gas": random.randint(900000, 1100000)
             }
+
             transaction = contract.functions.approve(
                 contract_address,
                 100000000000000000000000000000000000000000000000000000000000000000000000000000
             ).build_transaction(tx)
 
             signed_txn = self.sign(transaction)
+
             txn_hash = self.send_raw_transaction(signed_txn)
+
             self.wait_until_tx_finished(txn_hash.hex())
 
     def wait_until_tx_finished(self, hash: str, max_wait_time=180):
@@ -100,8 +122,10 @@ class Account:
 
     def sign(self, transaction):
         signed_txn = self.w3.eth.account.sign_transaction(transaction, self.private_key)
+
         return signed_txn
 
     def send_raw_transaction(self, signed_txn):
         txn_hash = self.w3.eth.send_raw_transaction(signed_txn.rawTransaction)
+
         return txn_hash

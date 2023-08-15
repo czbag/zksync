@@ -12,7 +12,6 @@ def get_gas():
         w3 = Web3(Web3.HTTPProvider(random.choice(RPC["ethereum"]["rpc"])))
         gas_price = w3.eth.gas_price
         gwei = w3.from_wei(gas_price, 'gwei')
-
         return gwei
     except Exception as error:
         logger.error(error)
@@ -27,4 +26,12 @@ def wait_gas():
             logger.info(f'Current GWEI: {gas} > {MAX_GWEI}')
             time.sleep(60)
         else:
+            logger.success(f"GWEI is normal | current: {gas} < {MAX_GWEI}")
             break
+
+
+def check_gas(func):
+    def _wrapper(*args, **kwargs):
+        wait_gas()
+        return func(*args, **kwargs)
+    return _wrapper
