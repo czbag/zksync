@@ -12,7 +12,7 @@ from zksync2.core.types import Token, EthBlockParams
 from zksync2.signer.eth_signer import PrivateKeyEthSigner
 from zksync2.transaction.transaction_builders import TxCreate2Contract, TxWithdraw
 
-from config import RPC, CONTRACT_PATH
+from config import RPC, CONTRACT_PATH, ZKSYNC_BRIDGE_ABI, ZKSYNC_BRIDGE_CONTRACT
 from .account import Account
 
 
@@ -27,37 +27,46 @@ class ZkSync(Account):
         self.zk_w3 = ZkSyncBuilder.build(random.choice(RPC["zksync"]["rpc"]))
         self.zk_w3.provider = Web3.HTTPProvider(random.choice(RPC["zksync"]["rpc"]), request_kwargs=request_kwargs)
 
+    def get_tx_data(self, value: int):
+        tx = {
+            "chainId": self.w3.eth.chain_id,
+            "nonce": self.w3.eth.get_transaction_count(self.address),
+            "from": self.address,
+            "value": value
+        }
+        return tx
+
     def deposit(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool):
         amount_wei, amount, balance = self.get_amount("ETH", min_amount, max_amount, decimal, all_amount)
 
-        logger.info(f"[{self.address}] Bridge {amount} ETH to ZkSync")
-
-        eth_provider = EthereumProvider(self.zk_w3, self.w3, self.account)
+        logger.info(f"[{self.address}] Bridge to ZkSync | {amount} ETH")
 
         gas_limit = random.randint(700000, 1000000)
-        gas_price = self.w3.eth.gas_price
 
-        operator_tip = eth_provider.get_base_cost(
-            l2_gas_limit=gas_limit,
-            gas_per_pubdata_byte=800,
-            gas_price=gas_price
-        )
+        contract = self.get_contract(ZKSYNC_BRIDGE_CONTRACT, ZKSYNC_BRIDGE_ABI)
+        base_cost = contract.functions.l2TransactionBaseCost(self.w3.eth.gas_price, gas_limit, 800).call()
+
+        tx_data = self.get_tx_data(amount_wei + base_cost)
 
         try:
-            l1_tx_receipt = eth_provider.deposit(
-                token=Token.create_eth(),
-                amount=Web3.to_wei(amount_wei, "ether"),
-                l2_gas_limit=gas_limit,
-                gas_price=gas_price,
-                gas_limit=gas_limit,
-                gas_per_pubdata_byte=800,
-                operator_tip=operator_tip
+            transaction = contract.functions.requestL2Transaction(
+                self.address,
+                Web3.to_wei(amount, "ether"),
+                "0x",
+                gas_limit,
+                800,
+                [],
+                self.address
+            ).build_transaction(
+                tx_data
             )
 
-            logger.success(
-                f"[{self.address}] Bridged {amount} ETH is successfully – " +
-                f"{self.explorer}{l1_tx_receipt['transactionHash'].hex()}"
-            )
+            signed_txn = self.sign(transaction)
+
+            txn_hash = self.send_raw_transaction(signed_txn)
+
+            self.wait_until_tx_finished(txn_hash.hex())
+            return txn_hash.hex()
         except Exception as e:
             logger.error(f"Deposit transaction on L1 network failed | error: {e}")
 

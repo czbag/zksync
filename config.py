@@ -13,6 +13,9 @@ with open("accounts.txt", "r") as file:
 with open("proxy.txt", "r") as file:
     PROXIES = [row.strip() for row in file]
 
+with open('data/abi/zksync/bridge.json') as file:
+    ZKSYNC_BRIDGE_ABI = json.load(file)
+
 with open("data/abi/syncswap/router.json", "r") as file:
     SYNCSWAP_ROUTER_ABI = json.load(file)
 
@@ -51,6 +54,8 @@ with open("data/abi/l2telegraph/bridge_nft.json", "r") as file:
 
 with open("data/abi/minter/abi.json", "r") as file:
     MINTER_ABI = json.load(file)
+
+ZKSYNC_BRIDGE_CONTRACT = "0x32400084c286cf3e17e7b677ea9583e60a000324"
 
 ORBITER_CONTRACT = "0x80C67432656d59144cEFf962E8fAF8926599bCF8"
 
