@@ -45,9 +45,9 @@ python main.py
 
 12) Отправка сообщений через Dmail (отправка происходит самому себе, письма не приходят, взаимодействия только с контрактом) респект за код https://github.com/sybil-v-zakone/dmailer
 
-13) L2Telegraph минт + бридж NFT
+13) L2Telegraph минт + бридж NFT (только в arb nova)
 
-14) L2Telegraph отправка сообщений
+14) L2Telegraph отправка сообщений (только в arb nova)
 
 15) Минт NFT
 
