@@ -284,11 +284,12 @@ def stargate_bridge(key, proxy):
     min_amount = 0.001
     max_amount = 0.002
     decimal = 4
+    slippage = 1
 
     all_amount = False
 
     st = Stargate(key, proxy)
-    st.bridge(min_amount, max_amount, decimal, all_amount)
+    st.bridge(min_amount, max_amount, decimal, slippage, all_amount)
 
 
 def swap_multiswap(key, proxy):

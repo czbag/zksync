@@ -38,11 +38,11 @@ class Stargate(Account):
 
         return get_fee[0]
 
-    def swap(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool):
+    def swap(self, min_amount: float, max_amount: float, decimal: int, slippage: int, all_amount: bool):
         syncswap = SyncSwap(self.private_key, self.proxy)
-        syncswap.swap("ETH", "MAV", min_amount, max_amount, decimal, all_amount)
+        syncswap.swap("ETH", "MAV", min_amount, max_amount, decimal, slippage, all_amount)
 
-    def bridge(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool):
+    def bridge(self, min_amount: float, max_amount: float, decimal: int, slippage: int, all_amount: bool):
         balance = self.get_balance(ZKSYNC_TOKENS["MAV"])
 
         logger.info(f"[{self.address}] Make stargate bridge {balance['balance']} MAV to BNB")
@@ -76,5 +76,5 @@ class Stargate(Account):
             self.wait_until_tx_finished(txn_hash.hex())
         else:
             logger.error(f"[{self.address}] Insufficient funds!")
-            self.swap(min_amount, max_amount, decimal, all_amount)
-            self.bridge(min_amount, max_amount, decimal, all_amount)
+            self.swap(min_amount, max_amount, decimal, slippage, all_amount)
+            self.bridge(min_amount, max_amount, decimal, slippage, all_amount)
