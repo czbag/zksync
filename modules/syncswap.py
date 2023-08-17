@@ -3,7 +3,14 @@ import time
 
 from loguru import logger
 from web3 import Web3
-from config import ZKSYNC_TOKENS, SYNCSWAP_CLASSIC_POOL_ABI, ZERO_ADDRESS, SYNCSWAP_CONTRACTS, SYNCSWAP_ROUTER_ABI
+from config import (
+    ZKSYNC_TOKENS,
+    SYNCSWAP_CLASSIC_POOL_ABI,
+    ZERO_ADDRESS,
+    SYNCSWAP_CONTRACTS,
+    SYNCSWAP_ROUTER_ABI,
+    SYNCSWAP_CLASSIC_POOL_DATA_ABI
+)
 from .account import Account
 from eth_abi import abi
 
@@ -30,6 +37,15 @@ class SyncSwap(Account):
 
         return pool_address
 
+    def get_min_amount_out(self, pool_address: str, token_address: str, amount: int, slippage: float):
+        pool_contract = self.get_contract(pool_address, SYNCSWAP_CLASSIC_POOL_DATA_ABI)
+        min_amount_out = pool_contract.functions.getAmountOut(
+            token_address,
+            amount,
+            self.address
+        ).call()
+        return int(min_amount_out - (min_amount_out / 100 * slippage))
+
     def swap(
             self,
             from_token: str,
@@ -37,6 +53,7 @@ class SyncSwap(Account):
             min_amount: float,
             max_amount: float,
             decimal: int,
+            slippage: float,
             all_amount: bool
     ):
         token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[from_token])
@@ -55,6 +72,8 @@ class SyncSwap(Account):
                     self.approve(amount_wei, token_address, Web3.to_checksum_address(SYNCSWAP_CONTRACTS["router"]))
                     self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
 
+                min_amount_out = self.get_min_amount_out(pool_address, token_address, amount_wei, slippage)
+
                 steps = [{
                     "pool": pool_address,
                     "data": abi.encode(["address", "address", "uint8"], [token_address, self.address, 1]),
@@ -64,14 +83,18 @@ class SyncSwap(Account):
 
                 paths = [{
                     "steps": steps,
-                    "tokenIn": ZERO_ADDRESS,
+                    "tokenIn": ZERO_ADDRESS if from_token == "ETH" else token_address,
                     "amountIn": amount_wei
                 }]
 
                 deadline = int(time.time()) + 1000000
 
-                contract_txn = self.swap_contract.functions.swap(paths, 0, deadline).build_transaction(self.tx)
-                # print(contract_txn)
+                contract_txn = self.swap_contract.functions.swap(
+                    paths,
+                    min_amount_out,
+                    deadline
+                ).build_transaction(self.tx)
+
                 signed_txn = self.sign(contract_txn)
 
                 txn_hash = self.send_raw_transaction(signed_txn)
@@ -106,4 +129,3 @@ class SyncSwap(Account):
         txn_hash = self.send_raw_transaction(signed_txn)
 
         self.wait_until_tx_finished(txn_hash.hex())
-

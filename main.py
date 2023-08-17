@@ -49,14 +49,19 @@ def get_module():
 
 
 @check_gas
-def main(module):
-    proxy = get_proxy() if USE_PROXY else None
+def run_module(module, key, proxy):
+    module(key, proxy)
 
+
+def main(module):
     if RANDOM_WALLET:
         random.shuffle(RANDOM_WALLET)
 
     for j, key in enumerate(ACCOUNTS):
-        module(key, proxy)
+        proxy = get_proxy() if USE_PROXY else None
+
+        run_module(module, key, proxy)
+
         if j + 1 < len(ACCOUNTS) and IS_SLEEP:
             sleep(SLEEP_FROM, SLEEP_TO)
 

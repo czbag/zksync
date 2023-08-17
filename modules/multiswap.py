@@ -25,7 +25,7 @@ class Multiswap(Account):
         swap_module = random.choice(use_dex)
         return self.swap_modules[swap_module]
 
-    def swap(self, use_dex: list, sleep_from: int, sleep_to: int, quantity_swap: int, all_amount: bool):
+    def swap(self, use_dex: list, sleep_from: int, sleep_to: int, quantity_swap: int, slippage: int, all_amount: bool):
         logger.info(f"[{self.address}] Start MultiSwap")
 
         for _ in range(0, quantity_swap):
@@ -48,7 +48,7 @@ class Multiswap(Account):
                 to_token = "USDC"
 
             swap_module = self.get_swap_module(use_dex)(self.private_key, self.proxy)
-            swap_module.swap(from_token, to_token, min_amount, max_amount, decimal, all_amount)
+            swap_module.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount)
 
             if _ + 1 != quantity_swap:
                 sleep(sleep_from, sleep_to)

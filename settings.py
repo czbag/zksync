@@ -6,7 +6,7 @@ from modules import *
 RANDOM_WALLET = False  # True or False
 
 # SLEEP MODE
-IS_SLEEP = True  # True or False
+IS_SLEEP = False  # True or False
 
 SLEEP_FROM = 5  # Second
 SLEEP_TO = 5  # Second
@@ -15,7 +15,7 @@ SLEEP_TO = 5  # Second
 USE_PROXY = False
 
 # GWEI CONTROL MODE
-CHECK_GWEI = True  # True or False
+CHECK_GWEI = False  # True or False
 MAX_GWEI = 20
 
 
@@ -30,7 +30,7 @@ def bridge_zksync(key, proxy):
     max_amount = 0.002
     decimal = 4
 
-    all_amount = False
+    all_amount = True
 
     zksync = ZkSync(key, proxy, "ethereum")
     zksync.deposit(min_amount, max_amount, decimal, all_amount)
@@ -84,17 +84,18 @@ def swap_syncswap(key, proxy):
     all_amount - Swap 90% ETH or 100% ANY_TOKEN
     """
 
-    from_token = "ETH"
-    to_token = "USDC"
+    from_token = "USDC"
+    to_token = "ETH"
 
-    min_amount = 0.1
-    max_amount = 0.2
+    min_amount = 0.0001
+    max_amount = 0.0002
     decimal = 6
+    slippage = 1
 
-    all_amount = False
+    all_amount = True
 
     syncswap = SyncSwap(key, proxy)
-    syncswap.swap(from_token, to_token, min_amount, max_amount, decimal, all_amount)
+    syncswap.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount)
 
 
 def liquidity_syncswap(key, proxy):
@@ -123,17 +124,18 @@ def swap_mute(key, proxy):
     all_amount - Swap 90% ETH or 100% ANY_TOKEN
     """
 
-    from_token = "ETH"
-    to_token = "USDC"
+    from_token = "USDC"
+    to_token = "ETH"
 
-    min_amount = 0.001
-    max_amount = 0.002
-    decimal = 4
+    min_amount = 0.0001
+    max_amount = 0.0002
+    decimal = 6
+    slippage = 1
 
-    all_amount = False
+    all_amount = True
 
     mute = Mute(key, proxy)
-    mute.swap(from_token, to_token, min_amount, max_amount, decimal, all_amount)
+    mute.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount)
 
 
 def swap_spacefi(key, proxy):
@@ -148,17 +150,18 @@ def swap_spacefi(key, proxy):
     all_amount - Swap 90% ETH or 100% ANY_TOKEN
     """
 
-    from_token = "ETH"
-    to_token = "USDC"
+    from_token = "USDC"
+    to_token = "ETH"
 
-    min_amount = 0.001
-    max_amount = 0.002
-    decimal = 4
+    min_amount = 0.0001
+    max_amount = 0.0002
+    decimal = 6
+    slippage = 1
 
-    all_amount = False
+    all_amount = True
 
     spacefi = SpaceFi(key, proxy)
-    spacefi.swap(from_token, to_token, min_amount, max_amount, decimal, all_amount)
+    spacefi.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount)
 
 
 def liquidity_spacefi(key, proxy):
@@ -190,17 +193,18 @@ def swap_pancake(key, proxy):
     all_amount - Swap 90% ETH or 100% ANY_TOKEN
     """
 
-    from_token = "ETH"
-    to_token = "USDC"
+    from_token = "USDC"
+    to_token = "ETH"
 
-    min_amount = 0.001
-    max_amount = 0.002
-    decimal = 4
+    min_amount = 0.0001
+    max_amount = 0.0002
+    decimal = 6
+    slippage = 1
 
-    all_amount = False
+    all_amount = True
 
     pancake = Pancake(key, proxy)
-    pancake.swap(from_token, to_token, min_amount, max_amount, decimal, all_amount)
+    pancake.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount)
 
 
 def swap_woofi(key, proxy):
@@ -216,14 +220,15 @@ def swap_woofi(key, proxy):
     from_token = "USDC"
     to_token = "ETH"
 
-    min_amount = 0.001
-    max_amount = 0.002
-    decimal = 4
+    min_amount = 0.0001
+    max_amount = 0.0002
+    decimal = 6
+    slippage = 1
 
-    all_amount = False
+    all_amount = True
 
     woofi = WooFi(key, proxy)
-    woofi.swap(from_token, to_token, min_amount, max_amount, decimal, all_amount)
+    woofi.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount)
 
 
 def swap_velocore(key, proxy):
@@ -238,17 +243,18 @@ def swap_velocore(key, proxy):
     all_amount - Swap 90% ETH or 100% ANY_TOKEN
     """
 
-    from_token = "ETH"
-    to_token = "WBTC"
+    from_token = "USDC"
+    to_token = "ETH"
 
-    min_amount = 0.001
-    max_amount = 0.002
-    decimal = 4
+    min_amount = 0.0001
+    max_amount = 0.0002
+    decimal = 6
+    slippage = 1
 
-    all_amount = False
+    all_amount = True
 
     velocore = Velocore(key, proxy)
-    velocore.swap(from_token, to_token, min_amount, max_amount, decimal, all_amount)
+    velocore.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount)
 
 
 def bungee_refuel(key, proxy):
@@ -296,15 +302,17 @@ def swap_multiswap(key, proxy):
     If False, swap 10-90% ETH to USDC, after swap USDC 10-90% to ETH remaining number of times
     """
     use_dex = ["syncswap", "mute", "spacefi"]
-    quantity_swap = 3
+    quantity_swap = 2
 
     sleep_from = 10
     sleep_to = 30
 
+    slippage = 1
+
     all_amount = False
 
     multi = Multiswap(key, proxy)
-    multi.swap(use_dex, sleep_from, sleep_to, quantity_swap, all_amount)
+    multi.swap(use_dex, sleep_from, sleep_to, quantity_swap, slippage, all_amount)
 
 
 def deploy_contract_zksync(key, proxy):
@@ -334,12 +342,12 @@ def custom_routes(key, proxy):
     swap_mute, swap_spacefi, swap_pancake, swap_woofi, swap_velocore,
     deploy_contract, send_mail, mint_nft, send_message, bridge_nft
     """
-    use_modules = [swap_spacefi, swap_mute]
+    use_modules = [swap_spacefi, swap_mute, swap_syncswap, swap_velocore, swap_woofi, swap_pancake]
 
     sleep_from = 10
     sleep_to = 10
 
-    random_module = True
+    random_module = False
 
     routes = Routes(key, proxy)
     routes.start(use_modules, sleep_from, sleep_to, random_module)

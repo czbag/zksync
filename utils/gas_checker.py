@@ -3,7 +3,7 @@ import random
 
 from web3 import Web3
 from config import RPC
-from settings import MAX_GWEI
+from settings import CHECK_GWEI, MAX_GWEI
 from loguru import logger
 
 
@@ -32,6 +32,7 @@ def wait_gas():
 
 def check_gas(func):
     def _wrapper(*args, **kwargs):
-        wait_gas()
+        if CHECK_GWEI:
+            wait_gas()
         return func(*args, **kwargs)
     return _wrapper

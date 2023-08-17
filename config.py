@@ -22,6 +22,9 @@ with open("data/abi/syncswap/router.json", "r") as file:
 with open('data/abi/syncswap/classic_pool.json') as file:
     SYNCSWAP_CLASSIC_POOL_ABI = json.load(file)
 
+with open('data/abi/syncswap/classic_pool_data.json') as file:
+    SYNCSWAP_CLASSIC_POOL_DATA_ABI = json.load(file)
+
 with open("data/abi/mute/router.json", "r") as file:
     MUTE_ROUTER_ABI = json.load(file)
 

@@ -19,6 +19,14 @@ class WooFi(Account):
             "nonce": self.w3.eth.get_transaction_count(self.address)
         }
 
+    def get_min_amount_out(self, from_token: str, to_token: str, amount: int, slippage: float):
+        min_amount_out = self.swap_contract.functions.querySwap(
+            Web3.to_checksum_address(from_token),
+            Web3.to_checksum_address(to_token),
+            amount
+        ).call()
+        return int(min_amount_out - (min_amount_out / 100 * slippage))
+
     def swap(
             self,
             from_token: str,
@@ -26,6 +34,7 @@ class WooFi(Account):
             min_amount: float,
             max_amount: float,
             decimal: int,
+            slippage: int,
             all_amount: bool
     ):
         amount_wei, amount, balance = self.get_amount(from_token, min_amount, max_amount, decimal, all_amount)
@@ -44,11 +53,13 @@ class WooFi(Account):
                 self.approve(amount_wei, from_token_address, WOOFI_CONTRACTS["router"])
                 self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
 
+            min_amount_out = self.get_min_amount_out(from_token_address, to_token_address, amount_wei, slippage)
+
             contract_txn = self.swap_contract.functions.swap(
                 from_token_address,
                 to_token_address,
                 amount_wei,
-                0,
+                min_amount_out,
                 self.address,
                 self.address
             ).build_transaction(self.tx)
