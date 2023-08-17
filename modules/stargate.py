@@ -48,6 +48,8 @@ class Stargate(Account):
         logger.info(f"[{self.address}] Make stargate bridge {balance['balance']} MAV to BNB")
 
         if balance["balance_wei"] > 0:
+            self.approve(balance["balance_wei"], ZKSYNC_TOKENS["MAV"], STARGATE_CONTRACT)
+
             fee = self.get_lz_estimate_fee(balance["balance_wei"])
 
             self.tx.update({"value": fee})
