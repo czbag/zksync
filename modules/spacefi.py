@@ -37,7 +37,7 @@ class SpaceFi(Account):
         min_amount_out = self.get_min_amount_out(ZKSYNC_TOKENS[from_token], ZKSYNC_TOKENS[to_token], amount, slippage)
 
         contract_txn = self.swap_contract.functions.swapExactETHForTokens(
-            0,
+            min_amount_out,
             [Web3.to_checksum_address(ZKSYNC_TOKENS[from_token]),
              Web3.to_checksum_address(ZKSYNC_TOKENS[to_token])],
             self.address,

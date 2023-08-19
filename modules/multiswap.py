@@ -25,8 +25,19 @@ class Multiswap(Account):
         swap_module = random.choice(use_dex)
         return self.swap_modules[swap_module]
 
-    def swap(self, use_dex: list, sleep_from: int, sleep_to: int, quantity_swap: int, slippage: int, all_amount: bool):
+    def swap(
+            self,
+            use_dex: list,
+            sleep_from: int,
+            sleep_to: int,
+            min_swap: int,
+            max_swap: int,
+            slippage: int,
+            all_amount: bool
+    ):
         logger.info(f"[{self.address}] Start MultiSwap")
+
+        quantity_swap = random.randint(min_swap, max_swap)
 
         for _ in range(0, quantity_swap):
             balance_eth = self.w3.eth.get_balance(self.address)

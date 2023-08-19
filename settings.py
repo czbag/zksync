@@ -6,10 +6,10 @@ from modules import *
 RANDOM_WALLET = False  # True or False
 
 # SLEEP MODE
-IS_SLEEP = False  # True or False
+IS_SLEEP = True  # True or False
 
-SLEEP_FROM = 5  # Second
-SLEEP_TO = 5  # Second
+SLEEP_FROM = 100  # Second
+SLEEP_TO = 500  # Second
 
 # PROXY MODE
 USE_PROXY = False
@@ -185,8 +185,8 @@ def swap_pancake(key, proxy):
     """
     Make swap on PancakeSwap
     ______________________________________________________
-    from_token – Choose SOURCE token ETH, USDC, USDT, BUSD, WBTC | Select one
-    to_token – Choose DESTINATION token ETH, USDC, USDT, BUSD, WBTC | Select one
+    from_token – Choose SOURCE token ETH, USDC | Select one
+    to_token – Choose DESTINATION token ETH, USDC | Select one
 
     Disclaimer - You can swap only ETH to any token or any token to ETH!
     ______________________________________________________
@@ -196,8 +196,8 @@ def swap_pancake(key, proxy):
     from_token = "USDC"
     to_token = "ETH"
 
-    min_amount = 0.0001
-    max_amount = 0.0002
+    min_amount = 0.001
+    max_amount = 0.002
     decimal = 6
     slippage = 1
 
@@ -211,8 +211,8 @@ def swap_woofi(key, proxy):
     """
     Make swap on WooFi
     ______________________________________________________
-    from_token – Choose SOURCE token ETH/USDC | Select one
-    to_token – Choose DESTINATION token ETH/USDC | Select one
+    from_token – Choose SOURCE token ETH, USDC | Select one
+    to_token – Choose DESTINATION token ETH, USDC | Select one
     ______________________________________________________
     all_amount - Swap 90% ETH or 100% ANY_TOKEN
     """
@@ -262,16 +262,18 @@ def bungee_refuel(key, proxy):
     Make refuel on Bungee
     ______________________________________________________
     to_chain – Choose DESTINATION chain: BSC, OPTIMISM, GNOSIS, POLYGON, BASE, ARBITRUM, AVALANCHE, AURORA, ZK_EVM
+
+    Disclaimer - The chain will be randomly selected
     ______________________________________________________
     random_amount – True - amount random from min to max | False - use min amount
     """
 
-    to_chain = "BSC"
+    chain_list = ["BSC", "GNOSIS", "BASE", "AURORA"]
 
     random_amount = False
 
     bungee = Bungee(key, proxy)
-    bungee.refuel(to_chain, random_amount)
+    bungee.refuel(chain_list, random_amount)
 
 
 def stargate_bridge(key, proxy):
@@ -292,6 +294,18 @@ def stargate_bridge(key, proxy):
     st.bridge(min_amount, max_amount, decimal, slippage, all_amount)
 
 
+def bridge_nft(key, proxy):
+    """
+    Make mint NFT and bridge NFT on L2Telegraph
+    """
+
+    sleep_from = 5
+    sleep_to = 20
+
+    l2telegraph = L2Telegraph(key, proxy)
+    l2telegraph.bridge(sleep_from, sleep_to)
+
+
 def swap_multiswap(key, proxy):
     """
     Multi-Swap module: Automatically performs the specified number of swaps in one of the dexes.
@@ -303,17 +317,19 @@ def swap_multiswap(key, proxy):
     If False, swap 10-90% ETH to USDC, after swap USDC 10-90% to ETH remaining number of times
     """
     use_dex = ["syncswap", "mute", "spacefi"]
-    quantity_swap = 2
 
-    sleep_from = 10
-    sleep_to = 30
+    min_swap = 3
+    max_swap = 8
+
+    sleep_from = 70
+    sleep_to = 400
 
     slippage = 1
 
-    all_amount = False
+    all_amount = True
 
     multi = Multiswap(key, proxy)
-    multi.swap(use_dex, sleep_from, sleep_to, quantity_swap, slippage, all_amount)
+    multi.swap(use_dex, sleep_from, sleep_to, min_swap, max_swap, slippage, all_amount)
 
 
 def deploy_contract_zksync(key, proxy):
@@ -339,14 +355,16 @@ def deploy_contract_zksync(key, proxy):
 def custom_routes(key, proxy):
     """
     You can use these methods:
-    bridge_zksync, withdraw_zksync, bridge_orbiter, swap_syncswap,
-    swap_mute, swap_spacefi, swap_pancake, swap_woofi, swap_velocore,
-    deploy_contract, send_mail, mint_nft, send_message, bridge_nft
+    bridge_zksync, withdraw_zksync, bridge_orbiter, swap_syncswap, liquidity_syncswap,
+    swap_mute, swap_spacefi, liquidity_spacefi, swap_pancake, swap_woofi, swap_velocore,
+    bungee_refuel, deploy_contract_zksync, send_mail, mint_nft, send_message, bridge_nft,
+    swap_multiswap, stargate_bridge
     """
-    use_modules = [swap_spacefi, swap_mute, swap_syncswap, swap_velocore, swap_woofi, swap_pancake]
+    use_modules = [send_message, bridge_nft, bungee_refuel,
+                   stargate_bridge, deploy_contract_zksync, mint_nft, send_mail]
 
-    sleep_from = 10
-    sleep_to = 10
+    sleep_from = 30
+    sleep_to = 250
 
     random_module = False
 
@@ -366,11 +384,6 @@ def send_mail(key, proxy):
 def send_message(key, proxy):
     l2telegraph = L2Telegraph(key, proxy)
     l2telegraph.send_message()
-
-
-def bridge_nft(key, proxy):
-    l2telegraph = L2Telegraph(key, proxy)
-    l2telegraph.bridge()
 
 
 def mint_nft(key, proxy):

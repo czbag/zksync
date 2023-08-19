@@ -79,7 +79,7 @@ class ZkSync(Account):
             withdrawal_tx = TxWithdraw(
                 web3=self.zk_w3,
                 token=Token.create_eth(),
-                amount=Web3.to_wei(amount_wei, "ether"),
+                amount=amount_wei,
                 gas_limit=random.randint(1900000, 2200000),
                 account=self.account
             )

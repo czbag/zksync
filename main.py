@@ -55,7 +55,7 @@ def run_module(module, key, proxy):
 
 def main(module):
     if RANDOM_WALLET:
-        random.shuffle(RANDOM_WALLET)
+        random.shuffle(ACCOUNTS)
 
     for j, key in enumerate(ACCOUNTS):
         proxy = get_proxy() if USE_PROXY else None

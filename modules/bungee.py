@@ -46,8 +46,10 @@ class Bungee(Account):
         }
         return tx
 
-    def refuel(self, to_chain: str, random_amount: bool):
+    def refuel(self, chain_list: list, random_amount: bool):
         limits = get_bungee_limits()
+
+        to_chain = random.choice(chain_list)
 
         try:
             to_chain_limits = [

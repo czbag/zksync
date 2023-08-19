@@ -34,6 +34,12 @@ with open("data/abi/spacefi/router.json", "r") as file:
 with open("data/abi/pancake/router.json", "r") as file:
     PANCAKE_ROUTER_ABI = json.load(file)
 
+with open("data/abi/pancake/factory.json", "r") as file:
+    PANCAKE_FACTORY_ABI = json.load(file)
+
+with open("data/abi/pancake/quoter.json", "r") as file:
+    PANCAKE_QUOTER_ABI = json.load(file)
+
 with open("data/abi/woofi/router.json", "r") as file:
     WOOFI_ROUTER_ABI = json.load(file)
 
@@ -91,7 +97,9 @@ SPACEFI_CONTRACTS = {
 }
 
 PANCAKE_CONTRACTS = {
-    "router": "0x5aEaF2883FBf30f3D62471154eDa3C0c1b05942d"
+    "router": "0xf8b59f3c3Ab33200ec80a8A58b2aA5F5D2a8944C",
+    "factory": "0x1BB72E0CbbEA93c08f535fc7856E0338D7F7a8aB",
+    "quoter": "0x3d146FcE6c1006857750cBe8aF44f76a28041CCc"
 }
 
 WOOFI_CONTRACTS = {

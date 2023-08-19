@@ -22,7 +22,7 @@ class Minter(Account):
         logger.info(f"[{self.address}] Mint NFT")
 
 
-        transaction = self.contract.functions.mint().build_transaction(tx)
+        transaction = self.contract.functions.mint().build_transaction(self.tx)
 
         signed_txn = self.sign(transaction)
 

@@ -1,4 +1,5 @@
 import random
+import time
 
 from loguru import logger
 from web3 import Web3
@@ -75,12 +76,15 @@ class L2Telegraph(Account):
         nft_id = self.get_nft_id(txn_hash.hex())
         return nft_id
 
-    def bridge(self):
+    def bridge(self, sleep_from, sleep_to):
         l0_fee = self.get_estimate_fee(L2TELEGRAPH_NFT_CONTRACT, L2TELEGRAPH_NFT_ABI)
 
         nft_id = self.mint()
 
+        time.sleep(random.randint(sleep_from, sleep_to))
+
         self.tx.update({"value": l0_fee})
+        self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
 
         logger.info(f"[{self.address}] Bridge NFT [{nft_id}]")
 
