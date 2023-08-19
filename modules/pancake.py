@@ -99,7 +99,7 @@ class Pancake(Account):
         unwrap_data = self.swap_contract.encodeABI(
             fn_name="unwrapWETH9",
             args=[
-                0,
+                min_amount_out,
                 self.address
             ]
 
