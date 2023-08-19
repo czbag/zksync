@@ -100,6 +100,8 @@ class SpaceFi(Account):
 
         deadline = int(time.time()) + 1000000
 
+        self.approve(10000000000000000000000000000000, ZKSYNC_TOKENS["USDC"], SPACEFI_CONTRACTS["router"])
+        self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
         self.tx.update({"value": amount_wei})
 
         transaction = self.swap_contract.functions.addLiquidityETH(
