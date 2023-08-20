@@ -167,3 +167,4 @@ pyproject.toml
 __pycache__/
 */__pycache__/
 .idea/
+accounts.txt
