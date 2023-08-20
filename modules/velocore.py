@@ -21,7 +21,7 @@ class Velocore(Account):
 
     def get_min_amount_out(self, from_token: str, to_token: str, amount: int, slippage: float):
         min_amount_out = self.swap_contract.functions.getAmountOut(
-            Web3.to_wei(1, "ether"),
+            amount,
             Web3.to_checksum_address(from_token),
             Web3.to_checksum_address(to_token)
         ).call()
