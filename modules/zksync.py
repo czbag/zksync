@@ -6,13 +6,12 @@ from web3 import Web3
 from loguru import logger
 from zksync2.manage_contracts.contract_encoder_base import ContractEncoder, JsonConfiguration
 from zksync2.manage_contracts.precompute_contract_deployer import PrecomputeContractDeployer
-from zksync2.provider.eth_provider import EthereumProvider
 from zksync2.module.module_builder import ZkSyncBuilder
 from zksync2.core.types import Token, EthBlockParams
 from zksync2.signer.eth_signer import PrivateKeyEthSigner
 from zksync2.transaction.transaction_builders import TxCreate2Contract, TxWithdraw
 
-from config import RPC, CONTRACT_PATH, ZKSYNC_BRIDGE_ABI, ZKSYNC_BRIDGE_CONTRACT
+from config import RPC, CONTRACT_PATH, ZKSYNC_BRIDGE_ABI, ZKSYNC_BRIDGE_CONTRACT, ZKSYNC_TOKENS, WETH_ABI
 from .account import Account
 
 
@@ -100,6 +99,58 @@ class ZkSync(Account):
             )
         else:
             logger.error(f"Withdraw transaction to L1 network failed | error: insufficient funds!")
+
+    def wrap_eth(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool):
+        amount_wei, amount, balance = self.get_amount("ETH", min_amount, max_amount, decimal, all_amount)
+
+        weth = self.get_contract(ZKSYNC_TOKENS["WETH"], WETH_ABI)
+
+        logger.info(f"[{self.address}] Wrap {amount} ETH")
+
+        if amount_wei < balance > 0:
+
+            tx = {
+                "from": self.address,
+                "gas": random.randint(800000, 1100000),
+                "gasPrice": self.w3.eth.gas_price,
+                "nonce": self.w3.eth.get_transaction_count(self.address),
+                "value": amount_wei
+            }
+
+            transaction = weth.functions.deposit().build_transaction(tx)
+
+            signed_txn = self.sign(transaction)
+
+            txn_hash = self.send_raw_transaction(signed_txn)
+
+            self.wait_until_tx_finished(txn_hash.hex())
+        else:
+            logger.error(f"[{self.address}] Insufficient funds!")
+
+    def unwrap_eth(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool):
+        amount_wei, amount, balance = self.get_amount("WETH", min_amount, max_amount, decimal, all_amount)
+
+        weth = self.get_contract(ZKSYNC_TOKENS["WETH"], WETH_ABI)
+
+        logger.info(f"[{self.address}] Unwrap {amount} ETH")
+
+        if amount_wei <= balance > 0:
+            tx = {
+                "from": self.address,
+                "gas": random.randint(800000, 1100000),
+                "gasPrice": self.w3.eth.gas_price,
+                "nonce": self.w3.eth.get_transaction_count(self.address)
+            }
+
+            transaction = weth.functions.withdraw(amount_wei).build_transaction(tx)
+
+            signed_txn = self.sign(transaction)
+
+            txn_hash = self.send_raw_transaction(signed_txn)
+
+            self.wait_until_tx_finished(txn_hash.hex())
+        else:
+            logger.error(f"[{self.address}] Insufficient funds!")
 
     def mint(self, contract_address: str, amount: int):
         logger.info(f"[{self.address}] Starting to mint token")

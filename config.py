@@ -16,6 +16,9 @@ with open("proxy.txt", "r") as file:
 with open('data/abi/zksync/bridge.json') as file:
     ZKSYNC_BRIDGE_ABI = json.load(file)
 
+with open('data/abi/zksync/weth.json') as file:
+    WETH_ABI = json.load(file)
+
 with open("data/abi/syncswap/router.json", "r") as file:
     SYNCSWAP_ROUTER_ABI = json.load(file)
 
@@ -74,6 +77,7 @@ ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 
 ZKSYNC_TOKENS = {
     "ETH": "0x5aea5775959fbc2557cc8789bc1bf90a239d9a91",
+    "WETH": "0x5aea5775959fbc2557cc8789bc1bf90a239d9a91",
     "USDC": "0x3355df6D4c9C3035724Fd0e3914dE96A5a83aaf4",
     "USDT": "0x493257fd37edb34451f62edf8d2a0c418852ba4c",
     "BUSD": "0x2039bb4116b4efc145ec4f0e2ea75012d6c0f181",

@@ -72,6 +72,38 @@ def bridge_orbiter(key, proxy):
     orbiter.bridge(to_chain, min_amount, max_amount, decimal)
 
 
+def wrap_eth(key, proxy):
+    """
+    Wrap ETH
+    ______________________________________________________
+    all_amount True - wrap 90% ETH
+    """
+    min_amount = 0.001
+    max_amount = 0.002
+    decimal = 4
+
+    all_amount = False
+
+    zksync = ZkSync(key, proxy, "zksync")
+    zksync.wrap_eth(min_amount, max_amount, decimal, all_amount)
+
+
+def unwrap_eth(key, proxy):
+    """
+    Unwrap ETH
+    ______________________________________________________
+    all_amount True - unwrap 100% ETH
+    """
+    min_amount = 0.001
+    max_amount = 0.002
+    decimal = 4
+
+    all_amount = True
+
+    zksync = ZkSync(key, proxy, "zksync")
+    zksync.unwrap_eth(min_amount, max_amount, decimal, all_amount)
+
+
 def swap_syncswap(key, proxy):
     """
     Make swap on SyncSwap
@@ -84,7 +116,7 @@ def swap_syncswap(key, proxy):
     all_amount - Swap 90% ETH or 100% ANY_TOKEN
     """
 
-    from_token = "USDC"
+    from_token = "BUSD"
     to_token = "ETH"
 
     min_amount = 0.0001
@@ -243,15 +275,15 @@ def swap_velocore(key, proxy):
     all_amount - Swap 90% ETH or 100% ANY_TOKEN
     """
 
-    from_token = "USDC"
-    to_token = "ETH"
+    from_token = "ETH"
+    to_token = "USDC"
 
     min_amount = 0.0001
     max_amount = 0.0002
     decimal = 6
     slippage = 1
 
-    all_amount = True
+    all_amount = False
 
     velocore = Velocore(key, proxy)
     velocore.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount)
@@ -316,13 +348,13 @@ def swap_multiswap(key, proxy):
     all_amount - If True, swap 90% ETH to USDC, after swap 100% USDC to ETH
     If False, swap 10-90% ETH to USDC, after swap USDC 10-90% to ETH remaining number of times
     """
-    use_dex = ["syncswap", "mute", "spacefi"]
+    use_dex = ["velocore", "mute"]
 
-    min_swap = 3
-    max_swap = 8
+    min_swap = 2
+    max_swap = 4
 
-    sleep_from = 70
-    sleep_to = 400
+    sleep_from = 5
+    sleep_to = 10
 
     slippage = 1
 
