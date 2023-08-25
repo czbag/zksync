@@ -1,5 +1,6 @@
 import random
 import sys
+from typing import Union
 
 from loguru import logger
 from web3 import Web3
@@ -8,8 +9,8 @@ from config import ORBITER_CONTRACT
 
 
 class Orbiter(Account):
-    def __init__(self, private_key: str, chain: str, proxy: str) -> None:
-        super().__init__(private_key=private_key, proxy=proxy, chain=chain)
+    def __init__(self, account_id: int, private_key: str, chain: str, proxy: Union[None, str]) -> None:
+        super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain=chain)
 
         self.bridge_codes = {
             "ethereum": 9001,
@@ -39,16 +40,18 @@ class Orbiter(Account):
         amount = round(random.uniform(min_bridge, max_bridge), decimal)
 
         if amount < 0.005 or amount > 5:
-            logger.error(f"[{self.address}] Limit range amount for bridge 0.005 – 5 ETH | {amount} ETH")
+            logger.error(
+                f"[{self.account_id}][{self.address}] Limit range amount for bridge 0.005 – 5 ETH | {amount} ETH"
+            )
             sys.exit()
 
-        logger.info(f"[{self.address}] Bridge {self.chain} –> {destination_chain} | {amount} ETH")
+        logger.info(f"[{self.account_id}][{self.address}] Bridge {self.chain} –> {destination_chain} | {amount} ETH")
 
         tx_data = self.get_tx_data(amount, destination_chain)
         balance = self.w3.eth.get_balance(self.address)
 
         if tx_data["value"] >= balance:
-            logger.error(f"[{self.address}] Insufficient funds!")
+            logger.error(f"[{self.account_id}][{self.address}] Insufficient funds!")
         else:
             gas_limit = self.w3.eth.estimate_gas(tx_data)
             tx_data.update({'gas': gas_limit})

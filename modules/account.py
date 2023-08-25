@@ -1,5 +1,6 @@
 import time
 import random
+from typing import Union
 
 from loguru import logger
 from web3 import Web3
@@ -10,7 +11,8 @@ from config import RPC, ERC20_ABI, ZKSYNC_TOKENS
 
 
 class Account:
-    def __init__(self, private_key: str, chain: str, proxy: str) -> None:
+    def __init__(self, account_id: int, private_key: str, chain: str, proxy: Union[None, str]) -> None:
+        self.account_id = account_id
         self.private_key = private_key
         self.chain = chain
         self.explorer = RPC[chain]["explorer"]
@@ -78,8 +80,10 @@ class Account:
 
         allowance_amount = self.check_allowance(token_address, contract_address)
 
-        if amount > allowance_amount:
-            logger.success(f"[{self.address}] approve is successfully!")
+        if amount > allowance_amount or amount == 0:
+            logger.success(f"[{self.account_id}][{self.address}] Make approve")
+
+            approve_amount = 2 ** 128 if amount > allowance_amount else 0
 
             tx = {
                 "chainId": self.w3.eth.chain_id,
@@ -91,7 +95,7 @@ class Account:
 
             transaction = contract.functions.approve(
                 contract_address,
-                100000000000000000000000000000000000000000000000000000000000000000000000000000
+                approve_amount
             ).build_transaction(tx)
 
             signed_txn = self.sign(transaction)
@@ -107,12 +111,12 @@ class Account:
                 receipts = self.w3.eth.get_transaction_receipt(hash)
                 status = receipts.get("status")
                 if status == 1:
-                    logger.success(f"[{self.address}] {self.explorer}{hash} successfully!")
+                    logger.success(f"[{self.account_id}][{self.address}] {self.explorer}{hash} successfully!")
                     return True
                 elif status is None:
                     time.sleep(0.3)
                 elif status != 1:
-                    logger.error(f"[{self.address}] {self.explorer}{hash} transaction failed!")
+                    logger.error(f"[{self.account_id}][{self.address}] {self.explorer}{hash} transaction failed!")
                     return False
             except TransactionNotFound:
                 if time.time() - start_time > max_wait_time:

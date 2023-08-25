@@ -20,8 +20,8 @@ def get_bungee_limits() -> Union[dict, bool]:
 
 
 class Bungee(Account):
-    def __init__(self, private_key: str, proxy: str) -> None:
-        super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
+    def __init__(self, account_id: int, private_key: str, proxy: Union[None, str]) -> None:
+        super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.contract = self.get_contract(BUNGEE_CONTRACT, BUNGEE_ABI)
         self.chain_ids = {
@@ -63,7 +63,8 @@ class Bungee(Account):
                 amount = random.randint(min_amount, max_amount) if random_amount else min_amount
 
                 logger.info(
-                    f"[{self.address}] Make refuel to {to_chain.title()} | {Web3.from_wei(amount, 'ether')} ETH"
+                    f"[{self.account_id}][{self.address}] Make refuel to " +
+                    f"{to_chain.title()} | {Web3.from_wei(amount, 'ether')} ETH"
                 )
 
                 transaction = self.contract.functions.depositNativeToken(
@@ -77,6 +78,6 @@ class Bungee(Account):
 
                 self.wait_until_tx_finished(txn_hash.hex())
             else:
-                logger.error(f"[{self.address}] Bungee refuel destination chain inactive!")
-        except:
-            logger.error(f"[{self.address}] Bungee refuel error!")
+                logger.error(f"[{self.account_id}][{self.address}] Bungee refuel destination chain inactive!")
+        except Exception as e:
+            logger.error(f"[{self.account_id}][{self.address}] Bungee refuel error | error {e}")

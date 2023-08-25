@@ -1,5 +1,6 @@
 import random
 import time
+from typing import Union
 
 from loguru import logger
 from web3 import Web3
@@ -16,8 +17,8 @@ from eth_abi import abi
 
 
 class SyncSwap(Account):
-    def __init__(self, private_key: str, proxy: str) -> None:
-        super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
+    def __init__(self, account_id: int, private_key: str, proxy: Union[None, str]) -> None:
+        super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.swap_contract = self.get_contract(SYNCSWAP_CONTRACTS["router"], SYNCSWAP_ROUTER_ABI)
         self.tx = {
@@ -60,9 +61,11 @@ class SyncSwap(Account):
 
         amount_wei, amount, balance = self.get_amount(from_token, min_amount, max_amount, decimal, all_amount)
 
-        logger.info(f"[{self.address}] Swap on SyncSwap – {from_token} -> {to_token} | {amount} {from_token}")
+        logger.info(
+            f"[{self.account_id}][{self.address}] Swap on SyncSwap – {from_token} -> {to_token} | {amount} {from_token}"
+        )
 
-        if amount_wei <= balance != 0:
+        try:
             pool_address = self.get_pool(from_token, to_token)
 
             if pool_address != ZERO_ADDRESS:
@@ -101,9 +104,9 @@ class SyncSwap(Account):
 
                 self.wait_until_tx_finished(txn_hash.hex())
             else:
-                logger.error(f"[{self.address}] Swap path {from_token} to {to_token} not found!")
-        else:
-            logger.error(f"[{self.address}] Insufficient funds!")
+                logger.error(f"[{self.account_id}][{self.address}] Swap path {from_token} to {to_token} not found!")
+        except Exception as e:
+            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
 
     def add_liquidity(self, min_amount: float, max_amount: float, decimal: int):
         amount_wei, amount, balance = self.get_amount("ETH", min_amount, max_amount, decimal, False)

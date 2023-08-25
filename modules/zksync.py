@@ -1,6 +1,7 @@
 import json
 import os
 import random
+from typing import Union
 
 from web3 import Web3
 from loguru import logger
@@ -16,8 +17,8 @@ from .account import Account
 
 
 class ZkSync(Account):
-    def __init__(self, private_key: str, proxy: str, chain: str) -> None:
-        super().__init__(private_key=private_key, proxy=proxy, chain=chain)
+    def __init__(self, account_id: int, private_key: str, proxy: Union[None, str], chain: str) -> None:
+        super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain=chain)
 
         request_kwargs = {}
         if proxy:
@@ -38,7 +39,7 @@ class ZkSync(Account):
     def deposit(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool):
         amount_wei, amount, balance = self.get_amount("ETH", min_amount, max_amount, decimal, all_amount)
 
-        logger.info(f"[{self.address}] Bridge to ZkSync | {amount} ETH")
+        logger.info(f"[{self.account_id}][{self.address}] Bridge to ZkSync | {amount} ETH")
 
         gas_limit = random.randint(700000, 1000000)
 
@@ -72,7 +73,7 @@ class ZkSync(Account):
     def withdraw(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool):
         amount_wei, amount, balance = self.get_amount("ETH", min_amount, max_amount, decimal, all_amount)
 
-        logger.info(f"[{self.address}] Bridge {amount} ETH to Ethereum")
+        logger.info(f"[{self.account_id}][{self.address}] Bridge {amount} ETH to Ethereum")
 
         if amount_wei < balance:
             withdrawal_tx = TxWithdraw(
@@ -94,7 +95,8 @@ class ZkSync(Account):
             tx_hash = self.zk_w3.to_hex(raw_tx_hash)
 
             logger.success(
-                f"[{self.address}] Bridged from ZkSync to Ethereum {amount} ETH is successfully – " +
+                f"[{self.account_id}][{self.address}] Bridged from ZkSync to " +
+                f"Ethereum {amount} ETH is successfully – " +
                 f"{self.explorer}{tx_hash}"
             )
         else:
@@ -105,9 +107,9 @@ class ZkSync(Account):
 
         weth = self.get_contract(ZKSYNC_TOKENS["WETH"], WETH_ABI)
 
-        logger.info(f"[{self.address}] Wrap {amount} ETH")
+        logger.info(f"[{self.account_id}][{self.address}] Wrap {amount} ETH")
 
-        if amount_wei < balance > 0:
+        try:
 
             tx = {
                 "from": self.address,
@@ -124,17 +126,17 @@ class ZkSync(Account):
             txn_hash = self.send_raw_transaction(signed_txn)
 
             self.wait_until_tx_finished(txn_hash.hex())
-        else:
-            logger.error(f"[{self.address}] Insufficient funds!")
+        except Exception as e:
+            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
 
     def unwrap_eth(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool):
         amount_wei, amount, balance = self.get_amount("WETH", min_amount, max_amount, decimal, all_amount)
 
         weth = self.get_contract(ZKSYNC_TOKENS["WETH"], WETH_ABI)
 
-        logger.info(f"[{self.address}] Unwrap {amount} ETH")
+        logger.info(f"[{self.account_id}][{self.address}] Unwrap {amount} ETH")
 
-        if amount_wei <= balance > 0:
+        try:
             tx = {
                 "from": self.address,
                 "gas": random.randint(800000, 1100000),
@@ -149,11 +151,11 @@ class ZkSync(Account):
             txn_hash = self.send_raw_transaction(signed_txn)
 
             self.wait_until_tx_finished(txn_hash.hex())
-        else:
-            logger.error(f"[{self.address}] Insufficient funds!")
+        except Exception as e:
+            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
 
     def mint(self, contract_address: str, amount: int):
-        logger.info(f"[{self.address}] Starting to mint token")
+        logger.info(f"[{self.account_id}][{self.address}] Starting to mint token")
 
         with open(CONTRACT_PATH) as file:
             contract_abi = json.load(file)
@@ -175,8 +177,23 @@ class ZkSync(Account):
 
         self.wait_until_tx_finished(txn_hash.hex())
 
-    def deploy_contract(self, token_name: str, token_symbol: str, min_mint: int, max_mint: int):
+    def get_token_data(self):
+        return "".join(random.sample([chr(l) for l in range(65, 91)], random.randint(3, 6)))
+
+    def deploy_contract(
+            self,
+            token_name: str,
+            token_symbol: str,
+            min_mint: int,
+            max_mint: int,
+            random_token_data: bool
+    ):
         logger.info(f"Starting to deploy token contract")
+
+        token_data = self.get_token_data()
+
+        token_name = token_data if random_token_data else token_name
+        token_symbol = token_data if random_token_data else token_symbol
 
         contract_args = {"name_": token_name, "symbol_": token_symbol, "decimals_": 18}
 
@@ -233,7 +250,9 @@ class ZkSync(Account):
 
         contract_address = tx_receipt["contractAddress"]
 
-        logger.success(f"[{self.address}] Contract has been successfully deployed – [{contract_address}]")
+        logger.success(
+            f"[{self.account_id}][{self.address}] Contract has been successfully deployed – [{contract_address}]"
+        )
 
         if precomputed_address.lower() != contract_address.lower():
             raise RuntimeError("Precomputed contract address does now match with deployed contract address")

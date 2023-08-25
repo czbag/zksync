@@ -1,15 +1,16 @@
 import random
-import time
+from typing import Union
 
 from loguru import logger
 from web3 import Web3
 from config import L2TELEGRAPH_MESSAGE_CONTRACT, L2TELEGRAPH_NFT_CONTRACT, L2TELEGRAPH_MESSAGE_ABI, L2TELEGRAPH_NFT_ABI
+from utils.sleeping import sleep
 from .account import Account
 
 
 class L2Telegraph(Account):
-    def __init__(self, private_key: str, proxy: str) -> None:
-        super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
+    def __init__(self, account_id: int, private_key: str, proxy: Union[None, str]) -> None:
+        super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.tx = {
             "chainId": self.w3.eth.chain_id,
@@ -38,30 +39,32 @@ class L2Telegraph(Account):
         return nft_id
 
     def send_message(self):
-        logger.info(f"[{self.address}] Send message")
+        logger.info(f"[{self.account_id}][{self.address}] Send message")
 
         l0_fee = self.get_estimate_fee(L2TELEGRAPH_MESSAGE_CONTRACT, L2TELEGRAPH_MESSAGE_ABI)
 
-        self.tx.update({"value": Web3.to_wei("0.00025", "ether") + l0_fee})
+        self.tx.update({"value": Web3.to_wei(0.00025, "ether") + l0_fee})
 
         contract = self.get_contract(L2TELEGRAPH_MESSAGE_CONTRACT, L2TELEGRAPH_MESSAGE_ABI)
+        try:
+            transaction = contract.functions.sendMessage(
+                ' ',
+                175,
+                "0x5f26ea1e4d47071a4d9a2c2611c2ae0665d64b6d0d4a6d5964f3b618d8e46bcfbf2792b0d769fbda"
+            ).build_transaction(self.tx)
 
-        transaction = contract.functions.sendMessage(
-            ' ',
-            175,
-            "0x5f26ea1e4d47071a4d9a2c2611c2ae0665d64b6d0d4a6d5964f3b618d8e46bcfbf2792b0d769fbda"
-        ).build_transaction(self.tx)
+            signed_txn = self.sign(transaction)
 
-        signed_txn = self.sign(transaction)
+            txn_hash = self.send_raw_transaction(signed_txn)
 
-        txn_hash = self.send_raw_transaction(signed_txn)
-
-        self.wait_until_tx_finished(txn_hash.hex())
+            self.wait_until_tx_finished(txn_hash.hex())
+        except Exception as e:
+            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
 
     def mint(self):
-        logger.info(f"[{self.address}] Mint NFT")
+        logger.info(f"[{self.account_id}][{self.address}] Mint NFT")
 
-        self.tx.update({"value": Web3.to_wei("0.0005", "ether")})
+        self.tx.update({"value": Web3.to_wei(0.0005, "ether")})
 
         contract = self.get_contract(L2TELEGRAPH_NFT_CONTRACT, L2TELEGRAPH_NFT_ABI)
 
@@ -81,23 +84,25 @@ class L2Telegraph(Account):
 
         nft_id = self.mint()
 
-        time.sleep(random.randint(sleep_from, sleep_to))
+        sleep(sleep_from, sleep_to)
 
         self.tx.update({"value": l0_fee})
         self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
 
-        logger.info(f"[{self.address}] Bridge NFT [{nft_id}]")
+        logger.info(f"[{self.account_id}][{self.address}] Bridge NFT [{nft_id}]")
 
         contract = self.get_contract(L2TELEGRAPH_NFT_CONTRACT, L2TELEGRAPH_NFT_ABI)
+        try:
+            transaction = contract.functions.crossChain(
+                175,
+                "0x5b10ae182c297ec76fe6fe0e3da7c4797cede02dd43a183c97db9174962607a8b6552ce320eac5aa",
+                nft_id
+            ).build_transaction(self.tx)
 
-        transaction = contract.functions.crossChain(
-            175,
-            "0x5b10ae182c297ec76fe6fe0e3da7c4797cede02dd43a183c97db9174962607a8b6552ce320eac5aa",
-            nft_id
-        ).build_transaction(self.tx)
+            signed_txn = self.sign(transaction)
 
-        signed_txn = self.sign(transaction)
+            txn_hash = self.send_raw_transaction(signed_txn)
 
-        txn_hash = self.send_raw_transaction(signed_txn)
-
-        self.wait_until_tx_finished(txn_hash.hex())
+            self.wait_until_tx_finished(txn_hash.hex())
+        except Exception as e:
+            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")

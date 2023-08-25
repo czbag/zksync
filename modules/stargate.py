@@ -1,15 +1,17 @@
 import random
+from typing import Union
 
 from loguru import logger
 from web3 import Web3
 from config import STARGATE_CONTRACT, STARGATE_ABI, ZKSYNC_TOKENS
+from utils.sleeping import sleep
 from .account import Account
 from .syncswap import SyncSwap
 
 
 class Stargate(Account):
-    def __init__(self, private_key: str, proxy: str) -> None:
-        super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
+    def __init__(self, account_id: int, private_key: str, proxy: Union[None, str]) -> None:
+        super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.proxy = proxy
 
@@ -39,13 +41,28 @@ class Stargate(Account):
         return get_fee[0]
 
     def swap(self, min_amount: float, max_amount: float, decimal: int, slippage: int, all_amount: bool):
-        syncswap = SyncSwap(self.private_key, self.proxy)
+        syncswap = SyncSwap(self.account_id, self.private_key, self.proxy)
         syncswap.swap("ETH", "MAV", min_amount, max_amount, decimal, slippage, all_amount)
 
-    def bridge(self, min_amount: float, max_amount: float, decimal: int, slippage: int, all_amount: bool):
         balance = self.get_balance(ZKSYNC_TOKENS["MAV"])
 
-        logger.info(f"[{self.address}] Make stargate bridge {balance['balance']} MAV to BNB")
+        if balance["balance_wei"] > 0:
+            return True
+        return False
+
+    def bridge(
+            self,
+            min_amount: float,
+            max_amount: float,
+            decimal: int,
+            slippage: int,
+            sleep_from: int,
+            sleep_to: int,
+            all_amount: bool,
+    ):
+        balance = self.get_balance(ZKSYNC_TOKENS["MAV"])
+
+        logger.info(f"[{self.account_id}][{self.address}] Make stargate bridge {balance['balance']} MAV to BNB")
 
         if balance["balance_wei"] > 0:
             self.approve(balance["balance_wei"], ZKSYNC_TOKENS["MAV"], STARGATE_CONTRACT)
@@ -77,6 +94,13 @@ class Stargate(Account):
 
             self.wait_until_tx_finished(txn_hash.hex())
         else:
-            logger.error(f"[{self.address}] Insufficient funds!")
-            self.swap(min_amount, max_amount, decimal, slippage, all_amount)
-            self.bridge(min_amount, max_amount, decimal, slippage, all_amount)
+            logger.error(f"[{self.account_id}][{self.address}] Insufficient funds!")
+
+            result_swap = self.swap(min_amount, max_amount, decimal, slippage, all_amount)
+
+            if result_swap:
+                sleep(sleep_from, sleep_to)
+
+                self.bridge(min_amount, max_amount, decimal, slippage, sleep_from, sleep_to, all_amount)
+            else:
+                logger.error(f"[{self.account_id}][{self.address}] Insufficient funds for swap!")

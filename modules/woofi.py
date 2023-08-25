@@ -1,4 +1,5 @@
 import random
+from typing import Union
 
 from loguru import logger
 from web3 import Web3
@@ -7,8 +8,8 @@ from .account import Account
 
 
 class WooFi(Account):
-    def __init__(self, private_key: str, proxy: str) -> None:
-        super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
+    def __init__(self, account_id: int, private_key: str, proxy: Union[None, str]) -> None:
+        super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.swap_contract = self.get_contract(WOOFI_CONTRACTS["router"], WOOFI_ROUTER_ABI)
 
@@ -39,9 +40,11 @@ class WooFi(Account):
     ):
         amount_wei, amount, balance = self.get_amount(from_token, min_amount, max_amount, decimal, all_amount)
 
-        logger.info(f"[{self.address}] Swap on WooFi – {from_token} -> {to_token} | {amount} {from_token}")
+        logger.info(
+            f"[{self.account_id}][{self.address}] Swap on WooFi – {from_token} -> {to_token} | {amount} {from_token}"
+        )
 
-        if amount_wei <= balance != 0:
+        try:
             if from_token == "ETH":
                 from_token_address = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
                 to_token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[to_token])
@@ -69,5 +72,5 @@ class WooFi(Account):
             txn_hash = self.send_raw_transaction(signed_txn)
 
             self.wait_until_tx_finished(txn_hash.hex())
-        else:
-            logger.error(f"[{self.address}] Insufficient funds!")
+        except Exception as e:
+            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")

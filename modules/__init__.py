@@ -15,3 +15,4 @@ from .l2telegraph import L2Telegraph
 from .minter import Minter
 from .routes import Routes
 from .tx_checker import check_tx
+from .multi_approve import MultiApprove

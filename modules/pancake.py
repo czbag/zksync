@@ -1,5 +1,6 @@
 import random
 import time
+from typing import Union
 
 from loguru import logger
 from web3 import Web3
@@ -16,8 +17,8 @@ from config import (
 
 
 class Pancake(Account):
-    def __init__(self, private_key: str, proxy: str) -> None:
-        super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
+    def __init__(self, account_id: int, private_key: str, proxy: Union[None, str]) -> None:
+        super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.swap_contract = self.get_contract(PANCAKE_CONTRACTS["router"], PANCAKE_ROUTER_ABI)
         self.tx = {
@@ -124,12 +125,14 @@ class Pancake(Account):
     ):
         amount_wei, amount, balance = self.get_amount(from_token, min_amount, max_amount, decimal, all_amount)
 
-        logger.info(f"[{self.address}] Swap on Pancake – {from_token} -> {to_token} | {amount} {from_token}")
+        logger.info(
+            f"[{self.account_id}][{self.address}] Swap on Pancake – {from_token} -> {to_token} | {amount} {from_token}"
+        )
 
         pool = self.get_pool(from_token, to_token)
 
         if pool != ZERO_ADDRESS:
-            if amount_wei <= balance != 0:
+            try:
                 if from_token == "ETH":
                     contract_txn = self.swap_to_token(from_token, to_token, amount_wei, slippage)
                 else:
@@ -140,7 +143,7 @@ class Pancake(Account):
                 txn_hash = self.send_raw_transaction(signed_txn)
 
                 self.wait_until_tx_finished(txn_hash.hex())
-            else:
-                logger.error(f"[{self.address}] Insufficient funds!")
+            except Exception as e:
+                logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
         else:
-            logger.error(f"[{self.address}] Swap path {from_token} to {to_token} not found!")
+            logger.error(f"[{self.account_id}][{self.address}] Swap path {from_token} to {to_token} not found!")

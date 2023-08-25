@@ -8,18 +8,18 @@ RANDOM_WALLET = False  # True or False
 # SLEEP MODE
 IS_SLEEP = True  # True or False
 
-SLEEP_FROM = 100  # Second
-SLEEP_TO = 500  # Second
+SLEEP_FROM = 300  # Second
+SLEEP_TO = 700  # Second
 
 # PROXY MODE
-USE_PROXY = False
+USE_PROXY = True
 
 # GWEI CONTROL MODE
 CHECK_GWEI = False  # True or False
 MAX_GWEI = 20
 
 
-def bridge_zksync(key, proxy):
+def bridge_zksync(account_id, key, proxy):
     """
     Deposit from official bridge
     ______________________________________________________
@@ -32,11 +32,11 @@ def bridge_zksync(key, proxy):
 
     all_amount = True
 
-    zksync = ZkSync(key, proxy, "ethereum")
+    zksync = ZkSync(account_id, key, proxy, "ethereum")
     zksync.deposit(min_amount, max_amount, decimal, all_amount)
 
 
-def withdraw_zksync(key, proxy):
+def withdraw_zksync(account_id, key, proxy):
     """
     Withdraw from official bridge
     ______________________________________________________
@@ -49,11 +49,11 @@ def withdraw_zksync(key, proxy):
 
     all_amount = False
 
-    zksync = ZkSync(key, proxy, "zksync")
+    zksync = ZkSync(account_id, key, proxy, "zksync")
     zksync.withdraw(min_amount, max_amount, decimal, all_amount)
 
 
-def bridge_orbiter(key, proxy):
+def bridge_orbiter(account_id, key, proxy):
     """
     Bridge from orbiter
     ______________________________________________________
@@ -68,11 +68,11 @@ def bridge_orbiter(key, proxy):
     max_amount = 3
     decimal = 4
 
-    orbiter = Orbiter(key, from_chain, proxy)
+    orbiter = Orbiter(account_id, key, from_chain, proxy)
     orbiter.bridge(to_chain, min_amount, max_amount, decimal)
 
 
-def wrap_eth(key, proxy):
+def wrap_eth(account_id, key, proxy):
     """
     Wrap ETH
     ______________________________________________________
@@ -84,11 +84,11 @@ def wrap_eth(key, proxy):
 
     all_amount = False
 
-    zksync = ZkSync(key, proxy, "zksync")
+    zksync = ZkSync(account_id, key, proxy, "zksync")
     zksync.wrap_eth(min_amount, max_amount, decimal, all_amount)
 
 
-def unwrap_eth(key, proxy):
+def unwrap_eth(account_id, key, proxy):
     """
     Unwrap ETH
     ______________________________________________________
@@ -100,11 +100,11 @@ def unwrap_eth(key, proxy):
 
     all_amount = True
 
-    zksync = ZkSync(key, proxy, "zksync")
+    zksync = ZkSync(account_id, key, proxy, "zksync")
     zksync.unwrap_eth(min_amount, max_amount, decimal, all_amount)
 
 
-def swap_syncswap(key, proxy):
+def swap_syncswap(account_id, key, proxy):
     """
     Make swap on SyncSwap
 
@@ -116,21 +116,21 @@ def swap_syncswap(key, proxy):
     all_amount - Swap 90% ETH or 100% ANY_TOKEN
     """
 
-    from_token = "BUSD"
-    to_token = "ETH"
+    from_token = "ETH"
+    to_token = "USDC"
 
-    min_amount = 0.0001
-    max_amount = 0.0002
+    min_amount = 1
+    max_amount = 2
     decimal = 6
     slippage = 1
 
-    all_amount = True
+    all_amount = False
 
-    syncswap = SyncSwap(key, proxy)
+    syncswap = SyncSwap(account_id, key, proxy)
     syncswap.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount)
 
 
-def liquidity_syncswap(key, proxy):
+def liquidity_syncswap(account_id, key, proxy):
     """
     Add liqudity on SyncSwap
 
@@ -140,11 +140,11 @@ def liquidity_syncswap(key, proxy):
     max_amount = 0.02
     decimal = 6
 
-    syncswap = SyncSwap(key, proxy)
+    syncswap = SyncSwap(account_id, key, proxy)
     syncswap.add_liquidity(min_amount, max_amount, decimal)
 
 
-def swap_mute(key, proxy):
+def swap_mute(account_id, key, proxy):
     """
     Make swap on Mute
     ______________________________________________________
@@ -166,11 +166,11 @@ def swap_mute(key, proxy):
 
     all_amount = True
 
-    mute = Mute(key, proxy)
+    mute = Mute(account_id, key, proxy)
     mute.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount)
 
 
-def swap_spacefi(key, proxy):
+def swap_spacefi(account_id, key, proxy):
     """
     Make swap on SpaceFi
     ______________________________________________________
@@ -192,11 +192,11 @@ def swap_spacefi(key, proxy):
 
     all_amount = True
 
-    spacefi = SpaceFi(key, proxy)
+    spacefi = SpaceFi(account_id, key, proxy)
     spacefi.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount)
 
 
-def liquidity_spacefi(key, proxy):
+def liquidity_spacefi(account_id, key, proxy):
     """
     Make swap on SyncSwap
 
@@ -209,11 +209,11 @@ def liquidity_spacefi(key, proxy):
     max_amount = 0.0002
     decimal = 6
 
-    spacefi = SpaceFi(key, proxy)
+    spacefi = SpaceFi(account_id, key, proxy)
     spacefi.add_liquidity(min_amount, max_amount, decimal)
 
 
-def swap_pancake(key, proxy):
+def swap_pancake(account_id, key, proxy):
     """
     Make swap on PancakeSwap
     ______________________________________________________
@@ -235,11 +235,11 @@ def swap_pancake(key, proxy):
 
     all_amount = True
 
-    pancake = Pancake(key, proxy)
+    pancake = Pancake(account_id, key, proxy)
     pancake.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount)
 
 
-def swap_woofi(key, proxy):
+def swap_woofi(account_id, key, proxy):
     """
     Make swap on WooFi
     ______________________________________________________
@@ -259,11 +259,11 @@ def swap_woofi(key, proxy):
 
     all_amount = True
 
-    woofi = WooFi(key, proxy)
+    woofi = WooFi(account_id, key, proxy)
     woofi.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount)
 
 
-def swap_velocore(key, proxy):
+def swap_velocore(account_id, key, proxy):
     """
     Make swap on Velocore
     ______________________________________________________
@@ -285,11 +285,11 @@ def swap_velocore(key, proxy):
 
     all_amount = False
 
-    velocore = Velocore(key, proxy)
+    velocore = Velocore(account_id, key, proxy)
     velocore.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount)
 
 
-def bungee_refuel(key, proxy):
+def bungee_refuel(account_id, key, proxy):
     """
     Make refuel on Bungee
     ______________________________________________________
@@ -304,11 +304,11 @@ def bungee_refuel(key, proxy):
 
     random_amount = False
 
-    bungee = Bungee(key, proxy)
+    bungee = Bungee(account_id, key, proxy)
     bungee.refuel(chain_list, random_amount)
 
 
-def stargate_bridge(key, proxy):
+def stargate_bridge(account_id, key, proxy):
     """
     Make stargate MAV token bridge to BSC
     ______________________________________________________
@@ -320,13 +320,16 @@ def stargate_bridge(key, proxy):
     decimal = 4
     slippage = 1
 
+    sleep_from = 5
+    sleep_to = 24
+
     all_amount = False
 
-    st = Stargate(key, proxy)
-    st.bridge(min_amount, max_amount, decimal, slippage, all_amount)
+    st = Stargate(account_id, key, proxy)
+    st.bridge(min_amount, max_amount, decimal, slippage, sleep_from, sleep_to, all_amount)
 
 
-def bridge_nft(key, proxy):
+def bridge_nft(account_id, key, proxy):
     """
     Make mint NFT and bridge NFT on L2Telegraph
     """
@@ -334,11 +337,11 @@ def bridge_nft(key, proxy):
     sleep_from = 5
     sleep_to = 20
 
-    l2telegraph = L2Telegraph(key, proxy)
+    l2telegraph = L2Telegraph(account_id, key, proxy)
     l2telegraph.bridge(sleep_from, sleep_to)
 
 
-def swap_multiswap(key, proxy):
+def swap_multiswap(account_id, key, proxy):
     """
     Multi-Swap module: Automatically performs the specified number of swaps in one of the dexes.
     ______________________________________________________
@@ -360,11 +363,11 @@ def swap_multiswap(key, proxy):
 
     all_amount = True
 
-    multi = Multiswap(key, proxy)
+    multi = Multiswap(account_id, key, proxy)
     multi.swap(use_dex, sleep_from, sleep_to, min_swap, max_swap, slippage, all_amount)
 
 
-def deploy_contract_zksync(key, proxy):
+def deploy_contract_zksync(account_id, key, proxy):
     """
     Deploy contract token and mint
     ______________________________________________________
@@ -380,11 +383,13 @@ def deploy_contract_zksync(key, proxy):
     min_mint = 10
     max_mint = 1000
 
-    zksync = ZkSync(key, proxy, "zksync")
-    zksync.deploy_contract(token_name, token_symbol, min_mint, max_mint)
+    random_token_data = True
+
+    zksync = ZkSync(account_id, key, proxy, "zksync")
+    zksync.deploy_contract(token_name, token_symbol, min_mint, max_mint, random_token_data)
 
 
-def custom_routes(key, proxy):
+def custom_routes(account_id, key, proxy):
     """
     You can use these methods:
     bridge_zksync, withdraw_zksync, bridge_orbiter, swap_syncswap, liquidity_syncswap,
@@ -392,34 +397,48 @@ def custom_routes(key, proxy):
     bungee_refuel, deploy_contract_zksync, send_mail, mint_nft, send_message, bridge_nft,
     swap_multiswap, stargate_bridge
     """
-    use_modules = [send_message, bridge_nft, bungee_refuel,
-                   stargate_bridge, deploy_contract_zksync, mint_nft, send_mail]
+    use_modules = [send_mail, mint_nft, bridge_nft, send_message, bungee_refuel]
 
-    sleep_from = 30
-    sleep_to = 250
+    sleep_from = 70
+    sleep_to = 400
 
     random_module = False
 
-    routes = Routes(key, proxy)
+    routes = Routes(account_id, key, proxy)
     routes.start(use_modules, sleep_from, sleep_to, random_module)
+
+
+def multi_approve(account_id, key, proxy):
+    """
+    Make approve all tokens from config in SyncSwap, Mute, SpaceFi, Pancake, WooFi, Velocore
+
+    Disclaimer - You can use 0 for cancel  approve
+    """
+    amount = 0
+
+    sleep_from = 30
+    sleep_to = 95
+
+    multiapprove = MultiApprove(account_id, key, proxy)
+    multiapprove.start(amount, sleep_from, sleep_to)
 
 
 #########################################
 ########### NO NEED TO CHANGE ###########
 #########################################
 
-def send_mail(key, proxy):
-    dmail = Dmail(key, proxy)
+def send_mail(account_id, key, proxy):
+    dmail = Dmail(account_id, key, proxy)
     dmail.send_mail()
 
 
-def send_message(key, proxy):
-    l2telegraph = L2Telegraph(key, proxy)
+def send_message(account_id, key, proxy):
+    l2telegraph = L2Telegraph(account_id, key, proxy)
     l2telegraph.send_message()
 
 
-def mint_nft(key, proxy):
-    mint_nft = Minter(key, proxy)
+def mint_nft(account_id, key, proxy):
+    mint_nft = Minter(account_id, key, proxy)
     mint_nft.mint()
 
 

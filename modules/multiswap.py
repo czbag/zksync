@@ -1,4 +1,5 @@
 import random
+from typing import Union
 
 from loguru import logger
 from web3 import Web3
@@ -8,8 +9,8 @@ from utils.sleeping import sleep
 
 
 class Multiswap(Account):
-    def __init__(self, private_key: str, proxy: str) -> None:
-        super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
+    def __init__(self, account_id: int, private_key: str, proxy: Union[None, str]) -> None:
+        super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.proxy = proxy
         self.swap_modules = {
@@ -35,7 +36,7 @@ class Multiswap(Account):
             slippage: int,
             all_amount: bool
     ):
-        logger.info(f"[{self.address}] Start MultiSwap")
+        logger.info(f"[{self.account_id}][{self.address}] Start MultiSwap")
 
         quantity_swap = random.randint(min_swap, max_swap)
 
@@ -58,7 +59,7 @@ class Multiswap(Account):
                 from_token = "ETH"
                 to_token = "USDC"
 
-            swap_module = self.get_swap_module(use_dex)(self.private_key, self.proxy)
+            swap_module = self.get_swap_module(use_dex)(self.account_id, self.private_key, self.proxy)
             swap_module.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount)
 
             if _ + 1 != quantity_swap:

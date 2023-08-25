@@ -1,5 +1,6 @@
 import random
 import time
+from typing import Union
 
 from loguru import logger
 from web3 import Web3
@@ -8,8 +9,8 @@ from .account import Account
 
 
 class Velocore(Account):
-    def __init__(self, private_key: str, proxy: str) -> None:
-        super().__init__(private_key=private_key, proxy=proxy, chain="zksync")
+    def __init__(self, account_id: int, private_key: str, proxy: Union[None, str]) -> None:
+        super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.swap_contract = self.get_contract(VELOCORE_CONTRACTS["router"], VELOCORE_ROUTER_ABI)
         self.tx = {
@@ -25,7 +26,6 @@ class Velocore(Account):
             Web3.to_checksum_address(from_token),
             Web3.to_checksum_address(to_token)
         ).call()
-        print(min_amount_out)
         return int(min_amount_out[0] - (min_amount_out[0] / 100 * slippage))
 
     def swap_to_token(self, from_token: str, to_token: str, amount: int, slippage: int):
@@ -88,9 +88,11 @@ class Velocore(Account):
     ):
         amount_wei, amount, balance = self.get_amount(from_token, min_amount, max_amount, decimal, all_amount)
 
-        logger.info(f"[{self.address}] Swap on Velocore – {from_token} -> {to_token} | {amount} {from_token}")
+        logger.info(
+            f"[{self.account_id}][{self.address}] Swap on Velocore – {from_token} -> {to_token} | {amount} {from_token}"
+        )
 
-        if amount_wei <= balance != 0:
+        try:
             if from_token == "ETH":
                 contract_txn = self.swap_to_token(from_token, to_token, amount_wei, slippage)
             else:
@@ -101,5 +103,5 @@ class Velocore(Account):
             txn_hash = self.send_raw_transaction(signed_txn)
 
             self.wait_until_tx_finished(txn_hash.hex())
-        else:
-            logger.error(f"[{self.address}] Insufficient funds!")
+        except Exception as e:
+            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")

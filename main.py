@@ -5,10 +5,10 @@ import questionary
 from questionary import Choice
 
 from config import ACCOUNTS
-from utils.gas_checker import check_gas
 from utils.get_proxy import get_proxy
-from settings import *
 from utils.sleeping import sleep
+from utils.gas_checker import check_gas
+from settings import *
 
 
 def get_module():
@@ -34,11 +34,12 @@ def get_module():
             Choice("17) Mint NFT", mint_nft),
             Choice("18) Deploy contract and mint token", deploy_contract_zksync),
             Choice("19) Dmail sending mail", send_mail),
-            Choice("20) Multiswap", swap_multiswap),
+            Choice("20) MultiSwap", swap_multiswap),
             Choice("21) Stargate bridge MAV", stargate_bridge),
             Choice("22) Use custom routes", custom_routes),
-            Choice("23) Check transaction count", "tx_checker"),
-            Choice("24) Exit", "exit"),
+            Choice("23) MultiApprove", multi_approve),
+            Choice("24) Check transaction count", "tx_checker"),
+            Choice("25) Exit", "exit"),
         ],
         qmark="🛠 ",
         pointer="✅ "
@@ -51,8 +52,8 @@ def get_module():
 
 
 @check_gas
-def run_module(module, key, proxy):
-    module(key, proxy)
+def run_module(module, account_id, key, proxy):
+    module(account_id, key, proxy)
 
 
 def main(module):
@@ -62,7 +63,7 @@ def main(module):
     for j, key in enumerate(ACCOUNTS):
         proxy = get_proxy() if USE_PROXY else None
 
-        run_module(module, key, proxy)
+        run_module(module, j + 1, key, proxy)
 
         if j + 1 < len(ACCOUNTS) and IS_SLEEP:
             sleep(SLEEP_FROM, SLEEP_TO)
