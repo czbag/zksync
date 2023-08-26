@@ -82,17 +82,18 @@ class L2Telegraph(Account):
     def bridge(self, sleep_from, sleep_to):
         l0_fee = self.get_estimate_fee(L2TELEGRAPH_NFT_CONTRACT, L2TELEGRAPH_NFT_ABI)
 
-        nft_id = self.mint()
-
-        sleep(sleep_from, sleep_to)
-
-        self.tx.update({"value": l0_fee})
-        self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
-
-        logger.info(f"[{self.account_id}][{self.address}] Bridge NFT [{nft_id}]")
-
-        contract = self.get_contract(L2TELEGRAPH_NFT_CONTRACT, L2TELEGRAPH_NFT_ABI)
         try:
+            nft_id = self.mint()
+
+            sleep(sleep_from, sleep_to)
+
+            self.tx.update({"value": l0_fee})
+            self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
+
+            logger.info(f"[{self.account_id}][{self.address}] Bridge NFT [{nft_id}]")
+
+            contract = self.get_contract(L2TELEGRAPH_NFT_CONTRACT, L2TELEGRAPH_NFT_ABI)
+
             transaction = contract.functions.crossChain(
                 175,
                 "0x5b10ae182c297ec76fe6fe0e3da7c4797cede02dd43a183c97db9174962607a8b6552ce320eac5aa",
