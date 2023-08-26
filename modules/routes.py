@@ -18,7 +18,7 @@ class Routes(Account):
         for _ in range(0, len(use_modules)):
             if random_module:
                 module = random.choice(use_modules)
-                module(self.private_key, self.proxy)
+                module(self.account_id, self.private_key, self.proxy)
                 use_modules.remove(module)
             else:
                 use_modules[_](self.account_id, self.private_key, self.proxy)
