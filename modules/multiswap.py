@@ -34,33 +34,51 @@ class Multiswap(Account):
             min_swap: int,
             max_swap: int,
             slippage: int,
-            all_amount: bool
+            random_swap_token: bool,
+            min_percent: int,
+            max_percent: int
     ):
-        logger.info(f"[{self.account_id}][{self.address}] Start MultiSwap")
-
         quantity_swap = random.randint(min_swap, max_swap)
 
-        for _ in range(0, quantity_swap):
-            balance_eth = self.w3.eth.get_balance(self.address)
-            balance_usdc = self.get_balance(ZKSYNC_TOKENS["USDC"])
+        if random_swap_token:
+            path = [random.choice(["ETH", "USDC"]) for _ in range(0, quantity_swap)]
+            if path[0] == "USDC" and self.get_balance(ZKSYNC_TOKENS["USDC"])["balance"] <= 1:
+                path[0] = "ETH"
+        else:
+            path = ["ETH" if _ % 2 == 0 else "USDC" for _ in range(0, quantity_swap)]
 
-            if balance_usdc["balance_wei"] > 0:
-                all_amount = True if balance_usdc["balance"] <= 1 else all_amount
-                decimal = balance_usdc["decimal"]
-                min_amount = int(balance_usdc["balance"] * 0.1)
-                max_amount = balance_usdc["balance"]
-                from_token = "USDC"
-                to_token = "ETH"
-            else:
-                all_amount = all_amount
-                decimal = 18
-                min_amount = float(Web3.from_wei(int(balance_eth * 0.1), "ether"))
-                max_amount = float(Web3.from_wei(int(balance_eth * 0.9), "ether"))
-                from_token = "ETH"
+        logger.info(f"[{self.account_id}][{self.address}] Start MultiSwap | quantity swaps: {quantity_swap}")
+
+        for _, token in enumerate(path):
+            if token == "ETH":
+                decimal = 6
                 to_token = "USDC"
 
-            swap_module = self.get_swap_module(use_dex)(self.account_id, self.private_key, self.proxy)
-            swap_module.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount)
+                balance = self.w3.eth.get_balance(self.address)
 
-            if _ + 1 != quantity_swap:
+                min_amount = float(Web3.from_wei(int(balance / 100 * min_percent), "ether"))
+                max_amount = float(Web3.from_wei(int(balance / 100 * max_percent), "ether"))
+            else:
+                decimal = 18
+                to_token = "ETH"
+
+                balance = self.get_balance(ZKSYNC_TOKENS["USDC"])
+
+                min_amount = balance["balance"] if balance["balance"] <= 1 else balance["balance"] / 100 * min_percent
+                max_amount = balance["balance"] if balance["balance"] <= 1 else balance["balance"] / 100 * max_percent
+
+            swap_module = self.get_swap_module(use_dex)(self.account_id, self.private_key, self.proxy)
+            swap_module.swap(
+                token,
+                to_token,
+                min_amount,
+                max_amount,
+                decimal,
+                slippage,
+                False,
+                min_percent,
+                max_percent
+            )
+
+            if _ + 1 != len(path):
                 sleep(sleep_from, sleep_to)

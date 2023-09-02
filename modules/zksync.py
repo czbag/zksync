@@ -36,8 +36,24 @@ class ZkSync(Account):
         }
         return tx
 
-    def deposit(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool):
-        amount_wei, amount, balance = self.get_amount("ETH", min_amount, max_amount, decimal, all_amount)
+    def deposit(
+            self,
+            min_amount: float,
+            max_amount: float,
+            decimal: int,
+            all_amount: bool,
+            min_percent: int,
+            max_percent: int
+    ):
+        amount_wei, amount, balance = self.get_amount(
+            "ETH",
+            min_amount,
+            max_amount,
+            decimal,
+            all_amount,
+            min_percent,
+            max_percent
+        )
 
         logger.info(f"[{self.account_id}][{self.address}] Bridge to ZkSync | {amount} ETH")
 
@@ -70,8 +86,24 @@ class ZkSync(Account):
         except Exception as e:
             logger.error(f"Deposit transaction on L1 network failed | error: {e}")
 
-    def withdraw(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool):
-        amount_wei, amount, balance = self.get_amount("ETH", min_amount, max_amount, decimal, all_amount)
+    def withdraw(
+            self,
+            min_amount: float,
+            max_amount: float,
+            decimal: int,
+            all_amount: bool,
+            min_percent: int,
+            max_percent: int
+    ):
+        amount_wei, amount, balance = self.get_amount(
+            "ETH",
+            min_amount,
+            max_amount,
+            decimal,
+            all_amount,
+            min_percent,
+            max_percent
+        )
 
         logger.info(f"[{self.account_id}][{self.address}] Bridge {amount} ETH to Ethereum")
 
@@ -102,10 +134,18 @@ class ZkSync(Account):
         else:
             logger.error(f"Withdraw transaction to L1 network failed | error: insufficient funds!")
 
-    def wrap_eth(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool):
-        amount_wei, amount, balance = self.get_amount("ETH", min_amount, max_amount, decimal, all_amount)
+    def wrap_eth(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool, min_percent: int, max_percent: int):
+        amount_wei, amount, balance = self.get_amount(
+            "ETH",
+            min_amount,
+            max_amount,
+            decimal,
+            all_amount,
+            min_percent,
+            max_percent
+        )
 
-        weth = self.get_contract(ZKSYNC_TOKENS["WETH"], WETH_ABI)
+        weth_contract = self.get_contract(ZKSYNC_TOKENS["WETH"], WETH_ABI)
 
         logger.info(f"[{self.account_id}][{self.address}] Wrap {amount} ETH")
 
@@ -113,13 +153,12 @@ class ZkSync(Account):
 
             tx = {
                 "from": self.address,
-                "gas": random.randint(800000, 1100000),
                 "gasPrice": self.w3.eth.gas_price,
                 "nonce": self.w3.eth.get_transaction_count(self.address),
                 "value": amount_wei
             }
 
-            transaction = weth.functions.deposit().build_transaction(tx)
+            transaction = weth_contract.functions.deposit().build_transaction(tx)
 
             signed_txn = self.sign(transaction)
 
@@ -129,22 +168,29 @@ class ZkSync(Account):
         except Exception as e:
             logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
 
-    def unwrap_eth(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool):
-        amount_wei, amount, balance = self.get_amount("WETH", min_amount, max_amount, decimal, all_amount)
+    def unwrap_eth(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool, min_percent: int, max_percent: int):
+        amount_wei, amount, balance = self.get_amount(
+            "WETH",
+            min_amount,
+            max_amount,
+            decimal,
+            all_amount,
+            min_percent,
+            max_percent
+        )
 
-        weth = self.get_contract(ZKSYNC_TOKENS["WETH"], WETH_ABI)
+        weth_contract = self.get_contract(ZKSYNC_TOKENS["WETH"], WETH_ABI)
 
         logger.info(f"[{self.account_id}][{self.address}] Unwrap {amount} ETH")
 
         try:
             tx = {
                 "from": self.address,
-                "gas": random.randint(800000, 1100000),
                 "gasPrice": self.w3.eth.gas_price,
                 "nonce": self.w3.eth.get_transaction_count(self.address)
             }
 
-            transaction = weth.functions.withdraw(amount_wei).build_transaction(tx)
+            transaction = weth_contract.functions.withdraw(amount_wei).build_transaction(tx)
 
             signed_txn = self.sign(transaction)
 
@@ -164,7 +210,6 @@ class ZkSync(Account):
 
         tx = {
             "from": self.address,
-            "gas": random.randint(1000000, 1100000),
             "gasPrice": self.w3.eth.gas_price,
             "nonce": self.w3.eth.get_transaction_count(self.address)
         }
@@ -177,8 +222,9 @@ class ZkSync(Account):
 
         self.wait_until_tx_finished(txn_hash.hex())
 
-    def get_token_data(self):
-        return "".join(random.sample([chr(l) for l in range(65, 91)], random.randint(3, 6)))
+    @staticmethod
+    def get_token_data():
+        return "".join(random.sample([chr(i) for i in range(65, 91)], random.randint(3, 6)))
 
     def deploy_contract(
             self,

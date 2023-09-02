@@ -15,7 +15,6 @@ class L2Telegraph(Account):
         self.tx = {
             "chainId": self.w3.eth.chain_id,
             "from": self.address,
-            "gas": random.randint(2900000, 3100000),
             "gasPrice": self.w3.eth.gas_price,
             "nonce": self.w3.eth.get_transaction_count(self.address),
         }

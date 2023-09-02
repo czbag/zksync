@@ -16,16 +16,26 @@ class Dmail(Account):
             "chainId": self.w3.eth.chain_id,
             "from": self.address,
             "to": Web3.to_checksum_address(DMAIL_CONTRACT),
-            "gas": random.randint(1000000, 1100000),
             "gasPrice": self.w3.eth.gas_price,
             "nonce": self.w3.eth.get_transaction_count(self.address)
         }
 
-    def send_mail(self):
+    @staticmethod
+    def get_random_email():
+        domain_list = ["@gmail.com", "@dmail.ai"]
+
+        domain_address = "".join(random.sample([chr(i) for i in range(97, 123)], random.randint(7, 15)))
+
+        return domain_address + random.choice(domain_list)
+
+    def send_mail(self, random_receiver: bool):
         logger.info(f"[{self.account_id}][{self.address}] Send email")
 
+        email_address = self.get_random_email() if random_receiver else f"{self.address}@dmail.ai"
+
         try:
-            data = self.contract.encodeABI("send_mail", args=(f"{self.address}@dmail.ai", f"{self.address}@dmail.ai"))
+            data = self.contract.encodeABI("send_mail", args=(email_address, email_address))
+
             self.tx.update({"data": data})
 
             signed_txn = self.sign(self.tx)

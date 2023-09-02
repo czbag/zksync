@@ -13,6 +13,7 @@ from .bungee import Bungee
 from .stargate import Stargate
 from .l2telegraph import L2Telegraph
 from .minter import Minter
+from .tavaera import Tavaera
 from .routes import Routes
 from .tx_checker import check_tx
 from .multi_approve import MultiApprove

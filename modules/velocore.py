@@ -15,7 +15,6 @@ class Velocore(Account):
         self.swap_contract = self.get_contract(VELOCORE_CONTRACTS["router"], VELOCORE_ROUTER_ABI)
         self.tx = {
             "from": self.address,
-            "gas": random.randint(2900000, 3100000),
             "gasPrice": self.w3.eth.gas_price,
             "nonce": self.w3.eth.get_transaction_count(self.address)
         }
@@ -84,9 +83,19 @@ class Velocore(Account):
             max_amount: float,
             decimal: int,
             slippage: int,
-            all_amount: bool
+            all_amount: bool,
+            min_percent: int,
+            max_percent: int
     ):
-        amount_wei, amount, balance = self.get_amount(from_token, min_amount, max_amount, decimal, all_amount)
+        amount_wei, amount, balance = self.get_amount(
+            from_token,
+            min_amount,
+            max_amount,
+            decimal,
+            all_amount,
+            min_percent,
+            max_percent
+        )
 
         logger.info(
             f"[{self.account_id}][{self.address}] Swap on Velocore – {from_token} -> {to_token} | {amount} {from_token}"
