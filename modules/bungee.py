@@ -39,7 +39,6 @@ class Bungee(Account):
     def get_tx_data(self, amount: int):
         tx = {
             "from": self.address,
-            "gas": random.randint(1000000, 1100000),
             "gasPrice": self.w3.eth.gas_price,
             "nonce": self.w3.eth.get_transaction_count(self.address),
             "value": amount

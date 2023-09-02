@@ -8,6 +8,7 @@ from eth_account import Account as EthereumAccount
 from web3.exceptions import TransactionNotFound
 
 from config import RPC, ERC20_ABI, ZKSYNC_TOKENS
+from utils.sleeping import sleep
 
 
 class Account:
@@ -19,6 +20,7 @@ class Account:
         self.token = RPC[chain]["token"]
 
         request_kwargs = {}
+        
         if proxy:
             request_kwargs = {"proxies": {"https": f"http://{proxy}"}}
 
@@ -48,17 +50,28 @@ class Account:
 
         return {"balance_wei": balance_wei, "balance": balance, "symbol": symbol, "decimal": decimal}
 
-    def get_amount(self, from_token: str, min_amount: float, max_amount: float, decimal: int, all_amount: bool):
+    def get_amount(
+            self,
+            from_token: str,
+            min_amount: float,
+            max_amount: float,
+            decimal: int,
+            all_amount: bool,
+            min_percent: int,
+            max_percent: int
+    ):
         random_amount = round(random.uniform(min_amount, max_amount), decimal)
+        random_percent = random.randint(min_percent, max_percent)
 
         if from_token == "ETH":
             balance = self.w3.eth.get_balance(self.address)
-            amount_wei = int(balance * 0.9) if all_amount else Web3.to_wei(random_amount, "ether")
-            amount = Web3.from_wei(int(balance * 0.9), "ether") if all_amount else random_amount
+            amount_wei = int(balance / 100 * random_percent) if all_amount else Web3.to_wei(random_amount, "ether")
+            amount = Web3.from_wei(int(balance / 100 * random_percent), "ether") if all_amount else random_amount
         else:
             balance = self.get_balance(ZKSYNC_TOKENS[from_token])
-            amount_wei = balance["balance_wei"] if all_amount else int(random_amount * 10 ** balance["decimal"])
-            amount = balance["balance"] if all_amount else random_amount
+            amount_wei = int(balance["balance_wei"] / 100 * random_percent) \
+                if all_amount else int(random_amount * 10 ** balance["decimal"])
+            amount = balance["balance"] / 100 * random_percent if all_amount else random_amount
             balance = balance["balance_wei"]
 
         return amount_wei, amount, balance
@@ -89,8 +102,7 @@ class Account:
                 "chainId": self.w3.eth.chain_id,
                 "from": self.address,
                 "nonce": self.w3.eth.get_transaction_count(self.address),
-                "gasPrice": self.w3.eth.gas_price,
-                "gas": random.randint(900000, 1100000)
+                "gasPrice": self.w3.eth.gas_price
             }
 
             transaction = contract.functions.approve(
@@ -104,6 +116,8 @@ class Account:
 
             self.wait_until_tx_finished(txn_hash.hex())
 
+            sleep(5, 20)
+
     def wait_until_tx_finished(self, hash: str, max_wait_time=180):
         start_time = time.time()
         while True:
@@ -115,7 +129,7 @@ class Account:
                     return True
                 elif status is None:
                     time.sleep(0.3)
-                elif status != 1:
+                else:
                     logger.error(f"[{self.account_id}][{self.address}] {self.explorer}{hash} transaction failed!")
                     return False
             except TransactionNotFound:
@@ -125,6 +139,11 @@ class Account:
                 time.sleep(1)
 
     def sign(self, transaction):
+        gas = self.w3.eth.estimate_gas(transaction)
+        gas = int(gas + gas * 0.3)
+
+        transaction.update({"gas": gas})
+
         signed_txn = self.w3.eth.account.sign_transaction(transaction, self.private_key)
 
         return signed_txn

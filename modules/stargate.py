@@ -19,7 +19,6 @@ class Stargate(Account):
         self.tx = {
             "chainId": self.w3.eth.chain_id,
             "from": self.address,
-            "gas": random.randint(2900000, 3100000),
             "gasPrice": self.w3.eth.gas_price
         }
 
@@ -40,9 +39,28 @@ class Stargate(Account):
 
         return get_fee[0]
 
-    def swap(self, min_amount: float, max_amount: float, decimal: int, slippage: int, all_amount: bool):
+    def swap(
+            self,
+            min_amount: float,
+            max_amount: float,
+            decimal: int,
+            slippage: int,
+            all_amount: bool,
+            min_percent: int,
+            max_percent: int
+    ):
         syncswap = SyncSwap(self.account_id, self.private_key, self.proxy)
-        syncswap.swap("ETH", "MAV", min_amount, max_amount, decimal, slippage, all_amount)
+        syncswap.swap(
+            "ETH",
+            "MAV",
+            min_amount,
+            max_amount,
+            decimal,
+            slippage,
+            all_amount,
+            min_percent,
+            max_percent
+        )
 
         balance = self.get_balance(ZKSYNC_TOKENS["MAV"])
 
@@ -59,6 +77,8 @@ class Stargate(Account):
             sleep_from: int,
             sleep_to: int,
             all_amount: bool,
+            min_percent: int,
+            max_percent: int
     ):
         balance = self.get_balance(ZKSYNC_TOKENS["MAV"])
 
@@ -96,11 +116,21 @@ class Stargate(Account):
         else:
             logger.error(f"[{self.account_id}][{self.address}] Insufficient funds!")
 
-            result_swap = self.swap(min_amount, max_amount, decimal, slippage, all_amount)
+            result_swap = self.swap(min_amount, max_amount, decimal, slippage, all_amount, min_percent, max_percent)
 
             if result_swap:
                 sleep(sleep_from, sleep_to)
 
-                self.bridge(min_amount, max_amount, decimal, slippage, sleep_from, sleep_to, all_amount)
+                self.bridge(
+                    min_amount,
+                    max_amount,
+                    decimal,
+                    slippage,
+                    sleep_from,
+                    sleep_to,
+                    all_amount,
+                    min_percent,
+                    max_percent
+                )
             else:
                 logger.error(f"[{self.account_id}][{self.address}] Insufficient funds for swap!")

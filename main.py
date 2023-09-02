@@ -2,10 +2,11 @@ import random
 import sys
 
 import questionary
+from loguru import logger
 from questionary import Choice
 
-from config import ACCOUNTS
-from utils.get_proxy import get_proxy
+from config import ACCOUNTS, PROXIES
+from utils.get_proxy import check_proxy
 from utils.sleeping import sleep
 from utils.gas_checker import check_gas
 from settings import *
@@ -31,15 +32,16 @@ def get_module():
             Choice("14) Make bungee refuel", bungee_refuel),
             Choice("15) Send message L2Telegraph", send_message),
             Choice("16) Mint and bridge NFT L2Telegraph", bridge_nft),
-            Choice("17) Mint NFT", mint_nft),
-            Choice("18) Deploy contract and mint token", deploy_contract_zksync),
-            Choice("19) Dmail sending mail", send_mail),
-            Choice("20) MultiSwap", swap_multiswap),
-            Choice("21) Stargate bridge MAV", stargate_bridge),
-            Choice("22) Use custom routes", custom_routes),
-            Choice("23) MultiApprove", multi_approve),
-            Choice("24) Check transaction count", "tx_checker"),
-            Choice("25) Exit", "exit"),
+            Choice("17) Mint Tavaera ID + NFT", mint_tavaera),
+            Choice("18) Mint NFT", mint_nft),
+            Choice("19) Deploy contract and mint token", deploy_contract_zksync),
+            Choice("20) Dmail sending mail", send_mail),
+            Choice("21) MultiSwap", swap_multiswap),
+            Choice("22) Stargate bridge MAV", stargate_bridge),
+            Choice("23) Use custom routes", custom_routes),
+            Choice("24) MultiApprove", multi_approve),
+            Choice("25) Check transaction count", "tx_checker"),
+            Choice("26) Exit", "exit"),
         ],
         qmark="🛠 ",
         pointer="✅ "
@@ -51,21 +53,49 @@ def get_module():
     return result
 
 
+def get_wallets():
+    if USE_PROXY:
+        account_with_proxy = dict(zip(ACCOUNTS, PROXIES))
+
+        wallets = [
+            {
+                "id": _id,
+                "key": key,
+                "proxy": account_with_proxy[key]
+            } for _id, key in enumerate(account_with_proxy, start=1)
+        ]
+    else:
+        wallets = [
+            {
+                "id": _id,
+                "key": key,
+                "proxy": None
+            } for _id, key in enumerate(ACCOUNTS, start=1)
+        ]
+    return wallets
+
+
 @check_gas
 def run_module(module, account_id, key, proxy):
     module(account_id, key, proxy)
 
 
 def main(module):
+    wallets = get_wallets()
+
     if RANDOM_WALLET:
-        random.shuffle(ACCOUNTS)
+        random.shuffle(wallets)
 
-    for j, key in enumerate(ACCOUNTS):
-        proxy = get_proxy() if USE_PROXY else None
+    for account in wallets:
+        if account["proxy"]:
+            result = check_proxy(account["proxy"])
+            if result is False:
+                logger.error(f"Proxy error - {account['proxy']}")
+                continue
 
-        run_module(module, j + 1, key, proxy)
+        run_module(module, account["id"], account["key"], account["proxy"])
 
-        if j + 1 < len(ACCOUNTS) and IS_SLEEP:
+        if account != wallets[-1] and IS_SLEEP:
             sleep(SLEEP_FROM, SLEEP_TO)
 
 
