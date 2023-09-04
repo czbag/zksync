@@ -18,8 +18,13 @@ class Routes(Account):
         for _ in range(0, len(use_modules)):
             if random_module:
                 module = random.choice(use_modules)
-                module(self.account_id, self.private_key, self.proxy)
+
                 use_modules.remove(module)
             else:
-                use_modules[_](self.account_id, self.private_key, self.proxy)
+                module = use_modules[_]
+
+            module = random.choice(module) if type(module) is list else module
+
+            module(self.account_id, self.private_key, self.proxy)
+
             sleep(sleep_from, sleep_to)

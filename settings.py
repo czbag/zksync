@@ -459,12 +459,16 @@ def custom_routes(account_id, key, proxy):
     swap_mute, swap_spacefi, liquidity_spacefi, swap_pancake, swap_woofi, swap_velocore,
     bungee_refuel, deploy_contract_zksync, send_mail, mint_nft, send_message, bridge_nft,
     swap_multiswap, stargate_bridge, mint_tavaera
+    ______________________________________________________
+    Disclaimer - You can add modules to [] to select random ones,
+    example [module_1, module_2, [module_3, module_4], module 5]
+    The script will start with module 1, 2, 5 and select a random one from module 3 and 4
     """
 
-    use_modules = [swap_multiswap, deploy_contract_zksync, mint_tavaera]
+    use_modules = [swap_multiswap, deploy_contract_zksync, mint_tavaera, [swap_woofi, swap_velocore]]
 
-    sleep_from = 70
-    sleep_to = 400
+    sleep_from = 1
+    sleep_to = 2
 
     random_module = True
 
