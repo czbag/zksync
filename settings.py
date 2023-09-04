@@ -12,7 +12,7 @@ SLEEP_FROM = 300  # Second
 SLEEP_TO = 700  # Second
 
 # PROXY MODE
-USE_PROXY = True
+USE_PROXY = False
 
 # GWEI CONTROL MODE
 CHECK_GWEI = False  # True or False
@@ -501,6 +501,16 @@ def send_message(account_id, key, proxy):
 def mint_nft(account_id, key, proxy):
     mint_nft = Minter(account_id, key, proxy)
     mint_nft.mint()
+
+
+def mint_zks_domain(account_id, key, proxy):
+    zks_domain = ZKSDomain(account_id, key, proxy)
+    zks_domain.mint()
+
+
+def mint_era_domain(account_id, key, proxy):
+    era_domain = EraDomain(account_id, key, proxy)
+    era_domain.mint()
 
 
 def get_tx_count():

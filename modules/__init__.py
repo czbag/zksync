@@ -17,3 +17,5 @@ from .tavaera import Tavaera
 from .routes import Routes
 from .tx_checker import check_tx
 from .multi_approve import MultiApprove
+from .zks_domain import ZKSDomain
+from .era_domain import EraDomain

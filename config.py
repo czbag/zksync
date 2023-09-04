@@ -73,6 +73,12 @@ with open("data/abi/tavaera/id.json", "r") as file:
 with open("data/abi/tavaera/abi.json", "r") as file:
     TAVAERA_ABI = json.load(file)
 
+with open("data/abi/zks/abi.json", "r") as file:
+    ZKS_ABI = json.load(file)
+
+with open("data/abi/era_ns/abi.json", "r") as file:
+    ENS_ABI = json.load(file)
+
 ZKSYNC_BRIDGE_CONTRACT = "0x32400084c286cf3e17e7b677ea9583e60a000324"
 
 ORBITER_CONTRACT = "0x80C67432656d59144cEFf962E8fAF8926599bCF8"
@@ -135,3 +141,7 @@ MINTER_CONTRACT = "0x31DCD96f29BD32F3a1856247846E9d2f95C2b639"
 TAVAERA_ID_CONTRACT = "0xd29Aa7bdD3cbb32557973daD995A3219D307721f"
 
 TAVAERA_CONTRACT = "0x50b2b7092bcc15fbb8ac74fe9796cf24602897ad"
+
+ZKS_CONTRACT = "0xcbe2093030f485adaaf5b61deb4d9ca8adeae509"
+
+ENS_CONTRACT = "0x935442af47f3dc1c11f006d551e13769f12eab13"
