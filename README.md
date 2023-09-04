@@ -82,6 +82,6 @@ python main.py
 
 3) В файле proxy.txt указываем список прокси, каждая прокси с новой строки, формат http, пример в файле указан
 
-4) В файле rpc.json по пути zksync/data/rpc.json можем менять прокси на свои
+4) В файле rpc.json по пути zksync/data/rpc.json можем менять rpc на свои
 
 Инфа по апдейтам да и просто лайф блог –– https://t.me/sybilwave
