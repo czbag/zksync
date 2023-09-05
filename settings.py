@@ -364,6 +364,27 @@ def stargate_bridge(account_id, key, proxy):
     st.bridge(min_amount, max_amount, decimal, slippage, sleep_from, sleep_to, all_amount, min_percent, max_percent)
 
 
+def deposit_eralend(account_id, key, proxy):
+    min_amount = 0.0001
+    max_amount = 0.0002
+    decimal = 5
+
+    sleep_from = 5
+    sleep_to = 24
+
+    make_withdraw = True
+
+    all_amount = False
+
+    min_percent = 60
+    max_percent = 80
+
+    eralend = Eralend(account_id, key, proxy)
+    eralend.deposit(
+        min_amount, max_amount, decimal, sleep_from, sleep_to, make_withdraw, all_amount, min_percent, max_percent
+    )
+
+
 def send_mail(account_id, key, proxy):
     """
     Dmail mail sender
@@ -467,8 +488,8 @@ def custom_routes(account_id, key, proxy):
 
     use_modules = [swap_multiswap, deploy_contract_zksync, mint_tavaera, [swap_woofi, swap_velocore]]
 
-    sleep_from = 1
-    sleep_to = 2
+    sleep_from = 70
+    sleep_to = 400
 
     random_module = True
 
@@ -515,6 +536,11 @@ def mint_zks_domain(account_id, key, proxy):
 def mint_era_domain(account_id, key, proxy):
     era_domain = EraDomain(account_id, key, proxy)
     era_domain.mint()
+
+
+def withdraw_erlaned(account_id, key, proxy):
+    eralend = Eralend(account_id, key, proxy)
+    eralend.withdraw()
 
 
 def get_tx_count():
