@@ -221,12 +221,7 @@ def swap_spacefi(account_id, key, proxy):
 
 def liquidity_spacefi(account_id, key, proxy):
     """
-    Make swap on SyncSwap
-
-    from_token – Choose SOURCE token ETH, USDC, USDT, BUSD, MAV, OT, MATIC, WBTC | Select one
-    to_token – Choose DESTINATION token ETH, USDC, USDT, BUSD, MAV, OT, MATIC, WBTC | Select one
-
-    amount in ETH, you need have usdc
+    Add liqudity on SpaceFi
     """
     min_amount = 0.0001
     max_amount = 0.0002
@@ -319,6 +314,37 @@ def swap_velocore(account_id, key, proxy):
 
     velocore = Velocore(account_id, key, proxy)
     velocore.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount, min_percent, max_percent)
+
+
+def swap_odos(account_id, key, proxy):
+    """
+    Make swap on Odos
+    ______________________________________________________
+    from_token – Choose SOURCE token ETH, WETH, USDC, USDT, BUSD, MAV, OT, MATIC, WBTC | Select one
+    to_token – Choose DESTINATION token ETH, WETH, USDC, USDT, BUSD, MAV, OT, MATIC, WBTC | Select one
+
+    Disclaimer - If you use True for use_fee, you support me 1% of the transaction amount
+    ______________________________________________________
+    all_amount - swap from min_percent to max_percent
+    """
+
+    from_token = "ETH"
+    to_token = "WETH"
+
+    min_amount = 0.0001
+    max_amount = 0.0002
+    decimal = 6
+    slippage = 1
+
+    all_amount = False
+
+    min_percent = 100
+    max_percent = 100
+
+    odos = Odos(account_id, key, proxy)
+    odos.swap(
+        from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount, min_percent, max_percent
+    )
 
 
 def bungee_refuel(account_id, key, proxy):
@@ -431,7 +457,7 @@ def swap_multiswap(account_id, key, proxy):
     """
     Multi-Swap module: Automatically performs the specified number of swaps in one of the dexes.
     ______________________________________________________
-    use_dex - Choose any dex: syncswap, mute, spacefi, pancake, woofi, velocore
+    use_dex - Choose any dex: syncswap, mute, spacefi, pancake, woofi, velocore, odos
     quantity_swap - Quantity swaps
     ______________________________________________________
     random_swap_token - If True the swap path will be [ETH -> USDC -> USDC -> ETH] (random!)
@@ -486,7 +512,7 @@ def custom_routes(account_id, key, proxy):
     bridge_zksync, withdraw_zksync, bridge_orbiter, swap_syncswap, liquidity_syncswap,
     swap_mute, swap_spacefi, liquidity_spacefi, swap_pancake, swap_woofi, swap_velocore,
     bungee_refuel, deploy_contract_zksync, send_mail, mint_nft, send_message, bridge_nft,
-    swap_multiswap, stargate_bridge, mint_tavaera, deposit_eralend, withdraw_eralend
+    swap_multiswap, stargate_bridge, mint_tavaera, deposit_eralend, withdraw_eralend, swap_odos
     ______________________________________________________
     Disclaimer - You can add modules to [] to select random ones,
     example [module_1, module_2, [module_3, module_4], module 5]

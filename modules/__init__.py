@@ -7,6 +7,7 @@ from .spacefi import SpaceFi
 from .pancake import Pancake
 from .woofi import WooFi
 from .velocore import Velocore
+from .odos import Odos
 from .multiswap import Multiswap
 from .dmail import Dmail
 from .bungee import Bungee

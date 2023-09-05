@@ -129,6 +129,11 @@ VELOCORE_CONTRACTS = {
     "router": "0xd999e16e68476bc749a28fc14a0c3b6d7073f50c"
 }
 
+ODOS_CONTRACT = {
+    "router": "0x4bba932e9792a2b917d47830c93a9bc79320e4f7",
+    "use_ref": True  # If you use True for ODOS_USE_REF, you support me 1% of the transaction amount
+}
+
 BUNGEE_CONTRACT = "0x7ee459d7fde8b4a3c22b9c8c7aa52abaddd9ffd5"
 
 STARGATE_CONTRACT = "0xdac7479e5f7c01cc59bbf7c1c4edf5604ada1ff2"
