@@ -365,6 +365,13 @@ def stargate_bridge(account_id, key, proxy):
 
 
 def deposit_eralend(account_id, key, proxy):
+    """
+    Make deposit on Eralend
+    ______________________________________________________
+    make_withdraw - True, if need withdraw after deposit
+
+    all_amount - depost from min_percent to max_percent
+    """
     min_amount = 0.0001
     max_amount = 0.0002
     decimal = 5
@@ -479,7 +486,7 @@ def custom_routes(account_id, key, proxy):
     bridge_zksync, withdraw_zksync, bridge_orbiter, swap_syncswap, liquidity_syncswap,
     swap_mute, swap_spacefi, liquidity_spacefi, swap_pancake, swap_woofi, swap_velocore,
     bungee_refuel, deploy_contract_zksync, send_mail, mint_nft, send_message, bridge_nft,
-    swap_multiswap, stargate_bridge, mint_tavaera
+    swap_multiswap, stargate_bridge, mint_tavaera, deposit_eralend, withdraw_eralend
     ______________________________________________________
     Disclaimer - You can add modules to [] to select random ones,
     example [module_1, module_2, [module_3, module_4], module 5]
