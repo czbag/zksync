@@ -12,6 +12,11 @@ class Odos(Account):
     def __init__(self, account_id: int, private_key: str, proxy: Union[None, str]) -> None:
         super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
+        self.proxies = {}
+
+        if proxy:
+            self.proxies.update({"http": f"http://{proxy}", "https": f"http://{proxy}"})
+
     def quote(self, from_token: str, to_token: str, amount: int, slippage: float):
         url = "https://api.odos.xyz/sor/quote/v2"
 
@@ -38,7 +43,8 @@ class Odos(Account):
         response = requests.post(
             url=url,
             headers={"Content-Type": "application/json"},
-            json=data
+            json=data,
+            proxies=self.proxies
         )
 
         if response.status_code == 200:
@@ -58,7 +64,8 @@ class Odos(Account):
         response = requests.post(
             url=url,
             headers={"Content-Type": "application/json"},
-            json=data
+            json=data,
+            proxies=self.proxies
         )
 
         if response.status_code == 200:
@@ -101,18 +108,20 @@ class Odos(Account):
         try:
             quote_data = self.quote(from_token, to_token, amount_wei, slippage)
 
+            print(quote_data)
+
             transaction_data = self.assemble(quote_data["pathId"])
 
             transaction = transaction_data["transaction"]
 
             transaction["chainId"] = self.w3.eth.chain_id
 
-            transaction["value"] = int(transaction["value"])
-
-            signed_txn = self.sign(transaction)
-
-            txn_hash = self.send_raw_transaction(signed_txn)
-
-            self.wait_until_tx_finished(txn_hash.hex())
+            # transaction["value"] = int(transaction["value"])
+            #
+            # signed_txn = self.sign(transaction)
+            #
+            # txn_hash = self.send_raw_transaction(signed_txn)
+            #
+            # self.wait_until_tx_finished(txn_hash.hex())
         except Exception as e:
             logger.error(f"[{self.account_id}][{self.address}] Error | {e}")

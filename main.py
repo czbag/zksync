@@ -93,10 +93,15 @@ def main(module):
 
     for account in wallets:
         if account["proxy"]:
+            logger.info(f"Trying to connect to the proxy [{account['proxy']}]")
+
             result = check_proxy(account["proxy"])
+
             if result is False:
                 logger.error(f"Proxy error - {account['proxy']}")
                 continue
+
+            logger.success(f"Proxy [{account['proxy']}] is available")
 
         run_module(module, account["id"], account["key"], account["proxy"])
 

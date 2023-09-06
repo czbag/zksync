@@ -12,7 +12,7 @@ SLEEP_FROM = 300  # Second
 SLEEP_TO = 700  # Second
 
 # PROXY MODE
-USE_PROXY = False
+USE_PROXY = True
 
 # GWEI CONTROL MODE
 CHECK_GWEI = False  # True or False
@@ -464,7 +464,7 @@ def swap_multiswap(account_id, key, proxy):
     If False the swap path will be [ETH -> USDC -> ETH -> USDC]
     """
 
-    use_dex = ["velocore", "mute", "pancake", "syncswap", "woofi", "spacefi"]
+    use_dex = ["velocore", "mute", "pancake", "syncswap", "woofi", "spacefi", "odos"]
 
     min_swap = 4
     max_swap = 8
