@@ -116,12 +116,12 @@ class Odos(Account):
 
             transaction["chainId"] = self.w3.eth.chain_id
 
-            # transaction["value"] = int(transaction["value"])
-            #
-            # signed_txn = self.sign(transaction)
-            #
-            # txn_hash = self.send_raw_transaction(signed_txn)
-            #
-            # self.wait_until_tx_finished(txn_hash.hex())
+            transaction["value"] = int(transaction["value"])
+
+            signed_txn = self.sign(transaction)
+
+            txn_hash = self.send_raw_transaction(signed_txn)
+
+            self.wait_until_tx_finished(txn_hash.hex())
         except Exception as e:
             logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
