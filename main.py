@@ -34,6 +34,8 @@ def get_module():
             Choice("16) Stargate bridge MAV", stargate_bridge),
             Choice("17) Deposit Eralend", deposit_eralend),
             Choice("18) Withdraw Eralend", withdraw_erlaned),
+            Choice("17) Deposit Basilisk", deposit_basilisk),
+            Choice("18) Withdraw Basilisk", withdraw_basilisk),
             Choice("19) Mint and bridge NFT L2Telegraph", bridge_nft),
             Choice("20) Mint Tavaera ID + NFT", mint_tavaera),
             Choice("21) Mint NFT", mint_nft),

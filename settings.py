@@ -12,7 +12,7 @@ SLEEP_FROM = 300  # Second
 SLEEP_TO = 700  # Second
 
 # PROXY MODE
-USE_PROXY = True
+USE_PROXY = False
 
 # GWEI CONTROL MODE
 CHECK_GWEI = False  # True or False
@@ -418,6 +418,34 @@ def deposit_eralend(account_id, key, proxy):
     )
 
 
+def deposit_basilisk(account_id, key, proxy):
+    """
+    Make deposit on Basilisk
+    ______________________________________________________
+    make_withdraw - True, if need withdraw after deposit
+
+    all_amount - depost from min_percent to max_percent
+    """
+    min_amount = 0.0001
+    max_amount = 0.0002
+    decimal = 5
+
+    sleep_from = 5
+    sleep_to = 24
+
+    make_withdraw = True
+
+    all_amount = False
+
+    min_percent = 60
+    max_percent = 80
+
+    basilisk = Basilisk(account_id, key, proxy)
+    basilisk.deposit(
+        min_amount, max_amount, decimal, sleep_from, sleep_to, make_withdraw, all_amount, min_percent, max_percent
+    )
+
+
 def send_mail(account_id, key, proxy):
     """
     Dmail mail sender
@@ -574,6 +602,11 @@ def mint_era_domain(account_id, key, proxy):
 def withdraw_erlaned(account_id, key, proxy):
     eralend = Eralend(account_id, key, proxy)
     eralend.withdraw()
+
+
+def withdraw_basilisk(account_id, key, proxy):
+    basilisk = Basilisk(account_id, key, proxy)
+    basilisk.withdraw()
 
 
 def get_tx_count():

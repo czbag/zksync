@@ -58,6 +58,9 @@ with open("data/abi/stargate/router.json", "r") as file:
 with open("data/abi/eralend/abi.json", "r") as file:
     ERALEND_ABI = json.load(file)
 
+with open("data/abi/basilisk/abi.json", "r") as file:
+    BASILISK_ABI = json.load(file)
+
 with open("data/abi/dmail/abi.json", "r") as file:
     DMAIL_ABI = json.load(file)
 
@@ -139,6 +142,8 @@ BUNGEE_CONTRACT = "0x7ee459d7fde8b4a3c22b9c8c7aa52abaddd9ffd5"
 STARGATE_CONTRACT = "0xdac7479e5f7c01cc59bbf7c1c4edf5604ada1ff2"
 
 ERALEND_CONTRACT = "0x22d8b71599e14f20a49a397b88c1c878c86f5579"
+
+BASILISK_CONTRACT = "0x1e8F1099a3fe6D2c1A960528394F4fEB8f8A288D"
 
 DMAIL_CONTRACT = "0x981F198286E40F9979274E0876636E9144B8FB8E"
 

@@ -13,6 +13,7 @@ from .dmail import Dmail
 from .bungee import Bungee
 from .stargate import Stargate
 from .eralend import Eralend
+from .basilisk import Basilisk
 from .l2telegraph import L2Telegraph
 from .minter import Minter
 from .tavaera import Tavaera
