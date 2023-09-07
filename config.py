@@ -49,6 +49,9 @@ with open("data/abi/woofi/router.json", "r") as file:
 with open("data/abi/velocore/router.json", "r") as file:
     VELOCORE_ROUTER_ABI = json.load(file)
 
+with open("data/abi/zkswap/router.json", "r") as file:
+    ZKSWAP_ROUTER_ABI = json.load(file)
+
 with open("data/abi/bungee/abi.json", "r") as file:
     BUNGEE_ABI = json.load(file)
 
@@ -84,6 +87,9 @@ with open("data/abi/zks/abi.json", "r") as file:
 
 with open("data/abi/era_ns/abi.json", "r") as file:
     ENS_ABI = json.load(file)
+
+with open("data/abi/omnisea/abi.json", "r") as file:
+    OMNISEA_ABI = json.load(file)
 
 ZKSYNC_BRIDGE_CONTRACT = "0x32400084c286cf3e17e7b677ea9583e60a000324"
 
@@ -137,6 +143,10 @@ ODOS_CONTRACT = {
     "use_ref": True  # If you use True for ODOS_USE_REF, you support me 1% of the transaction amount
 }
 
+ZKSWAP_CONTRACTS = {
+    "router": "0x18381c0f738146Fb694DE18D1106BdE2BE040Fa4"
+}
+
 BUNGEE_CONTRACT = "0x7ee459d7fde8b4a3c22b9c8c7aa52abaddd9ffd5"
 
 STARGATE_CONTRACT = "0xdac7479e5f7c01cc59bbf7c1c4edf5604ada1ff2"
@@ -160,3 +170,5 @@ TAVAERA_CONTRACT = "0x50b2b7092bcc15fbb8ac74fe9796cf24602897ad"
 ZKS_CONTRACT = "0xcbe2093030f485adaaf5b61deb4d9ca8adeae509"
 
 ENS_CONTRACT = "0x935442af47f3dc1c11f006d551e13769f12eab13"
+
+OMNISEA_CONTRACT = "0x1Ecd053f681a51E37087719653f3f0FFe54750C0"

@@ -8,6 +8,7 @@ from .pancake import Pancake
 from .woofi import WooFi
 from .velocore import Velocore
 from .odos import Odos
+from .zkswap import ZKSwap
 from .multiswap import Multiswap
 from .dmail import Dmail
 from .bungee import Bungee
@@ -22,3 +23,4 @@ from .tx_checker import check_tx
 from .multi_approve import MultiApprove
 from .zks_domain import ZKSDomain
 from .era_domain import EraDomain
+from .omnisea import Omnisea

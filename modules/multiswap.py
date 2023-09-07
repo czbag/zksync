@@ -20,7 +20,8 @@ class Multiswap(Account):
             "pancake": Pancake,
             "velocore": Velocore,
             "woofi": WooFi,
-            "odos": Odos
+            "odos": Odos,
+            "zkswap": ZKSwap
         }
 
     def get_swap_module(self, use_dex: list):

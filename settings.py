@@ -347,6 +347,35 @@ def swap_odos(account_id, key, proxy):
     )
 
 
+def swap_zkswap(account_id, key, proxy):
+    """
+    Make swap on ZkSwap
+    ______________________________________________________
+    from_token – Choose SOURCE token ETH, USDC | Select one
+    to_token – Choose DESTINATION token ETH, USDC | Select one
+
+    Disclaimer - You can swap only ETH to any token or any token to ETH!
+    ______________________________________________________
+    all_amount - swap from min_percent to max_percent
+    """
+
+    from_token = "ETH"
+    to_token = "USDC"
+
+    min_amount = 0.0001
+    max_amount = 0.0002
+    decimal = 6
+    slippage = 1
+
+    all_amount = True
+
+    min_percent = 60
+    max_percent = 80
+
+    zkswap = ZKSwap(account_id, key, proxy)
+    zkswap.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount, min_percent, max_percent)
+
+
 def bungee_refuel(account_id, key, proxy):
     """
     Make refuel on Bungee
@@ -485,14 +514,14 @@ def swap_multiswap(account_id, key, proxy):
     """
     Multi-Swap module: Automatically performs the specified number of swaps in one of the dexes.
     ______________________________________________________
-    use_dex - Choose any dex: syncswap, mute, spacefi, pancake, woofi, velocore, odos
+    use_dex - Choose any dex: syncswap, mute, spacefi, pancake, woofi, velocore, odos, zkswap
     quantity_swap - Quantity swaps
     ______________________________________________________
     random_swap_token - If True the swap path will be [ETH -> USDC -> USDC -> ETH] (random!)
     If False the swap path will be [ETH -> USDC -> ETH -> USDC]
     """
 
-    use_dex = ["velocore", "mute", "pancake", "syncswap", "woofi", "spacefi", "odos"]
+    use_dex = ["velocore", "mute", "pancake", "syncswap", "woofi", "spacefi", "odos", "zkswap"]
 
     min_swap = 4
     max_swap = 8
@@ -537,10 +566,11 @@ def deploy_contract_zksync(account_id, key, proxy):
 def custom_routes(account_id, key, proxy):
     """
     You can use these methods:
-    bridge_zksync, withdraw_zksync, bridge_orbiter, swap_syncswap, liquidity_syncswap,
-    swap_mute, swap_spacefi, liquidity_spacefi, swap_pancake, swap_woofi, swap_velocore,
-    bungee_refuel, deploy_contract_zksync, send_mail, mint_nft, send_message, bridge_nft,
-    swap_multiswap, stargate_bridge, mint_tavaera, deposit_eralend, withdraw_eralend, swap_odos
+    bridge_zksync, withdraw_zksync, bridge_orbiter, wrap_eth, unwrap_eth, swap_syncswap, liquidity_syncswap,
+    swap_mute, swap_spacefi, liquidity_spacefi, swap_pancake, swap_woofi, swap_velocore, swap_odos, swap_zkswap,
+    bungee_refuel, stargate_bridge, deposit_eralend, withdraw_erlaned, deposit_basilisk, withdraw_basilisk,
+    bridge_nft, mint_tavaera, mint_nft, mint_zks_domain, mint_era_domain, send_message, send_mail
+    swap_multiswap, custom_routes, multi_approve, deploy_contract_zksync
     ______________________________________________________
     Disclaimer - You can add modules to [] to select random ones,
     example [module_1, module_2, [module_3, module_4], module 5]
@@ -607,6 +637,11 @@ def withdraw_erlaned(account_id, key, proxy):
 def withdraw_basilisk(account_id, key, proxy):
     basilisk = Basilisk(account_id, key, proxy)
     basilisk.withdraw()
+
+
+def create_omnisea(account_id, key, proxy):
+    omnisea = Omnisea(account_id, key, proxy)
+    omnisea.create()
 
 
 def get_tx_count():
