@@ -6,10 +6,10 @@ from modules import *
 RANDOM_WALLET = True  # True or False
 
 # SLEEP MODE
-IS_SLEEP = False  # True or False
+IS_SLEEP = True  # True or False
 
-SLEEP_FROM = 300  # Second
-SLEEP_TO = 700  # Second
+SLEEP_FROM = 500  # Second
+SLEEP_TO = 1000  # Second
 
 # PROXY MODE
 USE_PROXY = False
@@ -475,6 +475,34 @@ def deposit_basilisk(account_id, key, proxy):
     )
 
 
+def deposit_reactorfusion(account_id, key, proxy):
+    """
+    Make deposit on Basilisk
+    ______________________________________________________
+    make_withdraw - True, if need withdraw after deposit
+
+    all_amount - depost from min_percent to max_percent
+    """
+    min_amount = 0.0001
+    max_amount = 0.0002
+    decimal = 5
+
+    sleep_from = 5
+    sleep_to = 24
+
+    make_withdraw = True
+
+    all_amount = False
+
+    min_percent = 60
+    max_percent = 80
+
+    reactorfusion = ReactorFusion(account_id, key, proxy)
+    reactorfusion.deposit(
+        min_amount, max_amount, decimal, sleep_from, sleep_to, make_withdraw, all_amount, min_percent, max_percent
+    )
+
+
 def send_mail(account_id, key, proxy):
     """
     Dmail mail sender
@@ -524,9 +552,9 @@ def swap_multiswap(account_id, key, proxy):
     use_dex = ["velocore", "mute", "pancake", "syncswap", "woofi", "spacefi", "odos", "zkswap"]
 
     min_swap = 4
-    max_swap = 8
+    max_swap = 10
 
-    sleep_from = 150
+    sleep_from = 300
     sleep_to = 700
 
     slippage = 1
@@ -534,7 +562,7 @@ def swap_multiswap(account_id, key, proxy):
     random_swap_token = True
 
     min_percent = 10
-    max_percent = 30
+    max_percent = 60
 
     multi = Multiswap(account_id, key, proxy)
     multi.swap(use_dex, sleep_from, sleep_to, min_swap, max_swap, slippage, random_swap_token, min_percent, max_percent)
@@ -569,18 +597,20 @@ def custom_routes(account_id, key, proxy):
     bridge_zksync, withdraw_zksync, bridge_orbiter, wrap_eth, unwrap_eth, swap_syncswap, liquidity_syncswap,
     swap_mute, swap_spacefi, liquidity_spacefi, swap_pancake, swap_woofi, swap_velocore, swap_odos, swap_zkswap,
     bungee_refuel, stargate_bridge, deposit_eralend, withdraw_erlaned, deposit_basilisk, withdraw_basilisk,
-    bridge_nft, mint_tavaera, mint_nft, mint_zks_domain, mint_era_domain, send_message, send_mail
-    swap_multiswap, custom_routes, multi_approve, deploy_contract_zksync
+    deposit_reactorfusion, withdraw_reactorfusion, create_omnisea, bridge_nft, mint_tavaera, mint_nft,
+    mint_zks_domain, mint_era_domain, send_message, send_mail, swap_multiswap, custom_routes, multi_approve,
+    deploy_contract_zksync
     ______________________________________________________
     Disclaimer - You can add modules to [] to select random ones,
     example [module_1, module_2, [module_3, module_4], module 5]
     The script will start with module 1, 2, 5 and select a random one from module 3 and 4
     """
 
-    use_modules = [swap_multiswap, deploy_contract_zksync, mint_tavaera, [swap_woofi, swap_velocore]]
+    use_modules = [swap_multiswap, [mint_tavaera, create_omnisea], [deposit_eralend, deposit_basilisk],
+                   [mint_era_domain, mint_zks_domain], [bungee_refuel, stargate_bridge]]
 
-    sleep_from = 70
-    sleep_to = 400
+    sleep_from = 100
+    sleep_to = 700
 
     random_module = True
 
@@ -637,6 +667,11 @@ def withdraw_erlaned(account_id, key, proxy):
 def withdraw_basilisk(account_id, key, proxy):
     basilisk = Basilisk(account_id, key, proxy)
     basilisk.withdraw()
+
+
+def withdraw_reactorfusion(account_id, key, proxy):
+    reactorfusion = ReactorFusion(account_id, key, proxy)
+    reactorfusion.withdraw()
 
 
 def create_omnisea(account_id, key, proxy):

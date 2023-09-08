@@ -108,8 +108,6 @@ class Odos(Account):
         try:
             quote_data = self.quote(from_token, to_token, amount_wei, slippage)
 
-            print(quote_data)
-
             transaction_data = self.assemble(quote_data["pathId"])
 
             transaction = transaction_data["transaction"]
