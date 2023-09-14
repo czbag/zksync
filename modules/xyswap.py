@@ -94,8 +94,6 @@ class XYSwap(Account):
         try:
             quote = self.get_quote(from_token, to_token, amount_wei, slippage)
 
-            print(quote)
-
             swap_provider = quote["routes"][0]["srcSwapDescription"]["provider"]
 
             transaction_data = self.build_transaction(
@@ -105,8 +103,6 @@ class XYSwap(Account):
                 slippage,
                 swap_provider
             )
-
-            print(transaction_data)
 
             if from_token != "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE":
                 self.approve(amount_wei, from_token, XYSWAP_CONTRACT["router"])
