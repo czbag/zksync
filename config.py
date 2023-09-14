@@ -143,11 +143,16 @@ VELOCORE_CONTRACTS = {
 
 ODOS_CONTRACT = {
     "router": "0x4bba932e9792a2b917d47830c93a9bc79320e4f7",
-    "use_ref": True  # If you use True for ODOS_USE_REF, you support me 1% of the transaction amount
+    "use_ref": True  # If you use True, you support me 1% of the transaction amount
 }
 
 ZKSWAP_CONTRACTS = {
     "router": "0x18381c0f738146Fb694DE18D1106BdE2BE040Fa4"
+}
+
+XYSWAP_CONTRACT = {
+    "router": "0x30E63157bD0bA74C814B786F6eA2ed9549507b46",
+    "use_ref": True  # If you use True, you support me 1% of the transaction amount
 }
 
 BUNGEE_CONTRACT = "0x7ee459d7fde8b4a3c22b9c8c7aa52abaddd9ffd5"

@@ -82,7 +82,6 @@ class ZkSync(Account):
             txn_hash = self.send_raw_transaction(signed_txn)
 
             self.wait_until_tx_finished(txn_hash.hex())
-            return txn_hash.hex()
         except Exception as e:
             logger.error(f"Deposit transaction on L1 network failed | error: {e}")
 

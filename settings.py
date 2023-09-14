@@ -376,6 +376,35 @@ def swap_zkswap(account_id, key, proxy):
     zkswap.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount, min_percent, max_percent)
 
 
+def swap_xyswap(account_id, key, proxy):
+    """
+    Make swap on XYSwap
+    ______________________________________________________
+    from_token – Choose SOURCE token ETH, WETH, USDC, USDT, BUSD, OT | Select one
+    to_token – Choose DESTINATION token ETH, WETH, USDC, USDT, BUSD, OT | Select one
+
+    Disclaimer - If you use True for use_fee, you support me 1% of the transaction amount
+    ______________________________________________________
+    all_amount - swap from min_percent to max_percent
+    """
+
+    from_token = "ETH"
+    to_token = "USDC"
+
+    min_amount = 0.0001
+    max_amount = 0.0002
+    decimal = 6
+    slippage = 1
+
+    all_amount = True
+
+    min_percent = 5
+    max_percent = 10
+
+    xyswap = XYSwap(account_id, key, proxy)
+    xyswap.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount, min_percent, max_percent)
+
+
 def bungee_refuel(account_id, key, proxy):
     """
     Make refuel on Bungee
@@ -425,7 +454,7 @@ def deposit_eralend(account_id, key, proxy):
     ______________________________________________________
     make_withdraw - True, if need withdraw after deposit
 
-    all_amount - depost from min_percent to max_percent
+    all_amount - deposit from min_percent to max_percent
     """
     min_amount = 0.0001
     max_amount = 0.0002
@@ -436,10 +465,10 @@ def deposit_eralend(account_id, key, proxy):
 
     make_withdraw = True
 
-    all_amount = False
+    all_amount = True
 
-    min_percent = 60
-    max_percent = 80
+    min_percent = 5
+    max_percent = 10
 
     eralend = Eralend(account_id, key, proxy)
     eralend.deposit(
@@ -453,7 +482,7 @@ def deposit_basilisk(account_id, key, proxy):
     ______________________________________________________
     make_withdraw - True, if need withdraw after deposit
 
-    all_amount - depost from min_percent to max_percent
+    all_amount - deposit from min_percent to max_percent
     """
     min_amount = 0.0001
     max_amount = 0.0002
@@ -481,7 +510,7 @@ def deposit_reactorfusion(account_id, key, proxy):
     ______________________________________________________
     make_withdraw - True, if need withdraw after deposit
 
-    all_amount - depost from min_percent to max_percent
+    all_amount - deposit from min_percent to max_percent
     """
     min_amount = 0.0001
     max_amount = 0.0002
