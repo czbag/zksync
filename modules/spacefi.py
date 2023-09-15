@@ -107,8 +107,19 @@ class SpaceFi(Account):
         except Exception as e:
             logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
 
-    def add_liquidity(self, min_amount: float, max_amount: float, decimal: int):
-        amount_wei, amount, balance = self.get_amount("ETH", min_amount, max_amount, decimal, False)
+    def add_liquidity(
+            self,
+            min_amount: float,
+            max_amount: float,
+            decimal: int,
+            all_amount: bool,
+            min_percent: int,
+            max_percent: int
+    ):
+
+        amount_wei, amount, balance = self.get_amount(
+            "ETH", min_amount, max_amount, decimal, all_amount, min_percent, max_percent
+        )
 
         deadline = int(time.time()) + 1000000
 
@@ -116,17 +127,20 @@ class SpaceFi(Account):
         self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
         self.tx.update({"value": amount_wei})
 
-        transaction = self.swap_contract.functions.addLiquidityETH(
-            Web3.to_checksum_address(ZKSYNC_TOKENS["USDC"]),
-            amount_wei,
-            0,
-            0,
-            self.address,
-            deadline
-        ).build_transaction(self.tx)
+        try:
+            transaction = self.swap_contract.functions.addLiquidityETH(
+                Web3.to_checksum_address(ZKSYNC_TOKENS["USDC"]),
+                amount_wei,
+                0,
+                0,
+                self.address,
+                deadline
+            ).build_transaction(self.tx)
 
-        signed_txn = self.sign(transaction)
+            signed_txn = self.sign(transaction)
 
-        txn_hash = self.send_raw_transaction(signed_txn)
+            txn_hash = self.send_raw_transaction(signed_txn)
 
-        self.wait_until_tx_finished(txn_hash.hex())
+            self.wait_until_tx_finished(txn_hash.hex())
+        except Exception as e:
+            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")

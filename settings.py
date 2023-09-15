@@ -157,8 +157,13 @@ def liquidity_syncswap(account_id, key, proxy):
     max_amount = 0.02
     decimal = 6
 
+    all_amount = True
+
+    min_percent = 5
+    max_percent = 10
+
     syncswap = SyncSwap(account_id, key, proxy)
-    syncswap.add_liquidity(min_amount, max_amount, decimal)
+    syncswap.add_liquidity(min_amount, max_amount, decimal, all_amount, min_percent, max_percent)
 
 
 def swap_mute(account_id, key, proxy):
@@ -227,8 +232,13 @@ def liquidity_spacefi(account_id, key, proxy):
     max_amount = 0.0002
     decimal = 6
 
+    all_amount = True
+
+    min_percent = 1
+    max_percent = 1
+
     spacefi = SpaceFi(account_id, key, proxy)
-    spacefi.add_liquidity(min_amount, max_amount, decimal)
+    spacefi.add_liquidity(min_amount, max_amount, decimal, all_amount, min_percent, max_percent)
 
 
 def swap_pancake(account_id, key, proxy):
@@ -571,14 +581,14 @@ def swap_multiswap(account_id, key, proxy):
     """
     Multi-Swap module: Automatically performs the specified number of swaps in one of the dexes.
     ______________________________________________________
-    use_dex - Choose any dex: syncswap, mute, spacefi, pancake, woofi, velocore, odos, zkswap
+    use_dex - Choose any dex: syncswap, mute, spacefi, pancake, woofi, velocore, odos, zkswap, xyswap
     quantity_swap - Quantity swaps
     ______________________________________________________
     random_swap_token - If True the swap path will be [ETH -> USDC -> USDC -> ETH] (random!)
     If False the swap path will be [ETH -> USDC -> ETH -> USDC]
     """
 
-    use_dex = ["velocore", "mute", "pancake", "syncswap", "woofi", "spacefi", "odos", "zkswap"]
+    use_dex = ["velocore", "mute", "pancake", "syncswap", "woofi", "spacefi", "odos", "zkswap", "xyswap"]
 
     min_swap = 4
     max_swap = 10
@@ -623,22 +633,32 @@ def deploy_contract_zksync(account_id, key, proxy):
 def custom_routes(account_id, key, proxy):
     """
     You can use these methods:
-    bridge_zksync, withdraw_zksync, bridge_orbiter, wrap_eth, unwrap_eth, swap_syncswap, liquidity_syncswap,
-    swap_mute, swap_spacefi, liquidity_spacefi, swap_pancake, swap_woofi, swap_velocore, swap_odos, swap_zkswap,
+    bridge_zksync, withdraw_zksync, bridge_orbiter, wrap_eth, unwrap_eth, swap_syncswap, liquidity_syncswap, swap_mute,
+    swap_spacefi, liquidity_spacefi, swap_pancake, swap_woofi, swap_velocore, swap_odos, swap_zkswap, swap_xyswap
     bungee_refuel, stargate_bridge, deposit_eralend, withdraw_erlaned, deposit_basilisk, withdraw_basilisk,
-    deposit_reactorfusion, withdraw_reactorfusion, create_omnisea, bridge_nft, mint_tavaera, mint_nft,
+    deposit_reactorfusion, withdraw_reactorfusion,
+    enable_collateral_eralend, disable_collateral_eralend
+    enable_collateral_basilisk, disable_collateral_basilisk
+    enable_collateral_reactorfusion, disable_collateral_reactorfusion,
+    create_omnisea, bridge_nft, mint_tavaera, mint_nft,
     mint_zks_domain, mint_era_domain, send_message, send_mail, swap_multiswap, custom_routes, multi_approve,
     deploy_contract_zksync
+
+
     ______________________________________________________
     Disclaimer - You can add modules to [] to select random ones,
     example [module_1, module_2, [module_3, module_4], module 5]
     The script will start with module 1, 2, 5 and select a random one from module 3 and 4
     """
 
-    use_modules = [swap_multiswap, [mint_tavaera, create_omnisea], [deposit_eralend, deposit_basilisk],
-                   [mint_era_domain, mint_zks_domain], [bungee_refuel, stargate_bridge]]
+    use_modules = [
+        swap_multiswap,
+        [mint_tavaera, create_omnisea],
+        [deposit_eralend, deposit_basilisk, deposit_reactorfusion],
+        [mint_era_domain, mint_zks_domain]
+    ]
 
-    sleep_from = 100
+    sleep_from = 300
     sleep_to = 700
 
     random_module = True
@@ -693,14 +713,44 @@ def withdraw_erlaned(account_id, key, proxy):
     eralend.withdraw()
 
 
+def enable_collateral_eralend(account_id, key, proxy):
+    eralend = Eralend(account_id, key, proxy)
+    eralend.enable_collateral()
+
+
+def disable_collateral_eralend(account_id, key, proxy):
+    eralend = Eralend(account_id, key, proxy)
+    eralend.disable_collateral()
+
+
 def withdraw_basilisk(account_id, key, proxy):
     basilisk = Basilisk(account_id, key, proxy)
     basilisk.withdraw()
 
 
+def enable_collateral_basilisk(account_id, key, proxy):
+    basilisk = Basilisk(account_id, key, proxy)
+    basilisk.enable_collateral()
+
+
+def disable_collateral_basilisk(account_id, key, proxy):
+    basilisk = Basilisk(account_id, key, proxy)
+    basilisk.disable_collateral()
+
+
 def withdraw_reactorfusion(account_id, key, proxy):
     reactorfusion = ReactorFusion(account_id, key, proxy)
     reactorfusion.withdraw()
+
+
+def enable_collateral_reactorfusion(account_id, key, proxy):
+    reactorfusion = ReactorFusion(account_id, key, proxy)
+    reactorfusion.enable_collateral()
+
+
+def disable_collateral_reactorfusion(account_id, key, proxy):
+    reactorfusion = ReactorFusion(account_id, key, proxy)
+    reactorfusion.disable_collateral()
 
 
 def create_omnisea(account_id, key, proxy):

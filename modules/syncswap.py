@@ -117,27 +117,41 @@ class SyncSwap(Account):
         except Exception as e:
             logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
 
-    def add_liquidity(self, min_amount: float, max_amount: float, decimal: int):
-        amount_wei, amount, balance = self.get_amount("ETH", min_amount, max_amount, decimal, False)
+    def add_liquidity(
+            self,
+            min_amount: float,
+            max_amount: float,
+            decimal: int,
+            all_amount: bool,
+            min_percent: int,
+            max_percent: int
+    ):
+
+        amount_wei, amount, balance = self.get_amount(
+            "ETH", min_amount, max_amount, decimal, all_amount, min_percent, max_percent
+        )
 
         pool_address = self.get_pool("ETH", "USDC")
 
         self.tx.update({"value": amount_wei})
 
-        transaction = self.swap_contract.functions.addLiquidity2(
-            pool_address,
-            [
-                (Web3.to_checksum_address(ZERO_ADDRESS), amount_wei),
-                (Web3.to_checksum_address(ZKSYNC_TOKENS["USDC"]), 0)
-            ],
-            abi.encode(["address"], [self.address]),
-            0,
-            ZERO_ADDRESS,
-            "0x"
-        ).build_transaction(self.tx)
+        try:
+            transaction = self.swap_contract.functions.addLiquidity2(
+                pool_address,
+                [
+                    (Web3.to_checksum_address(ZERO_ADDRESS), amount_wei),
+                    (Web3.to_checksum_address(ZKSYNC_TOKENS["USDC"]), 0)
+                ],
+                abi.encode(["address"], [self.address]),
+                0,
+                ZERO_ADDRESS,
+                "0x"
+            ).build_transaction(self.tx)
 
-        signed_txn = self.sign(transaction)
+            signed_txn = self.sign(transaction)
 
-        txn_hash = self.send_raw_transaction(signed_txn)
+            txn_hash = self.send_raw_transaction(signed_txn)
 
-        self.wait_until_tx_finished(txn_hash.hex())
+            self.wait_until_tx_finished(txn_hash.hex())
+        except Exception as e:
+            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
