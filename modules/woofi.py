@@ -4,6 +4,8 @@ from typing import Union
 from loguru import logger
 from web3 import Web3
 from config import WOOFI_CONTRACTS, WOOFI_ROUTER_ABI, ZKSYNC_TOKENS
+from utils.gas_checker import check_gas
+from utils.helpers import retry
 from .account import Account
 
 
@@ -27,6 +29,8 @@ class WooFi(Account):
         ).call()
         return int(min_amount_out - (min_amount_out / 100 * slippage))
 
+    @retry
+    @check_gas
     def swap(
             self,
             from_token: str,
@@ -53,33 +57,30 @@ class WooFi(Account):
             f"[{self.account_id}][{self.address}] Swap on WooFi – {from_token} -> {to_token} | {amount} {from_token}"
         )
 
-        try:
-            if from_token == "ETH":
-                from_token_address = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
-                to_token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[to_token])
-                self.tx.update({"value": amount_wei})
-            else:
-                from_token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[from_token])
-                to_token_address = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+        if from_token == "ETH":
+            from_token_address = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
+            to_token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[to_token])
+            self.tx.update({"value": amount_wei})
+        else:
+            from_token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[from_token])
+            to_token_address = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
 
-                self.approve(amount_wei, from_token_address, WOOFI_CONTRACTS["router"])
-                self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
+            self.approve(amount_wei, from_token_address, WOOFI_CONTRACTS["router"])
+            self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
 
-            min_amount_out = self.get_min_amount_out(from_token_address, to_token_address, amount_wei, slippage)
+        min_amount_out = self.get_min_amount_out(from_token_address, to_token_address, amount_wei, slippage)
 
-            contract_txn = self.swap_contract.functions.swap(
-                from_token_address,
-                to_token_address,
-                amount_wei,
-                min_amount_out,
-                self.address,
-                self.address
-            ).build_transaction(self.tx)
+        contract_txn = self.swap_contract.functions.swap(
+            from_token_address,
+            to_token_address,
+            amount_wei,
+            min_amount_out,
+            self.address,
+            self.address
+        ).build_transaction(self.tx)
 
-            signed_txn = self.sign(contract_txn)
+        signed_txn = self.sign(contract_txn)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+        self.wait_until_tx_finished(txn_hash.hex())

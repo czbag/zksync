@@ -5,6 +5,8 @@ from loguru import logger
 from web3 import Web3
 
 from config import ZERO_ADDRESS, ZKSYNC_TOKENS, ODOS_CONTRACT
+from utils.gas_checker import check_gas
+from utils.helpers import retry
 from .account import Account
 
 
@@ -73,6 +75,8 @@ class Odos(Account):
         else:
             logger.error(f"[{self.account_id}][{self.address}] Bad Odos request")
 
+    @retry
+    @check_gas
     def swap(
             self,
             from_token: str,
@@ -105,21 +109,18 @@ class Odos(Account):
         if from_token != ZERO_ADDRESS:
             self.approve(amount_wei, from_token, Web3.to_checksum_address(ODOS_CONTRACT["router"]))
 
-        try:
-            quote_data = self.quote(from_token, to_token, amount_wei, slippage)
+        quote_data = self.quote(from_token, to_token, amount_wei, slippage)
 
-            transaction_data = self.assemble(quote_data["pathId"])
+        transaction_data = self.assemble(quote_data["pathId"])
 
-            transaction = transaction_data["transaction"]
+        transaction = transaction_data["transaction"]
 
-            transaction["chainId"] = self.w3.eth.chain_id
+        transaction["chainId"] = self.w3.eth.chain_id
 
-            transaction["value"] = int(transaction["value"])
+        transaction["value"] = int(transaction["value"])
 
-            signed_txn = self.sign(transaction)
+        signed_txn = self.sign(transaction)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+        self.wait_until_tx_finished(txn_hash.hex())

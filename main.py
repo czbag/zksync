@@ -8,8 +8,8 @@ from questionary import Choice
 from config import ACCOUNTS, PROXIES
 from utils.get_proxy import check_proxy
 from utils.sleeping import sleep
-from utils.gas_checker import check_gas
-from settings import *
+from settings import USE_PROXY, RANDOM_WALLET, IS_SLEEP, SLEEP_FROM, SLEEP_TO
+from modules_settings import *
 
 
 def get_module():
@@ -93,7 +93,6 @@ def get_wallets():
     return wallets
 
 
-@check_gas
 def run_module(module, account_id, key, proxy):
     module(account_id, key, proxy)
 

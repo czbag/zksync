@@ -4,6 +4,8 @@ from typing import Union
 from loguru import logger
 from web3 import Web3
 from config import ENS_CONTRACT, ENS_ABI
+from utils.gas_checker import check_gas
+from utils.helpers import retry
 from .account import Account
 
 
@@ -33,20 +35,19 @@ class EraDomain(Account):
 
         self.get_random_name()
 
+    @retry
+    @check_gas
     def mint(self):
         logger.info(f"[{self.account_id}][{self.address}] Mint Era Domain")
 
         domain_name = self.get_random_name()
 
-        try:
-            self.tx.update({"value": Web3.to_wei(0.003, "ether")})
+        self.tx.update({"value": Web3.to_wei(0.003, "ether")})
 
-            transaction = self.contract.functions.Register(domain_name).build_transaction(self.tx)
+        transaction = self.contract.functions.Register(domain_name).build_transaction(self.tx)
 
-            signed_txn = self.sign(transaction)
+        signed_txn = self.sign(transaction)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+        self.wait_until_tx_finished(txn_hash.hex())

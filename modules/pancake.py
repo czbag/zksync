@@ -4,6 +4,9 @@ from typing import Union
 
 from loguru import logger
 from web3 import Web3
+
+from utils.gas_checker import check_gas
+from utils.helpers import retry
 from .account import Account
 
 from config import (
@@ -112,6 +115,8 @@ class Pancake(Account):
 
         return contract_txn
 
+    @retry
+    @check_gas
     def swap(
             self,
             from_token: str,
@@ -141,18 +146,15 @@ class Pancake(Account):
         pool = self.get_pool(from_token, to_token)
 
         if pool != ZERO_ADDRESS:
-            try:
-                if from_token == "ETH":
-                    contract_txn = self.swap_to_token(from_token, to_token, amount_wei, slippage)
-                else:
-                    contract_txn = self.swap_to_eth(from_token, to_token, amount_wei, slippage)
+            if from_token == "ETH":
+                contract_txn = self.swap_to_token(from_token, to_token, amount_wei, slippage)
+            else:
+                contract_txn = self.swap_to_eth(from_token, to_token, amount_wei, slippage)
 
-                signed_txn = self.sign(contract_txn)
+            signed_txn = self.sign(contract_txn)
 
-                txn_hash = self.send_raw_transaction(signed_txn)
+            txn_hash = self.send_raw_transaction(signed_txn)
 
-                self.wait_until_tx_finished(txn_hash.hex())
-            except Exception as e:
-                logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+            self.wait_until_tx_finished(txn_hash.hex())
         else:
             logger.error(f"[{self.account_id}][{self.address}] Swap path {from_token} to {to_token} not found!")

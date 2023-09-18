@@ -3,6 +3,8 @@ from typing import Union
 
 from loguru import logger
 from config import ZKS_CONTRACT, ZKS_ABI
+from utils.gas_checker import check_gas
+from utils.helpers import retry
 from .account import Account
 
 
@@ -32,18 +34,17 @@ class ZKSDomain(Account):
 
         self.get_random_name()
 
+    @retry
+    @check_gas
     def mint(self):
         logger.info(f"[{self.account_id}][{self.address}] Mint ZKS Domain")
 
         domain_name = self.get_random_name()
 
-        try:
-            transaction = self.contract.functions.register(domain_name, self.address, 1).build_transaction(self.tx)
+        transaction = self.contract.functions.register(domain_name, self.address, 1).build_transaction(self.tx)
 
-            signed_txn = self.sign(transaction)
+        signed_txn = self.sign(transaction)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+        self.wait_until_tx_finished(txn_hash.hex())

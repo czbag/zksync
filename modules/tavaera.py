@@ -5,6 +5,8 @@ from loguru import logger
 from web3 import Web3
 
 from config import TAVAERA_CONTRACT, TAVAERA_ID_CONTRACT, TAVAERA_ABI, TAVAERA_ID_ABI
+from utils.gas_checker import check_gas
+from utils.helpers import retry
 from utils.sleeping import sleep
 from .account import Account
 
@@ -51,12 +53,11 @@ class Tavaera(Account):
 
         self.wait_until_tx_finished(txn_hash.hex())
 
+    @retry
+    @check_gas
     def mint(self, sleep_from: int, sleep_to: int):
-        try:
-            self.mint_id()
+        self.mint_id()
 
-            sleep(sleep_from, sleep_to)
+        sleep(sleep_from, sleep_to)
 
-            self.mint_nft()
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+        self.mint_nft()

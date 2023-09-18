@@ -4,6 +4,7 @@ from typing import Union
 from loguru import logger
 from web3 import Web3
 from config import STARGATE_CONTRACT, STARGATE_ABI, ZKSYNC_TOKENS
+from utils.gas_checker import check_gas
 from utils.sleeping import sleep
 from .account import Account
 from .syncswap import SyncSwap
@@ -68,6 +69,7 @@ class Stargate(Account):
             return True
         return False
 
+    @check_gas
     def bridge(
             self,
             min_amount: float,

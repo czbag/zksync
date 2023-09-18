@@ -13,6 +13,8 @@ from zksync2.signer.eth_signer import PrivateKeyEthSigner
 from zksync2.transaction.transaction_builders import TxCreate2Contract, TxWithdraw
 
 from config import RPC, CONTRACT_PATH, ZKSYNC_BRIDGE_ABI, ZKSYNC_BRIDGE_CONTRACT, ZKSYNC_TOKENS, WETH_ABI
+from utils.gas_checker import check_gas
+from utils.helpers import retry
 from .account import Account
 
 
@@ -36,6 +38,8 @@ class ZkSync(Account):
         }
         return tx
 
+    @retry
+    @check_gas
     def deposit(
             self,
             min_amount: float,
@@ -64,27 +68,26 @@ class ZkSync(Account):
 
         tx_data = self.get_tx_data(amount_wei + base_cost)
 
-        try:
-            transaction = contract.functions.requestL2Transaction(
-                self.address,
-                Web3.to_wei(amount, "ether"),
-                "0x",
-                gas_limit,
-                800,
-                [],
-                self.address
-            ).build_transaction(
-                tx_data
-            )
+        transaction = contract.functions.requestL2Transaction(
+            self.address,
+            Web3.to_wei(amount, "ether"),
+            "0x",
+            gas_limit,
+            800,
+            [],
+            self.address
+        ).build_transaction(
+            tx_data
+        )
 
-            signed_txn = self.sign(transaction)
+        signed_txn = self.sign(transaction)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"Deposit transaction on L1 network failed | error: {e}")
+        self.wait_until_tx_finished(txn_hash.hex())
 
+    @retry
+    @check_gas
     def withdraw(
             self,
             min_amount: float,
@@ -133,7 +136,10 @@ class ZkSync(Account):
         else:
             logger.error(f"Withdraw transaction to L1 network failed | error: insufficient funds!")
 
-    def wrap_eth(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool, min_percent: int, max_percent: int):
+    @retry
+    @check_gas
+    def wrap_eth(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool, min_percent: int,
+                 max_percent: int):
         amount_wei, amount, balance = self.get_amount(
             "ETH",
             min_amount,
@@ -148,26 +154,25 @@ class ZkSync(Account):
 
         logger.info(f"[{self.account_id}][{self.address}] Wrap {amount} ETH")
 
-        try:
+        tx = {
+            "from": self.address,
+            "gasPrice": self.w3.eth.gas_price,
+            "nonce": self.w3.eth.get_transaction_count(self.address),
+            "value": amount_wei
+        }
 
-            tx = {
-                "from": self.address,
-                "gasPrice": self.w3.eth.gas_price,
-                "nonce": self.w3.eth.get_transaction_count(self.address),
-                "value": amount_wei
-            }
+        transaction = weth_contract.functions.deposit().build_transaction(tx)
 
-            transaction = weth_contract.functions.deposit().build_transaction(tx)
+        signed_txn = self.sign(transaction)
 
-            signed_txn = self.sign(transaction)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        self.wait_until_tx_finished(txn_hash.hex())
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
-
-    def unwrap_eth(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool, min_percent: int, max_percent: int):
+    @retry
+    @check_gas
+    def unwrap_eth(self, min_amount: float, max_amount: float, decimal: int, all_amount: bool, min_percent: int,
+                   max_percent: int):
         amount_wei, amount, balance = self.get_amount(
             "WETH",
             min_amount,
@@ -182,22 +187,20 @@ class ZkSync(Account):
 
         logger.info(f"[{self.account_id}][{self.address}] Unwrap {amount} ETH")
 
-        try:
-            tx = {
-                "from": self.address,
-                "gasPrice": self.w3.eth.gas_price,
-                "nonce": self.w3.eth.get_transaction_count(self.address)
-            }
+        tx = {
+            "from": self.address,
+            "gasPrice": self.w3.eth.gas_price,
+            "nonce": self.w3.eth.get_transaction_count(self.address)
+        }
 
-            transaction = weth_contract.functions.withdraw(amount_wei).build_transaction(tx)
+        transaction = weth_contract.functions.withdraw(amount_wei).build_transaction(tx)
 
-            signed_txn = self.sign(transaction)
+        signed_txn = self.sign(transaction)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+        self.wait_until_tx_finished(txn_hash.hex())
+
 
     def mint(self, contract_address: str, amount: int):
         logger.info(f"[{self.account_id}][{self.address}] Starting to mint token")
@@ -225,6 +228,8 @@ class ZkSync(Account):
     def get_token_data():
         return "".join(random.sample([chr(i) for i in range(65, 91)], random.randint(3, 6)))
 
+    @retry
+    @check_gas
     def deploy_contract(
             self,
             token_name: str,

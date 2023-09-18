@@ -5,6 +5,8 @@ from typing import Union
 from loguru import logger
 from web3 import Web3
 from config import SPACEFI_ROUTER_ABI, SPACEFI_CONTRACTS, ZKSYNC_TOKENS
+from utils.gas_checker import check_gas
+from utils.helpers import retry
 from .account import Account
 
 
@@ -67,6 +69,8 @@ class SpaceFi(Account):
 
         return contract_txn
 
+    @retry
+    @check_gas
     def swap(
             self,
             from_token: str,
@@ -93,20 +97,19 @@ class SpaceFi(Account):
             f"[{self.account_id}][{self.address}] Swap on SpaceFi – {from_token} -> {to_token} | {amount} {from_token}"
         )
 
-        try:
-            if from_token == "ETH":
-                contract_txn = self.swap_to_token(from_token, to_token, amount_wei, slippage)
-            else:
-                contract_txn = self.swap_to_eth(from_token, to_token, amount_wei, slippage)
+        if from_token == "ETH":
+            contract_txn = self.swap_to_token(from_token, to_token, amount_wei, slippage)
+        else:
+            contract_txn = self.swap_to_eth(from_token, to_token, amount_wei, slippage)
 
-            signed_txn = self.sign(contract_txn)
+        signed_txn = self.sign(contract_txn)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+        self.wait_until_tx_finished(txn_hash.hex())
 
+    @retry
+    @check_gas
     def add_liquidity(
             self,
             min_amount: float,
@@ -127,20 +130,17 @@ class SpaceFi(Account):
         self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
         self.tx.update({"value": amount_wei})
 
-        try:
-            transaction = self.swap_contract.functions.addLiquidityETH(
-                Web3.to_checksum_address(ZKSYNC_TOKENS["USDC"]),
-                amount_wei,
-                0,
-                0,
-                self.address,
-                deadline
-            ).build_transaction(self.tx)
+        transaction = self.swap_contract.functions.addLiquidityETH(
+            Web3.to_checksum_address(ZKSYNC_TOKENS["USDC"]),
+            amount_wei,
+            0,
+            0,
+            self.address,
+            deadline
+        ).build_transaction(self.tx)
 
-            signed_txn = self.sign(transaction)
+        signed_txn = self.sign(transaction)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+        self.wait_until_tx_finished(txn_hash.hex())

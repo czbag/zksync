@@ -4,6 +4,8 @@ import requests
 from loguru import logger
 from web3 import Web3
 from config import XYSWAP_CONTRACT, ZKSYNC_TOKENS
+from utils.gas_checker import check_gas
+from utils.helpers import retry
 from .account import Account
 
 
@@ -62,6 +64,8 @@ class XYSwap(Account):
 
         return response.json()
 
+    @retry
+    @check_gas
     def swap(
             self,
             from_token: str,
@@ -91,35 +95,32 @@ class XYSwap(Account):
         from_token = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" if from_token == "ETH" else ZKSYNC_TOKENS[from_token]
         to_token = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" if to_token == "ETH" else ZKSYNC_TOKENS[to_token]
 
-        try:
-            quote = self.get_quote(from_token, to_token, amount_wei, slippage)
+        quote = self.get_quote(from_token, to_token, amount_wei, slippage)
 
-            swap_provider = quote["routes"][0]["srcSwapDescription"]["provider"]
+        swap_provider = quote["routes"][0]["srcSwapDescription"]["provider"]
 
-            transaction_data = self.build_transaction(
-                from_token,
-                to_token,
-                amount_wei,
-                slippage,
-                swap_provider
-            )
+        transaction_data = self.build_transaction(
+            from_token,
+            to_token,
+            amount_wei,
+            slippage,
+            swap_provider
+        )
 
-            if from_token != "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE":
-                self.approve(amount_wei, from_token, XYSWAP_CONTRACT["router"])
+        if from_token != "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE":
+            self.approve(amount_wei, from_token, XYSWAP_CONTRACT["router"])
 
-            self.tx.update(
-                {
-                    "to": transaction_data["tx"]["to"],
-                    "data": transaction_data["tx"]["data"],
-                    "value": transaction_data["tx"]["value"],
-                    "nonce": self.w3.eth.get_transaction_count(self.address)
-                }
-            )
+        self.tx.update(
+            {
+                "to": transaction_data["tx"]["to"],
+                "data": transaction_data["tx"]["data"],
+                "value": transaction_data["tx"]["value"],
+                "nonce": self.w3.eth.get_transaction_count(self.address)
+            }
+        )
 
-            signed_txn = self.sign(self.tx)
+        signed_txn = self.sign(self.tx)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+        self.wait_until_tx_finished(txn_hash.hex())

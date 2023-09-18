@@ -12,6 +12,8 @@ from config import (
     SYNCSWAP_ROUTER_ABI,
     SYNCSWAP_CLASSIC_POOL_DATA_ABI
 )
+from utils.gas_checker import check_gas
+from utils.helpers import retry
 from .account import Account
 from eth_abi import abi
 
@@ -46,6 +48,8 @@ class SyncSwap(Account):
         ).call()
         return int(min_amount_out - (min_amount_out / 100 * slippage))
 
+    @retry
+    @check_gas
     def swap(
             self,
             from_token: str,
@@ -74,49 +78,48 @@ class SyncSwap(Account):
             f"[{self.account_id}][{self.address}] Swap on SyncSwap – {from_token} -> {to_token} | {amount} {from_token}"
         )
 
-        try:
-            pool_address = self.get_pool(from_token, to_token)
+        pool_address = self.get_pool(from_token, to_token)
 
-            if pool_address != ZERO_ADDRESS:
-                if from_token == "ETH":
-                    self.tx.update({"value": amount_wei})
-                else:
-                    self.approve(amount_wei, token_address, Web3.to_checksum_address(SYNCSWAP_CONTRACTS["router"]))
-                    self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
-
-                min_amount_out = self.get_min_amount_out(pool_address, token_address, amount_wei, slippage)
-
-                steps = [{
-                    "pool": pool_address,
-                    "data": abi.encode(["address", "address", "uint8"], [token_address, self.address, 1]),
-                    "callback": ZERO_ADDRESS,
-                    "callbackData": "0x"
-                }]
-
-                paths = [{
-                    "steps": steps,
-                    "tokenIn": ZERO_ADDRESS if from_token == "ETH" else token_address,
-                    "amountIn": amount_wei
-                }]
-
-                deadline = int(time.time()) + 1000000
-
-                contract_txn = self.swap_contract.functions.swap(
-                    paths,
-                    min_amount_out,
-                    deadline
-                ).build_transaction(self.tx)
-
-                signed_txn = self.sign(contract_txn)
-
-                txn_hash = self.send_raw_transaction(signed_txn)
-
-                self.wait_until_tx_finished(txn_hash.hex())
+        if pool_address != ZERO_ADDRESS:
+            if from_token == "ETH":
+                self.tx.update({"value": amount_wei})
             else:
-                logger.error(f"[{self.account_id}][{self.address}] Swap path {from_token} to {to_token} not found!")
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+                self.approve(amount_wei, token_address, Web3.to_checksum_address(SYNCSWAP_CONTRACTS["router"]))
+                self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
 
+            min_amount_out = self.get_min_amount_out(pool_address, token_address, amount_wei, slippage)
+
+            steps = [{
+                "pool": pool_address,
+                "data": abi.encode(["address", "address", "uint8"], [token_address, self.address, 1]),
+                "callback": ZERO_ADDRESS,
+                "callbackData": "0x"
+            }]
+
+            paths = [{
+                "steps": steps,
+                "tokenIn": ZERO_ADDRESS if from_token == "ETH" else token_address,
+                "amountIn": amount_wei
+            }]
+
+            deadline = int(time.time()) + 1000000
+
+            contract_txn = self.swap_contract.functions.swap(
+                paths,
+                min_amount_out,
+                deadline
+            ).build_transaction(self.tx)
+
+            signed_txn = self.sign(contract_txn)
+
+            txn_hash = self.send_raw_transaction(signed_txn)
+
+            self.wait_until_tx_finished(txn_hash.hex())
+        else:
+            logger.error(f"[{self.account_id}][{self.address}] Swap path {from_token} to {to_token} not found!")
+
+    @retry
+    @check_gas
     def add_liquidity(
             self,
             min_amount: float,
@@ -135,23 +138,20 @@ class SyncSwap(Account):
 
         self.tx.update({"value": amount_wei})
 
-        try:
-            transaction = self.swap_contract.functions.addLiquidity2(
-                pool_address,
-                [
-                    (Web3.to_checksum_address(ZERO_ADDRESS), amount_wei),
-                    (Web3.to_checksum_address(ZKSYNC_TOKENS["USDC"]), 0)
-                ],
-                abi.encode(["address"], [self.address]),
-                0,
-                ZERO_ADDRESS,
-                "0x"
-            ).build_transaction(self.tx)
+        transaction = self.swap_contract.functions.addLiquidity2(
+            pool_address,
+            [
+                (Web3.to_checksum_address(ZERO_ADDRESS), amount_wei),
+                (Web3.to_checksum_address(ZKSYNC_TOKENS["USDC"]), 0)
+            ],
+            abi.encode(["address"], [self.address]),
+            0,
+            ZERO_ADDRESS,
+            "0x"
+        ).build_transaction(self.tx)
 
-            signed_txn = self.sign(transaction)
+        signed_txn = self.sign(transaction)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+        self.wait_until_tx_finished(txn_hash.hex())

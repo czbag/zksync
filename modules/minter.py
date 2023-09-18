@@ -3,6 +3,8 @@ from typing import Union
 
 from loguru import logger
 from config import MINTER_ABI, MINTER_CONTRACT
+from utils.gas_checker import check_gas
+from utils.helpers import retry
 from .account import Account
 
 
@@ -18,16 +20,15 @@ class Minter(Account):
             "nonce": self.w3.eth.get_transaction_count(self.address)
         }
 
+    @retry
+    @check_gas
     def mint(self):
         logger.info(f"[{self.account_id}][{self.address}] Mint NFT")
 
-        try:
-            transaction = self.contract.functions.mint().build_transaction(self.tx)
+        transaction = self.contract.functions.mint().build_transaction(self.tx)
 
-            signed_txn = self.sign(transaction)
+        signed_txn = self.sign(transaction)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+        self.wait_until_tx_finished(txn_hash.hex())

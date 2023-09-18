@@ -4,6 +4,8 @@ from typing import Union
 from loguru import logger
 from web3 import Web3
 from config import BUNGEE_ABI, BUNGEE_CONTRACT
+from utils.gas_checker import check_gas
+from utils.helpers import retry
 from .account import Account
 from utils.bungee_data import get_bungee_data
 
@@ -45,38 +47,37 @@ class Bungee(Account):
         }
         return tx
 
+    @retry
+    @check_gas
     def refuel(self, chain_list: list, random_amount: bool):
         limits = get_bungee_limits()
 
         to_chain = random.choice(chain_list)
 
-        try:
-            to_chain_limits = [
-                chain for chain in limits if chain["chainId"] == self.chain_ids[to_chain] and chain["isEnabled"]
-            ]
+        to_chain_limits = [
+            chain for chain in limits if chain["chainId"] == self.chain_ids[to_chain] and chain["isEnabled"]
+        ]
 
-            if to_chain_limits:
-                min_amount = int(to_chain_limits[0]["minAmount"])
-                max_amount = int(to_chain_limits[0]["maxAmount"])
+        if to_chain_limits:
+            min_amount = int(to_chain_limits[0]["minAmount"])
+            max_amount = int(to_chain_limits[0]["maxAmount"])
 
-                amount = random.randint(min_amount, max_amount) if random_amount else min_amount
+            amount = random.randint(min_amount, max_amount) if random_amount else min_amount
 
-                logger.info(
-                    f"[{self.account_id}][{self.address}] Make refuel to " +
-                    f"{to_chain.title()} | {Web3.from_wei(amount, 'ether')} ETH"
-                )
+            logger.info(
+                f"[{self.account_id}][{self.address}] Make refuel to " +
+                f"{to_chain.title()} | {Web3.from_wei(amount, 'ether')} ETH"
+            )
 
-                transaction = self.contract.functions.depositNativeToken(
-                    self.chain_ids[to_chain],
-                    self.address
-                ).build_transaction(self.get_tx_data(amount))
+            transaction = self.contract.functions.depositNativeToken(
+                self.chain_ids[to_chain],
+                self.address
+            ).build_transaction(self.get_tx_data(amount))
 
-                signed_txn = self.sign(transaction)
+            signed_txn = self.sign(transaction)
 
-                txn_hash = self.send_raw_transaction(signed_txn)
+            txn_hash = self.send_raw_transaction(signed_txn)
 
-                self.wait_until_tx_finished(txn_hash.hex())
-            else:
-                logger.error(f"[{self.account_id}][{self.address}] Bungee refuel destination chain inactive!")
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Bungee refuel error | error {e}")
+            self.wait_until_tx_finished(txn_hash.hex())
+        else:
+            logger.error(f"[{self.account_id}][{self.address}] Bungee refuel destination chain inactive!")

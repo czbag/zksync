@@ -4,6 +4,8 @@ from typing import Union
 from loguru import logger
 from web3 import Web3
 from config import L2TELEGRAPH_MESSAGE_CONTRACT, L2TELEGRAPH_NFT_CONTRACT, L2TELEGRAPH_MESSAGE_ABI, L2TELEGRAPH_NFT_ABI
+from utils.gas_checker import check_gas
+from utils.helpers import retry
 from utils.sleeping import sleep
 from .account import Account
 
@@ -37,6 +39,8 @@ class L2Telegraph(Account):
 
         return nft_id
 
+    @retry
+    @check_gas
     def send_message(self):
         logger.info(f"[{self.account_id}][{self.address}] Send message")
 
@@ -45,20 +49,18 @@ class L2Telegraph(Account):
         self.tx.update({"value": Web3.to_wei(0.00025, "ether") + l0_fee})
 
         contract = self.get_contract(L2TELEGRAPH_MESSAGE_CONTRACT, L2TELEGRAPH_MESSAGE_ABI)
-        try:
-            transaction = contract.functions.sendMessage(
-                ' ',
-                175,
-                "0x5f26ea1e4d47071a4d9a2c2611c2ae0665d64b6d0d4a6d5964f3b618d8e46bcfbf2792b0d769fbda"
-            ).build_transaction(self.tx)
 
-            signed_txn = self.sign(transaction)
+        transaction = contract.functions.sendMessage(
+            ' ',
+            175,
+            "0x5f26ea1e4d47071a4d9a2c2611c2ae0665d64b6d0d4a6d5964f3b618d8e46bcfbf2792b0d769fbda"
+        ).build_transaction(self.tx)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        signed_txn = self.sign(transaction)
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+        txn_hash = self.send_raw_transaction(signed_txn)
+
+        self.wait_until_tx_finished(txn_hash.hex())
 
     def mint(self):
         logger.info(f"[{self.account_id}][{self.address}] Mint NFT")
@@ -78,31 +80,30 @@ class L2Telegraph(Account):
         nft_id = self.get_nft_id(txn_hash.hex())
         return nft_id
 
+    @retry
+    @check_gas
     def bridge(self, sleep_from, sleep_to):
         l0_fee = self.get_estimate_fee(L2TELEGRAPH_NFT_CONTRACT, L2TELEGRAPH_NFT_ABI)
 
-        try:
-            nft_id = self.mint()
+        nft_id = self.mint()
 
-            sleep(sleep_from, sleep_to)
+        sleep(sleep_from, sleep_to)
 
-            self.tx.update({"value": l0_fee})
-            self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
+        self.tx.update({"value": l0_fee})
+        self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
 
-            logger.info(f"[{self.account_id}][{self.address}] Bridge NFT [{nft_id}]")
+        logger.info(f"[{self.account_id}][{self.address}] Bridge NFT [{nft_id}]")
 
-            contract = self.get_contract(L2TELEGRAPH_NFT_CONTRACT, L2TELEGRAPH_NFT_ABI)
+        contract = self.get_contract(L2TELEGRAPH_NFT_CONTRACT, L2TELEGRAPH_NFT_ABI)
 
-            transaction = contract.functions.crossChain(
-                175,
-                "0x5b10ae182c297ec76fe6fe0e3da7c4797cede02dd43a183c97db9174962607a8b6552ce320eac5aa",
-                nft_id
-            ).build_transaction(self.tx)
+        transaction = contract.functions.crossChain(
+            175,
+            "0x5b10ae182c297ec76fe6fe0e3da7c4797cede02dd43a183c97db9174962607a8b6552ce320eac5aa",
+            nft_id
+        ).build_transaction(self.tx)
 
-            signed_txn = self.sign(transaction)
+        signed_txn = self.sign(transaction)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+        self.wait_until_tx_finished(txn_hash.hex())

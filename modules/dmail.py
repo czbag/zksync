@@ -4,6 +4,8 @@ from typing import Union
 from loguru import logger
 from web3 import Web3
 from config import DMAIL_ABI, DMAIL_CONTRACT
+from utils.gas_checker import check_gas
+from utils.helpers import retry
 from .account import Account
 
 
@@ -28,21 +30,19 @@ class Dmail(Account):
 
         return domain_address + random.choice(domain_list)
 
+    @retry
+    @check_gas
     def send_mail(self, random_receiver: bool):
         logger.info(f"[{self.account_id}][{self.address}] Send email")
 
         email_address = self.get_random_email() if random_receiver else f"{self.address}@dmail.ai"
 
-        try:
-            data = self.contract.encodeABI("send_mail", args=(email_address, email_address))
+        data = self.contract.encodeABI("send_mail", args=(email_address, email_address))
 
-            self.tx.update({"data": data})
+        self.tx.update({"data": data})
 
-            signed_txn = self.sign(self.tx)
+        signed_txn = self.sign(self.tx)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
-
+        self.wait_until_tx_finished(txn_hash.hex())

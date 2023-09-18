@@ -4,6 +4,8 @@ from typing import Union
 from loguru import logger
 from web3 import Web3
 from config import ERALEND_CONTRACTS, ERALEND_ABI
+from utils.gas_checker import check_gas
+from utils.helpers import retry
 from utils.sleeping import sleep
 from .account import Account
 
@@ -18,6 +20,8 @@ class Eralend(Account):
         amount = self.contract.functions.balanceOfUnderlying(self.address).call()
         return amount
 
+    @retry
+    @check_gas
     def deposit(
             self,
             min_amount: float,
@@ -50,97 +54,91 @@ class Eralend(Account):
             "data": "0x1249c58b"
         }
 
-        try:
-            logger.info(f"[{self.account_id}][{self.address}] Make deposit on Eralend | {amount} ETH")
+        logger.info(f"[{self.account_id}][{self.address}] Make deposit on Eralend | {amount} ETH")
 
-            signed_txn = self.sign(tx)
+        signed_txn = self.sign(tx)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
+        self.wait_until_tx_finished(txn_hash.hex())
 
-            if make_withdraw:
-                sleep(sleep_from, sleep_to)
+        if make_withdraw:
+            sleep(sleep_from, sleep_to)
 
-                self.withdraw()
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+            self.withdraw()
 
+    @retry
+    @check_gas
     def withdraw(self):
         amount = self.get_deposit_amount()
 
         if amount > 0:
-            try:
-                logger.info(
-                    f"[{self.account_id}][{self.address}] Make withdraw from Eralend | " +
-                    f"{Web3.from_wei(amount, 'ether')} ETH"
-                )
+            logger.info(
+                f"[{self.account_id}][{self.address}] Make withdraw from Eralend | " +
+                f"{Web3.from_wei(amount, 'ether')} ETH"
+            )
 
-                tx = {
-                    "chainId": self.w3.eth.chain_id,
-                    "from": self.address,
-                    "gasPrice": self.w3.eth.gas_price,
-                    "nonce": self.w3.eth.get_transaction_count(self.address)
-                }
+            tx = {
+                "chainId": self.w3.eth.chain_id,
+                "from": self.address,
+                "gasPrice": self.w3.eth.gas_price,
+                "nonce": self.w3.eth.get_transaction_count(self.address)
+            }
 
-                transaction = self.contract.functions.redeemUnderlying(amount).build_transaction(tx)
+            transaction = self.contract.functions.redeemUnderlying(amount).build_transaction(tx)
 
-                signed_txn = self.sign(transaction)
+            signed_txn = self.sign(transaction)
 
-                txn_hash = self.send_raw_transaction(signed_txn)
+            txn_hash = self.send_raw_transaction(signed_txn)
 
-                self.wait_until_tx_finished(txn_hash.hex())
-            except Exception as e:
-                logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+            self.wait_until_tx_finished(txn_hash.hex())
         else:
             logger.error(f"[{self.account_id}][{self.address}] Deposit not found")
 
+    @retry
+    @check_gas
     def enable_collateral(self):
         logger.info(f"[{self.account_id}][{self.address}] Enable collateral on Eralend")
 
         contract = self.get_contract(ERALEND_CONTRACTS["collateral"], ERALEND_ABI)
 
-        try:
-            tx = {
-                "chainId": self.w3.eth.chain_id,
-                "from": self.address,
-                "gasPrice": self.w3.eth.gas_price,
-                "nonce": self.w3.eth.get_transaction_count(self.address)
-            }
+        tx = {
+            "chainId": self.w3.eth.chain_id,
+            "from": self.address,
+            "gasPrice": self.w3.eth.gas_price,
+            "nonce": self.w3.eth.get_transaction_count(self.address)
+        }
 
-            transaction = contract.functions.enterMarkets(
-                [Web3.to_checksum_address(ERALEND_CONTRACTS["landing"])]
-            ).build_transaction(tx)
+        transaction = contract.functions.enterMarkets(
+            [Web3.to_checksum_address(ERALEND_CONTRACTS["landing"])]
+        ).build_transaction(tx)
 
-            signed_txn = self.sign(transaction)
+        signed_txn = self.sign(transaction)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+        self.wait_until_tx_finished(txn_hash.hex())
 
+    @retry
+    @check_gas
     def disable_collateral(self):
         logger.info(f"[{self.account_id}][{self.address}] Disable collateral on Eralend")
 
         contract = self.get_contract(ERALEND_CONTRACTS["collateral"], ERALEND_ABI)
 
-        try:
-            tx = {
-                "chainId": self.w3.eth.chain_id,
-                "from": self.address,
-                "gasPrice": self.w3.eth.gas_price,
-                "nonce": self.w3.eth.get_transaction_count(self.address)
-            }
+        tx = {
+            "chainId": self.w3.eth.chain_id,
+            "from": self.address,
+            "gasPrice": self.w3.eth.gas_price,
+            "nonce": self.w3.eth.get_transaction_count(self.address)
+        }
 
-            transaction = contract.functions.exitMarket(
-                Web3.to_checksum_address(ERALEND_CONTRACTS["landing"])
-            ).build_transaction(tx)
+        transaction = contract.functions.exitMarket(
+            Web3.to_checksum_address(ERALEND_CONTRACTS["landing"])
+        ).build_transaction(tx)
 
-            signed_txn = self.sign(transaction)
+        signed_txn = self.sign(transaction)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
-        except Exception as e:
-            logger.error(f"[{self.account_id}][{self.address}] Error | {e}")
+        self.wait_until_tx_finished(txn_hash.hex())

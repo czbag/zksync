@@ -4,6 +4,9 @@ from typing import Union
 
 from loguru import logger
 from web3 import Web3
+
+from utils.gas_checker import check_gas
+from utils.helpers import retry
 from .account import Account
 from config import ORBITER_CONTRACT
 
@@ -36,6 +39,8 @@ class Orbiter(Account):
         }
         return tx
 
+    @retry
+    @check_gas
     def bridge(self, destination_chain: str, min_bridge: float, max_bridge: float, decimal: int):
         amount = round(random.uniform(min_bridge, max_bridge), decimal)
 
