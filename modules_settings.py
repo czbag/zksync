@@ -676,8 +676,7 @@ def custom_routes(account_id, key, proxy):
     You can use these methods:
     bridge_zksync, withdraw_zksync, bridge_orbiter, wrap_eth, unwrap_eth, swap_syncswap, liquidity_syncswap, swap_mute,
     swap_spacefi, liquidity_spacefi, swap_pancake, swap_woofi, swap_velocore, swap_odos, swap_zkswap, swap_xyswap, swap_inch,
-    swap_openocean,
-    bungee_refuel, stargate_bridge, deposit_eralend, withdraw_erlaned, deposit_basilisk, withdraw_basilisk,
+    swap_openocean, bungee_refuel, stargate_bridge, deposit_eralend, withdraw_erlaned, deposit_basilisk, withdraw_basilisk,
     deposit_reactorfusion, withdraw_reactorfusion,
     enable_collateral_eralend, disable_collateral_eralend
     enable_collateral_basilisk, disable_collateral_basilisk

@@ -159,7 +159,10 @@ OPENOCEAN_CONTRACT = {
     "use_ref": True  # If you use True, you support me 1% of the transaction amount
 }
 
-INCH_CONTRACT = "0x6e2b76966cbd9cf4cc2fa0d76d24d5241e0abc2f"
+INCH_CONTRACT = {
+    "router": "0x6e2b76966cbd9cf4cc2fa0d76d24d5241e0abc2f",
+    "use_ref": True
+}
 
 BUNGEE_CONTRACT = "0x7ee459d7fde8b4a3c22b9c8c7aa52abaddd9ffd5"
 

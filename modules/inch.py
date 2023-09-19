@@ -38,7 +38,14 @@ class Inch(Account):
             "slippage": slippage,
         }
 
+        if INCH_CONTRACT["use_ref"]:
+            params.update({
+                "referrer": Web3.to_checksum_address("0x1c7ff320ae4327784b464eed07714581643b36a7"),
+                "fee": 1
+            })
+
         response = requests.get(url, params=params, headers=self.headers, proxies=self.proxies)
+
         transaction = response.json()
 
         return transaction
@@ -75,7 +82,7 @@ class Inch(Account):
         to_token = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" if to_token == "ETH" else ZKSYNC_TOKENS[to_token]
 
         if from_token != "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE":
-            self.approve(amount_wei, from_token, INCH_CONTRACT)
+            self.approve(amount_wei, from_token, INCH_CONTRACT["router"])
 
         transaction_data = self.build_tx(from_token, to_token, amount_wei, slippage)
 
