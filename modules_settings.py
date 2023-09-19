@@ -622,14 +622,14 @@ def swap_multiswap(account_id, key, proxy):
     """
     Multi-Swap module: Automatically performs the specified number of swaps in one of the dexes.
     ______________________________________________________
-    use_dex - Choose any dex: syncswap, mute, spacefi, pancake, woofi, velocore, odos, zkswap, xyswap
+    use_dex - Choose any dex: syncswap, mute, spacefi, pancake, woofi, velocore, odos, zkswap, xyswap, openocean, inch
     quantity_swap - Quantity swaps
     ______________________________________________________
     random_swap_token - If True the swap path will be [ETH -> USDC -> USDC -> ETH] (random!)
     If False the swap path will be [ETH -> USDC -> ETH -> USDC]
     """
 
-    use_dex = ["velocore", "mute", "pancake", "syncswap", "woofi", "spacefi", "odos", "zkswap", "xyswap"]
+    use_dex = ["velocore", "mute", "pancake", "syncswap", "woofi", "spacefi", "odos", "zkswap", "xyswap", "openocean", "inch"]
 
     min_swap = 4
     max_swap = 10
@@ -675,7 +675,8 @@ def custom_routes(account_id, key, proxy):
     """
     You can use these methods:
     bridge_zksync, withdraw_zksync, bridge_orbiter, wrap_eth, unwrap_eth, swap_syncswap, liquidity_syncswap, swap_mute,
-    swap_spacefi, liquidity_spacefi, swap_pancake, swap_woofi, swap_velocore, swap_odos, swap_zkswap, swap_xyswap
+    swap_spacefi, liquidity_spacefi, swap_pancake, swap_woofi, swap_velocore, swap_odos, swap_zkswap, swap_xyswap, swap_inch,
+    swap_openocean,
     bungee_refuel, stargate_bridge, deposit_eralend, withdraw_erlaned, deposit_basilisk, withdraw_basilisk,
     deposit_reactorfusion, withdraw_reactorfusion,
     enable_collateral_eralend, disable_collateral_eralend

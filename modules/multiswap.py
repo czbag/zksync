@@ -22,7 +22,9 @@ class Multiswap(Account):
             "woofi": WooFi,
             "odos": Odos,
             "zkswap": ZKSwap,
-            "xyswap": XYSwap
+            "xyswap": XYSwap,
+            "openocean": OpenOcean,
+            "inch": Inch
         }
 
     def get_swap_module(self, use_dex: list):
