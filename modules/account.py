@@ -8,6 +8,7 @@ from eth_account import Account as EthereumAccount
 from web3.exceptions import TransactionNotFound
 
 from config import RPC, ERC20_ABI, ZKSYNC_TOKENS
+from settings import GAS_MULTIPLIER
 from utils.sleeping import sleep
 
 
@@ -140,7 +141,7 @@ class Account:
 
     def sign(self, transaction):
         gas = self.w3.eth.estimate_gas(transaction)
-        gas = int(gas + gas * 0.3)
+        gas = int(gas * GAS_MULTIPLIER)
 
         transaction.update({"gas": gas})
 

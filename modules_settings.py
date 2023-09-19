@@ -398,6 +398,64 @@ def swap_xyswap(account_id, key, proxy):
     xyswap.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount, min_percent, max_percent)
 
 
+def swap_openocean(account_id, key, proxy):
+    """
+    Make swap on OpenOcean
+    ______________________________________________________
+    from_token – Choose SOURCE token ETH, WETH, USDC, USDT, BUSD, MAV, OT, WBTC | Select one
+    to_token – Choose DESTINATION token ETH, WETH, USDC, USDT, BUSD, MAV, OT, WBTC | Select one
+
+    Disclaimer - If you use True for use_fee, you support me 1% of the transaction amount
+    ______________________________________________________
+    all_amount - swap from min_percent to max_percent
+    """
+
+    from_token = "ETH"
+    to_token = "WETH"
+
+    min_amount = 0.0001
+    max_amount = 0.0002
+    decimal = 6
+    slippage = 1
+
+    all_amount = True
+
+    min_percent = 1
+    max_percent = 2
+
+    xyswap = OpenOcean(account_id, key, proxy)
+    xyswap.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount, min_percent, max_percent)
+
+
+def swap_inch(account_id, key, proxy):
+    """
+    Make swap on 1inch
+    ______________________________________________________
+    from_token – Choose SOURCE token ETH, WETH, USDC, USDT, BUSD | Select one
+    to_token – Choose DESTINATION token ETH, WETH, USDC, USDT, BUSD | Select one
+
+    Disclaimer - If you use True for use_fee, you support me 1% of the transaction amount
+    ______________________________________________________
+    all_amount - swap from min_percent to max_percent
+    """
+
+    from_token = "ETH"
+    to_token = "WETH"
+
+    min_amount = 0.0001
+    max_amount = 0.0002
+    decimal = 6
+    slippage = 1
+
+    all_amount = True
+
+    min_percent = 1
+    max_percent = 2
+
+    inch_dex = Inch(account_id, key, proxy)
+    inch_dex.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount, min_percent, max_percent)
+
+
 def bungee_refuel(account_id, key, proxy):
     """
     Make refuel on Bungee

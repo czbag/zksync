@@ -154,6 +154,12 @@ XYSWAP_CONTRACT = {
     "router": "0x30E63157bD0bA74C814B786F6eA2ed9549507b46",
     "use_ref": True  # If you use True, you support me 1% of the transaction amount
 }
+OPENOCEAN_CONTRACT = {
+    "router": "0x36A1aCbbCAfca2468b85011DDD16E7Cb4d673230",
+    "use_ref": True  # If you use True, you support me 1% of the transaction amount
+}
+
+INCH_CONTRACT = "0x6e2b76966cbd9cf4cc2fa0d76d24d5241e0abc2f"
 
 BUNGEE_CONTRACT = "0x7ee459d7fde8b4a3c22b9c8c7aa52abaddd9ffd5"
 
