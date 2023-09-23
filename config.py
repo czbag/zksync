@@ -79,6 +79,9 @@ with open("data/abi/l2telegraph/bridge_nft.json", "r") as file:
 with open("data/abi/minter/abi.json", "r") as file:
     MINTER_ABI = json.load(file)
 
+with open("data/abi/mailzero/abi.json", "r") as file:
+    MAILZERO_ABI = json.load(file)
+
 with open("data/abi/tavaera/id.json", "r") as file:
     TAVAERA_ID_ABI = json.load(file)
 
@@ -190,6 +193,8 @@ L2TELEGRAPH_MESSAGE_CONTRACT = "0x0d4a6d5964f3b618d8e46bcfbf2792b0d769fbda"
 L2TELEGRAPH_NFT_CONTRACT = "0xD43A183C97dB9174962607A8b6552CE320eAc5aA"
 
 MINTER_CONTRACT = "0x31DCD96f29BD32F3a1856247846E9d2f95C2b639"
+
+MAILZERO_CONTRACT = "0xc94025c2eA9512857BD8E1e611aB9b773b769350"
 
 TAVAERA_ID_CONTRACT = "0xd29Aa7bdD3cbb32557973daD995A3219D307721f"
 

@@ -629,7 +629,8 @@ def swap_multiswap(account_id, key, proxy):
     If False the swap path will be [ETH -> USDC -> ETH -> USDC]
     """
 
-    use_dex = ["velocore", "mute", "pancake", "syncswap", "woofi", "spacefi", "odos", "zkswap", "xyswap", "openocean", "inch"]
+    use_dex = ["velocore", "mute", "pancake", "syncswap", "woofi", "spacefi", "odos", "zkswap", "xyswap", "openocean",
+               "inch"]
 
     min_swap = 4
     max_swap = 10
@@ -681,7 +682,7 @@ def custom_routes(account_id, key, proxy):
     enable_collateral_eralend, disable_collateral_eralend
     enable_collateral_basilisk, disable_collateral_basilisk
     enable_collateral_reactorfusion, disable_collateral_reactorfusion,
-    create_omnisea, bridge_nft, mint_tavaera, mint_nft,
+    create_omnisea, bridge_nft, mint_tavaera, mint_nft, mint_mailzero_nft,
     mint_zks_domain, mint_era_domain, send_message, send_mail, swap_multiswap, custom_routes, multi_approve,
     deploy_contract_zksync
 
@@ -736,6 +737,11 @@ def send_message(account_id, key, proxy):
 
 def mint_nft(account_id, key, proxy):
     mint_nft = Minter(account_id, key, proxy)
+    mint_nft.mint()
+
+
+def mint_mailzero_nft(account_id, key, proxy):
+    mint_nft = MailZero(account_id, key, proxy)
     mint_nft.mint()
 
 

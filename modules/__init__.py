@@ -21,6 +21,7 @@ from .basilisk import Basilisk
 from .reactorfusion import ReactorFusion
 from .l2telegraph import L2Telegraph
 from .minter import Minter
+from .mailzero import MailZero
 from .tavaera import Tavaera
 from .routes import Routes
 from .tx_checker import check_tx
