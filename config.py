@@ -99,7 +99,7 @@ with open("data/abi/omnisea/abi.json", "r") as file:
 
 ZKSYNC_BRIDGE_CONTRACT = "0x32400084c286cf3e17e7b677ea9583e60a000324"
 
-ORBITER_CONTRACT = "0x80C67432656d59144cEFf962E8fAF8926599bCF8"
+ORBITER_CONTRACT = ""
 
 CONTRACT_PATH = Path("data/deploy/Token.json")
 
