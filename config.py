@@ -52,6 +52,15 @@ with open("data/abi/velocore/router.json", "r") as file:
 with open("data/abi/zkswap/router.json", "r") as file:
     ZKSWAP_ROUTER_ABI = json.load(file)
 
+with open("data/abi/maverick/position.json", "r") as file:
+    MAVERICK_POSITION_ABI = json.load(file)
+
+with open("data/abi/maverick/router.json", "r") as file:
+    MAVERICK_ROUTER_ABI = json.load(file)
+
+with open("data/abi/vesync/router.json", "r") as file:
+    VESYNC_ROUTER_ABI = json.load(file)
+
 with open("data/abi/bungee/abi.json", "r") as file:
     BUNGEE_ABI = json.load(file)
 
@@ -66,6 +75,9 @@ with open("data/abi/basilisk/abi.json", "r") as file:
 
 with open("data/abi/reactorfusion/abi.json", "r") as file:
     REACTORFUSION_ABI = json.load(file)
+
+with open("data/abi/zerolend/abi.json", "r") as file:
+    ZEROLEND_ABI = json.load(file)
 
 with open("data/abi/dmail/abi.json", "r") as file:
     DMAIL_ABI = json.load(file)
@@ -96,6 +108,9 @@ with open("data/abi/era_ns/abi.json", "r") as file:
 
 with open("data/abi/omnisea/abi.json", "r") as file:
     OMNISEA_ABI = json.load(file)
+
+with open("data/abi/zksoul/abi.json", "r") as file:
+    ZKSOUL_ABI = json.load(file)
 
 ZKSYNC_BRIDGE_CONTRACT = "0x32400084c286cf3e17e7b677ea9583e60a000324"
 
@@ -167,6 +182,16 @@ INCH_CONTRACT = {
     "use_ref": True
 }
 
+MAVERICK_CONTRACTS = {
+    "router": "0x39E098A153Ad69834a9Dac32f0FCa92066aD03f4",
+    "pool": "0x41C8cf74c27554A8972d3bf3D2BD4a14D8B604AB",
+    "pool_information": "0x57D47F505EdaA8Ae1eFD807A860A79A28bE06449",
+}
+
+VESYNC_CONTRACTS = {
+    "router": "0x6C31035D62541ceba2Ac587ea09891d1645D6D07"
+}
+
 BUNGEE_CONTRACT = "0x7ee459d7fde8b4a3c22b9c8c7aa52abaddd9ffd5"
 
 STARGATE_CONTRACT = "0xdac7479e5f7c01cc59bbf7c1c4edf5604ada1ff2"
@@ -185,6 +210,10 @@ REACTORFUSION_CONTRACTS = {
     "landing": "0xC5db68F30D21cBe0C9Eac7BE5eA83468d69297e6",
     "collateral": "0x23848c28af1c3aa7b999fa57e6b6e8599c17f3f2",
 }
+
+ZEROLEND_CONTRACT = "0x767b4A087c11d7581Ac95eaFfc1FeBFA26bad3d2"
+
+ZEROLEND_WETH_CONTRACT = "0x9002ecb8a06060e3b56669c6B8F18E1c3b119914"
 
 DMAIL_CONTRACT = "0x981F198286E40F9979274E0876636E9144B8FB8E"
 
@@ -205,3 +234,5 @@ ZKS_CONTRACT = "0xcbe2093030f485adaaf5b61deb4d9ca8adeae509"
 ENS_CONTRACT = "0x935442af47f3dc1c11f006d551e13769f12eab13"
 
 OMNISEA_CONTRACT = "0x1Ecd053f681a51E37087719653f3f0FFe54750C0"
+
+ZKSOUL_CONTRACT = "0x346f859312527e5b2f34c22b645015e8764c0b14"

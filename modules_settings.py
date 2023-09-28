@@ -456,6 +456,62 @@ def swap_inch(account_id, key, proxy):
     inch_dex.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount, min_percent, max_percent)
 
 
+def swap_maverick(account_id, key, proxy):
+    """
+    Make swap on Maverick
+    ______________________________________________________
+    from_token – Choose SOURCE token ETH, USDC | Select one
+    to_token – Choose DESTINATION token ETH, USDC | Select one
+    ______________________________________________________
+    all_amount - swap from min_percent to max_percent
+    """
+
+    from_token = "USDC"
+    to_token = "ETH"
+
+    min_amount = 0.001
+    max_amount = 0.002
+    decimal = 6
+    slippage = 1
+
+    all_amount = True
+
+    min_percent = 100
+    max_percent = 100
+
+    maverick = Maverick(account_id, key, proxy)
+    maverick.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount, min_percent, max_percent)
+
+
+def swap_vesync(account_id, key, proxy):
+    """
+    Make swap on VeSync
+    ______________________________________________________
+    from_token – Choose SOURCE token ETH, USDC, BUSD, WBTC | Select one
+    to_token – Choose DESTINATION token ETH, USDC, BUSD, WBTC | Select one
+
+    Disclaimer - You can swap only ETH to any token or any token to ETH!
+    ______________________________________________________
+    all_amount - swap from min_percent to max_percent
+    """
+
+    from_token = "USDC"
+    to_token = "ETH"
+
+    min_amount = 0.0001
+    max_amount = 0.0002
+    decimal = 6
+    slippage = 1
+
+    all_amount = True
+
+    min_percent = 100
+    max_percent = 100
+
+    vesync = VeSync(account_id, key, proxy)
+    vesync.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount, min_percent, max_percent)
+
+
 def bungee_refuel(account_id, key, proxy):
     """
     Make refuel on Bungee
@@ -583,6 +639,34 @@ def deposit_reactorfusion(account_id, key, proxy):
     )
 
 
+def deposit_zerolend(account_id, key, proxy):
+    """
+    Make deposit on ZeroLend
+    ______________________________________________________
+    make_withdraw - True, if need withdraw after deposit
+
+    all_amount - deposit from min_percent to max_percent
+    """
+    min_amount = 0.0001
+    max_amount = 0.0002
+    decimal = 5
+
+    sleep_from = 5
+    sleep_to = 24
+
+    make_withdraw = True
+
+    all_amount = True
+
+    min_percent = 5
+    max_percent = 10
+
+    zerolend = ZeroLend(account_id, key, proxy)
+    zerolend.deposit(
+        min_amount, max_amount, decimal, sleep_from, sleep_to, make_withdraw, all_amount, min_percent, max_percent
+    )
+
+
 def send_mail(account_id, key, proxy):
     """
     Dmail mail sender
@@ -622,15 +706,21 @@ def swap_multiswap(account_id, key, proxy):
     """
     Multi-Swap module: Automatically performs the specified number of swaps in one of the dexes.
     ______________________________________________________
-    use_dex - Choose any dex: syncswap, mute, spacefi, pancake, woofi, velocore, odos, zkswap, xyswap, openocean, inch
+    use_dex - Choose any dex:
+    syncswap, mute, spacefi, pancake, woofi, maverick, velocore, odos, zkswap, xyswap, openocean, inch, vesync
+
     quantity_swap - Quantity swaps
     ______________________________________________________
     random_swap_token - If True the swap path will be [ETH -> USDC -> USDC -> ETH] (random!)
     If False the swap path will be [ETH -> USDC -> ETH -> USDC]
     """
 
-    use_dex = ["velocore", "mute", "pancake", "syncswap", "woofi", "spacefi", "odos", "zkswap", "xyswap", "openocean",
-               "inch"]
+    use_dex = [
+        "maverick", "mute", "pancake", "syncswap",
+        "woofi", "spacefi", "odos", "zkswap",
+        "velocore", "xyswap", "openocean", "inch",
+        "vesync"
+    ]
 
     min_swap = 4
     max_swap = 10
@@ -674,19 +764,52 @@ def deploy_contract_zksync(account_id, key, proxy):
 
 def custom_routes(account_id, key, proxy):
     """
-    You can use these methods:
-    bridge_zksync, withdraw_zksync, bridge_orbiter, wrap_eth, unwrap_eth, swap_syncswap, liquidity_syncswap, swap_mute,
-    swap_spacefi, liquidity_spacefi, swap_pancake, swap_woofi, swap_velocore, swap_odos, swap_zkswap, swap_xyswap, swap_inch,
-    swap_openocean, bungee_refuel, stargate_bridge, deposit_eralend, withdraw_erlaned, deposit_basilisk, withdraw_basilisk,
-    deposit_reactorfusion, withdraw_reactorfusion,
-    enable_collateral_eralend, disable_collateral_eralend
-    enable_collateral_basilisk, disable_collateral_basilisk
-    enable_collateral_reactorfusion, disable_collateral_reactorfusion,
-    create_omnisea, bridge_nft, mint_tavaera, mint_nft, mint_mailzero_nft,
-    mint_zks_domain, mint_era_domain, send_message, send_mail, swap_multiswap, custom_routes, multi_approve,
-    deploy_contract_zksync
-
-
+    BRIDGE:
+        – bridge_zksync
+        – withdraw_zksync
+        – bridge_orbiter
+        – bungee_refuel
+        – stargate_bridge
+    WRAP:
+        – wrap_eth
+        – unwrap_eth
+    DEX:
+        – swap_syncswap
+        – swap_maverick
+        – swap_mute
+        – swap_spacefi
+        – swap_pancake
+        – swap_woofi
+        – swap_velocore
+        – swap_odos
+        – swap_zkswap
+        – swap_xyswap
+        – swap_inch
+        – swap_openocean
+        – swap_vesync
+    LIQUIDITY:
+        – liquidity_syncswap
+        – liquidity_spacefi
+    LANDING:
+        – deposit_eralend, withdraw_erlaned, enable_collateral_eralend, disable_collateral_eralend
+        – deposit_basilisk, withdraw_basilisk, enable_collateral_basilisk, disable_collateral_basilisk
+        – deposit_reactorfusion, withdraw_reactorfusion,
+        enable_collateral_reactorfusion, disable_collateral_reactorfusion
+        – deposit_zerolend
+        – withdraw_zerolend
+    NFT/DOMAIN:
+        – create_omnisea
+        – bridge_nft
+        – mint_tavaera
+        – mint_nft
+        – mint_mailzero_nft
+        – mint_zks_domain
+        – mint_era_domain
+    ANOTHER:
+        – send_message (l2Telegraph)
+        – send_mail (Dmail)
+        – swap_multiswap
+        – deploy_contract_zksync
     ______________________________________________________
     Disclaimer - You can add modules to [] to select random ones,
     example [module_1, module_2, [module_3, module_4], module 5]
@@ -750,6 +873,11 @@ def mint_zks_domain(account_id, key, proxy):
     zks_domain.mint()
 
 
+def mint_zksoul_id(account_id, key, proxy):
+    zksoul_id = ZkSoulId(account_id, key, proxy)
+    zksoul_id.mint()
+
+
 def mint_era_domain(account_id, key, proxy):
     era_domain = EraDomain(account_id, key, proxy)
     era_domain.mint()
@@ -798,6 +926,11 @@ def enable_collateral_reactorfusion(account_id, key, proxy):
 def disable_collateral_reactorfusion(account_id, key, proxy):
     reactorfusion = ReactorFusion(account_id, key, proxy)
     reactorfusion.disable_collateral()
+
+
+def withdraw_zerolend(account_id, key, proxy):
+    zerolend = ZeroLend(account_id, key, proxy)
+    zerolend.withdraw()
 
 
 def create_omnisea(account_id, key, proxy):
