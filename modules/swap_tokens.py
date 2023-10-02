@@ -24,7 +24,9 @@ class SwapTokens(Account):
             "zkswap": ZKSwap,
             "xyswap": XYSwap,
             "openocean": OpenOcean,
-            "inch": Inch
+            "inch": Inch,
+            "maverick": Maverick,
+            "vesync": VeSync
         }
 
     def get_swap_module(self, use_dex: list):
