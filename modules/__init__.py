@@ -33,3 +33,4 @@ from .zks_domain import ZKSDomain
 from .era_domain import EraDomain
 from .zk_soul import ZkSoulId
 from .omnisea import Omnisea
+from .swap_tokens import SwapTokens

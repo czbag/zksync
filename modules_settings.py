@@ -667,17 +667,6 @@ def deposit_zerolend(account_id, key, proxy):
     )
 
 
-def send_mail(account_id, key, proxy):
-    """
-    Dmail mail sender
-    """
-
-    random_receiver = True
-
-    dmail = Dmail(account_id, key, proxy)
-    dmail.send_mail(random_receiver)
-
-
 def bridge_nft(account_id, key, proxy):
     """
     Make mint NFT and bridge NFT on L2Telegraph
@@ -700,6 +689,35 @@ def mint_tavaera(account_id, key, proxy):
 
     tavaera_nft = Tavaera(account_id, key, proxy)
     tavaera_nft.mint(sleep_from, sleep_to)
+
+
+def swap_tokens(account_id, key, proxy):
+    """
+    SwapTokens module: Automatically swap tokens to ETH
+    ______________________________________________________
+    use_dex - Choose any dex:
+    syncswap, mute, spacefi, pancake, woofi, maverick, velocore, odos, zkswap, xyswap, openocean, inch, vesync
+    """
+
+    use_dex = [
+        "maverick", "mute", "pancake", "syncswap",
+        "woofi", "spacefi", "odos", "zkswap",
+        "velocore", "xyswap", "openocean", "inch",
+        "vesync"
+    ]
+
+    use_tokens = ["USDC"]
+
+    sleep_from = 300
+    sleep_to = 600
+
+    slippage = 1
+
+    min_percent = 100
+    max_percent = 100
+
+    swap_tokens = SwapTokens(account_id, key, proxy)
+    swap_tokens.swap(use_dex, use_tokens, sleep_from, sleep_to, slippage, min_percent, max_percent)
 
 
 def swap_multiswap(account_id, key, proxy):
@@ -809,6 +827,7 @@ def custom_routes(account_id, key, proxy):
         – send_message (l2Telegraph)
         – send_mail (Dmail)
         – swap_multiswap
+        – swap_tokens
         – deploy_contract_zksync
     ______________________________________________________
     Disclaimer - You can add modules to [] to select random ones,
@@ -851,6 +870,9 @@ def multi_approve(account_id, key, proxy):
 #########################################
 ########### NO NEED TO CHANGE ###########
 #########################################
+def send_mail(account_id, key, proxy):
+    dmail = Dmail(account_id, key, proxy)
+    dmail.send_mail()
 
 
 def send_message(account_id, key, proxy):

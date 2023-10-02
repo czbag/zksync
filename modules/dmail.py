@@ -1,4 +1,5 @@
 import random
+from hashlib import sha256
 from typing import Union
 
 from loguru import logger
@@ -22,22 +23,15 @@ class Dmail(Account):
             "nonce": self.w3.eth.get_transaction_count(self.address)
         }
 
-    @staticmethod
-    def get_random_email():
-        domain_list = ["@gmail.com", "@dmail.ai"]
-
-        domain_address = "".join(random.sample([chr(i) for i in range(97, 123)], random.randint(7, 15)))
-
-        return domain_address + random.choice(domain_list)
-
     @retry
     @check_gas
-    def send_mail(self, random_receiver: bool):
+    def send_mail(self):
         logger.info(f"[{self.account_id}][{self.address}] Send email")
 
-        email_address = self.get_random_email() if random_receiver else f"{self.address}@dmail.ai"
+        email = sha256(str(1e11 * random.random()).encode()).hexdigest()
+        theme = sha256(str(1e11 * random.random()).encode()).hexdigest()
 
-        data = self.contract.encodeABI("send_mail", args=(email_address, email_address))
+        data = self.contract.encodeABI("send_mail", args=(email, theme))
 
         self.tx.update({"data": data})
 
