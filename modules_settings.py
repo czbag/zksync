@@ -72,9 +72,9 @@ def wrap_eth(account_id, key, proxy):
     max_amount = 0.002
     decimal = 4
 
-    all_amount = False
+    all_amount = True
 
-    min_percent = 60
+    min_percent = 80
     max_percent = 80
 
     zksync = ZkSync(account_id, key, proxy, "zksync")
@@ -321,8 +321,8 @@ def swap_odos(account_id, key, proxy):
     all_amount - swap from min_percent to max_percent
     """
 
-    from_token = "ETH"
-    to_token = "WETH"
+    from_token = "WETH"
+    to_token = "ETH"
 
     min_amount = 0.0001
     max_amount = 0.0002
@@ -381,8 +381,8 @@ def swap_xyswap(account_id, key, proxy):
     all_amount - swap from min_percent to max_percent
     """
 
-    from_token = "ETH"
-    to_token = "USDC"
+    from_token = "WETH"
+    to_token = "ETH"
 
     min_amount = 0.0001
     max_amount = 0.0002
@@ -391,8 +391,8 @@ def swap_xyswap(account_id, key, proxy):
 
     all_amount = True
 
-    min_percent = 5
-    max_percent = 10
+    min_percent = 100
+    max_percent = 100
 
     xyswap = XYSwap(account_id, key, proxy)
     xyswap.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount, min_percent, max_percent)
@@ -829,6 +829,7 @@ def custom_routes(account_id, key, proxy):
         – swap_multiswap
         – swap_tokens
         – deploy_contract_zksync
+        – create_safe
     ______________________________________________________
     Disclaimer - You can add modules to [] to select random ones,
     example [module_1, module_2, [module_3, module_4], module 5]
@@ -958,6 +959,11 @@ def withdraw_zerolend(account_id, key, proxy):
 def create_omnisea(account_id, key, proxy):
     omnisea = Omnisea(account_id, key, proxy)
     omnisea.create()
+
+
+def create_safe(account_id, key, proxy):
+    gnosis_safe = GnosisSafe(account_id, key, proxy)
+    gnosis_safe.create_safe()
 
 
 def get_tx_count():

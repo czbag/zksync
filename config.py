@@ -112,6 +112,10 @@ with open("data/abi/omnisea/abi.json", "r") as file:
 with open("data/abi/zksoul/abi.json", "r") as file:
     ZKSOUL_ABI = json.load(file)
 
+with open("data/abi/gnosis/abi.json", "r") as file:
+    SAFE_ABI = json.load(file)
+
+
 ZKSYNC_BRIDGE_CONTRACT = "0x32400084c286cf3e17e7b677ea9583e60a000324"
 
 ORBITER_CONTRACT = ""
@@ -236,3 +240,5 @@ ENS_CONTRACT = "0x935442af47f3dc1c11f006d551e13769f12eab13"
 OMNISEA_CONTRACT = "0x1Ecd053f681a51E37087719653f3f0FFe54750C0"
 
 ZKSOUL_CONTRACT = "0x346f859312527e5b2f34c22b645015e8764c0b14"
+
+SAFE_CONTRACT = "0xDAec33641865E4651fB43181C6DB6f7232Ee91c2"
