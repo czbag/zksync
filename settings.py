@@ -1,8 +1,7 @@
 # RANDOM WALLETS MODE
 RANDOM_WALLET = True  # True or False
 
-# SLEEP MODE
-IS_SLEEP = True  # True or False
+QUANTITY_RUN_ACCOUNTS = 5
 
 SLEEP_FROM = 500  # Second
 SLEEP_TO = 1000  # Second

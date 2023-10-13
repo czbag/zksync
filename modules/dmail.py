@@ -15,17 +15,20 @@ class Dmail(Account):
         super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.contract = self.get_contract(DMAIL_CONTRACT, DMAIL_ABI)
-        self.tx = {
-            "chainId": self.w3.eth.chain_id,
+
+    async def get_tx_data(self):
+        tx = {
+            "chainId": await self.w3.eth.chain_id,
             "from": self.address,
             "to": Web3.to_checksum_address(DMAIL_CONTRACT),
-            "gasPrice": self.w3.eth.gas_price,
-            "nonce": self.w3.eth.get_transaction_count(self.address)
+            "gasPrice": await self.w3.eth.gas_price,
+            "nonce": await self.w3.eth.get_transaction_count(self.address),
         }
+        return tx
 
     @retry
     @check_gas
-    def send_mail(self):
+    async def send_mail(self):
         logger.info(f"[{self.account_id}][{self.address}] Send email")
 
         email = sha256(str(1e11 * random.random()).encode()).hexdigest()
@@ -33,10 +36,11 @@ class Dmail(Account):
 
         data = self.contract.encodeABI("send_mail", args=(email, theme))
 
-        self.tx.update({"data": data})
+        tx_data = await self.get_tx_data()
+        tx_data.update({"data": data})
 
-        signed_txn = self.sign(self.tx)
+        signed_txn = await self.sign(tx_data)
 
-        txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = await self.send_raw_transaction(signed_txn)
 
-        self.wait_until_tx_finished(txn_hash.hex())
+        await self.wait_until_tx_finished(txn_hash.hex())

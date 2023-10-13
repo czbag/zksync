@@ -1,5 +1,6 @@
-from typing import Union
+from typing import Union, Dict
 
+import aiohttp
 import requests
 from loguru import logger
 from web3 import Web3
@@ -18,36 +19,43 @@ class XYSwap(Account):
         if proxy:
             self.proxies.update({"http": f"http://{proxy}", "https": f"http://{proxy}"})
 
-        self.tx = {
+    async def get_tx_data(self) -> Dict:
+        tx = {
+            "chainId": await self.w3.eth.chain_id,
             "from": self.address,
-            "gasPrice": self.w3.eth.gas_price,
-            "nonce": self.w3.eth.get_transaction_count(self.address)
+            "gasPrice": await self.w3.eth.gas_price,
+            "nonce": await self.w3.eth.get_transaction_count(self.address),
         }
 
-    def get_quote(self, from_token: str, to_token: str, amount: int, slippage: float):
+        return tx
+
+    async def get_quote(self, from_token: str, to_token: str, amount: int, slippage: float):
         url = "https://aggregator-api.xy.finance/v1/quote"
 
         params = {
-            "srcChainId": self.w3.eth.chain_id,
+            "srcChainId": await self.w3.eth.chain_id,
             "srcQuoteTokenAddress": Web3.to_checksum_address(from_token),
             "srcQuoteTokenAmount": amount,
-            "dstChainId": self.w3.eth.chain_id,
+            "dstChainId": await self.w3.eth.chain_id,
             "dstQuoteTokenAddress": Web3.to_checksum_address(to_token),
             "slippage": slippage
         }
 
-        response = requests.get(url=url, params=params, proxies=self.proxies)
+        async with aiohttp.ClientSession() as session:
+            response = await session.get(url=url, params=params)
 
-        return response.json()
+            transaction_data = await response.json()
 
-    def build_transaction(self, from_token: str, to_token: str, amount: int, slippage: float, swap_provider: str):
+            return transaction_data
+
+    async def build_transaction(self, from_token: str, to_token: str, amount: int, slippage: float, swap_provider: str):
         url = "https://aggregator-api.xy.finance/v1/buildTx"
 
         params = {
-            "srcChainId": self.w3.eth.chain_id,
+            "srcChainId": await self.w3.eth.chain_id,
             "srcQuoteTokenAddress": Web3.to_checksum_address(from_token),
             "srcQuoteTokenAmount": amount,
-            "dstChainId": self.w3.eth.chain_id,
+            "dstChainId": await self.w3.eth.chain_id,
             "dstQuoteTokenAddress": Web3.to_checksum_address(to_token),
             "slippage": slippage,
             "receiver": self.address,
@@ -60,13 +68,16 @@ class XYSwap(Account):
                 "commissionRate": 10000
             })
 
-        response = requests.get(url=url, params=params, proxies=self.proxies)
+        async with aiohttp.ClientSession() as session:
+            response = await session.get(url=url, params=params)
 
-        return response.json()
+            transaction_data = await response.json()
+
+            return transaction_data
 
     @retry
     @check_gas
-    def swap(
+    async def swap(
             self,
             from_token: str,
             to_token: str,
@@ -78,7 +89,7 @@ class XYSwap(Account):
             min_percent: int,
             max_percent: int
     ):
-        amount_wei, amount, balance = self.get_amount(
+        amount_wei, amount, balance = await self.get_amount(
             from_token,
             min_amount,
             max_amount,
@@ -95,11 +106,11 @@ class XYSwap(Account):
         from_token = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" if from_token == "ETH" else ZKSYNC_TOKENS[from_token]
         to_token = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE" if to_token == "ETH" else ZKSYNC_TOKENS[to_token]
 
-        quote = self.get_quote(from_token, to_token, amount_wei, slippage)
+        quote = await self.get_quote(from_token, to_token, amount_wei, slippage)
 
         swap_provider = quote["routes"][0]["srcSwapDescription"]["provider"]
 
-        transaction_data = self.build_transaction(
+        transaction_data = await self.build_transaction(
             from_token,
             to_token,
             amount_wei,
@@ -108,19 +119,19 @@ class XYSwap(Account):
         )
 
         if from_token != "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE":
-            self.approve(amount_wei, from_token, XYSWAP_CONTRACT["router"])
+            await self.approve(amount_wei, from_token, XYSWAP_CONTRACT["router"])
 
-        self.tx.update(
+        tx_data = await self.get_tx_data()
+        tx_data.update(
             {
-                "to": transaction_data["tx"]["to"],
+                "to": Web3.to_checksum_address(transaction_data["tx"]["to"]),
                 "data": transaction_data["tx"]["data"],
                 "value": transaction_data["tx"]["value"],
-                "nonce": self.w3.eth.get_transaction_count(self.address)
             }
         )
 
-        signed_txn = self.sign(self.tx)
+        signed_txn = await self.sign(tx_data)
 
-        txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = await self.send_raw_transaction(signed_txn)
 
-        self.wait_until_tx_finished(txn_hash.hex())
+        await self.wait_until_tx_finished(txn_hash.hex())

@@ -13,8 +13,11 @@ with open("accounts.txt", "r") as file:
 with open("proxy.txt", "r") as file:
     PROXIES = [row.strip() for row in file]
 
-with open('data/abi/zksync/bridge.json') as file:
-    ZKSYNC_BRIDGE_ABI = json.load(file)
+with open('data/abi/zksync/deposit.json') as file:
+    ZKSYNC_DEPOSIT_ABI = json.load(file)
+
+with open('data/abi/zksync/withdraw.json') as file:
+    ZKSYNC_WITHDRAW_ABI = json.load(file)
 
 with open('data/abi/zksync/weth.json') as file:
     WETH_ABI = json.load(file)
@@ -45,9 +48,6 @@ with open("data/abi/pancake/quoter.json", "r") as file:
 
 with open("data/abi/woofi/router.json", "r") as file:
     WOOFI_ROUTER_ABI = json.load(file)
-
-with open("data/abi/velocore/router.json", "r") as file:
-    VELOCORE_ROUTER_ABI = json.load(file)
 
 with open("data/abi/zkswap/router.json", "r") as file:
     ZKSWAP_ROUTER_ABI = json.load(file)
@@ -88,7 +88,7 @@ with open("data/abi/l2telegraph/send_message.json", "r") as file:
 with open("data/abi/l2telegraph/bridge_nft.json", "r") as file:
     L2TELEGRAPH_NFT_ABI = json.load(file)
 
-with open("data/abi/minter/abi.json", "r") as file:
+with open("data/abi/nft2me/abi.json", "r") as file:
     MINTER_ABI = json.load(file)
 
 with open("data/abi/mailzero/abi.json", "r") as file:
@@ -109,12 +109,8 @@ with open("data/abi/era_ns/abi.json", "r") as file:
 with open("data/abi/omnisea/abi.json", "r") as file:
     OMNISEA_ABI = json.load(file)
 
-with open("data/abi/zksoul/abi.json", "r") as file:
-    ZKSOUL_ABI = json.load(file)
-
 with open("data/abi/gnosis/abi.json", "r") as file:
     SAFE_ABI = json.load(file)
-
 
 ZKSYNC_BRIDGE_CONTRACT = "0x32400084c286cf3e17e7b677ea9583e60a000324"
 
@@ -157,10 +153,6 @@ PANCAKE_CONTRACTS = {
 
 WOOFI_CONTRACTS = {
     "router": "0xfd505702b37Ae9b626952Eb2DD736d9045876417"
-}
-
-VELOCORE_CONTRACTS = {
-    "router": "0xF29Eb540eEba673f8Fb6131a7C7403C8e4C3f143"
 }
 
 ODOS_CONTRACT = {
@@ -225,8 +217,6 @@ L2TELEGRAPH_MESSAGE_CONTRACT = "0x0d4a6d5964f3b618d8e46bcfbf2792b0d769fbda"
 
 L2TELEGRAPH_NFT_CONTRACT = "0xD43A183C97dB9174962607A8b6552CE320eAc5aA"
 
-MINTER_CONTRACT = "0x31DCD96f29BD32F3a1856247846E9d2f95C2b639"
-
 MAILZERO_CONTRACT = "0xc94025c2eA9512857BD8E1e611aB9b773b769350"
 
 TAVAERA_ID_CONTRACT = "0xd29Aa7bdD3cbb32557973daD995A3219D307721f"
@@ -238,7 +228,5 @@ ZKS_CONTRACT = "0xcbe2093030f485adaaf5b61deb4d9ca8adeae509"
 ENS_CONTRACT = "0x935442af47f3dc1c11f006d551e13769f12eab13"
 
 OMNISEA_CONTRACT = "0x1Ecd053f681a51E37087719653f3f0FFe54750C0"
-
-ZKSOUL_CONTRACT = "0x346f859312527e5b2f34c22b645015e8764c0b14"
 
 SAFE_CONTRACT = "0xDAec33641865E4651fB43181C6DB6f7232Ee91c2"

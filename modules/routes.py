@@ -12,7 +12,7 @@ class Routes(Account):
 
         self.proxy = proxy
 
-    def start(self, use_modules: list, sleep_from: int, sleep_to: int, random_module: bool):
+    async def start(self, use_modules: list, sleep_from: int, sleep_to: int, random_module: bool):
         logger.info(f"[{self.account_id}][{self.address}] Start using routes")
 
         for _ in range(0, len(use_modules)):
@@ -25,6 +25,6 @@ class Routes(Account):
 
             module = random.choice(module) if type(module) is list else module
 
-            module(self.account_id, self.private_key, self.proxy)
+            await module(self.account_id, self.private_key, self.proxy)
 
-            sleep(sleep_from, sleep_to)
+            await sleep(sleep_from, sleep_to)

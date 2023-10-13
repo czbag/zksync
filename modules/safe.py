@@ -1,5 +1,5 @@
 import time
-from typing import Union
+from typing import Union, Dict
 
 from loguru import logger
 from web3 import Web3
@@ -14,16 +14,20 @@ class GnosisSafe(Account):
         super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.contract = self.get_contract(SAFE_CONTRACT, SAFE_ABI)
-        self.tx = {
-            "chainId": self.w3.eth.chain_id,
+
+    async def get_tx_data(self) -> Dict:
+        tx = {
+            "chainId": await self.w3.eth.chain_id,
             "from": self.address,
-            "gasPrice": self.w3.eth.gas_price,
-            "nonce": self.w3.eth.get_transaction_count(self.address)
+            "gasPrice": await self.w3.eth.gas_price,
+            "nonce": await self.w3.eth.get_transaction_count(self.address),
         }
+
+        return tx
 
     @retry
     @check_gas
-    def create_safe(self):
+    async def create_safe(self):
         logger.info(f"[{self.account_id}][{self.address}] Create gnosis safe")
 
         setup_data = self.contract.encodeABI(
@@ -40,14 +44,16 @@ class GnosisSafe(Account):
             ]
         )
 
-        transaction = self.contract.functions.createProxyWithNonce(
+        tx_data = await self.get_tx_data()
+
+        transaction = await self.contract.functions.createProxyWithNonce(
             Web3.to_checksum_address("0x1727c2c531cf966f902E5927b98490fDFb3b2b70"),
             setup_data,
             int(time.time()*1000)
-        ).build_transaction(self.tx)
+        ).build_transaction(tx_data)
 
-        signed_txn = self.sign(transaction)
+        signed_txn = await self.sign(transaction)
 
-        txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = await self.send_raw_transaction(signed_txn)
 
-        self.wait_until_tx_finished(txn_hash.hex())
+        await self.wait_until_tx_finished(txn_hash.hex())

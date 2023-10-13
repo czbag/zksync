@@ -18,7 +18,6 @@ class SwapTokens(Account):
             "mute": Mute,
             "spacefi": SpaceFi,
             "pancake": Pancake,
-            "velocore": Velocore,
             "woofi": WooFi,
             "odos": Odos,
             "zkswap": ZKSwap,
@@ -33,7 +32,7 @@ class SwapTokens(Account):
         swap_module = random.choice(use_dex)
         return self.swap_modules[swap_module]
 
-    def swap(
+    async def swap(
             self,
             use_dex: List,
             tokens: List,
@@ -51,11 +50,11 @@ class SwapTokens(Account):
             if token == "ETH":
                 continue
 
-            balance = self.get_balance(ZKSYNC_TOKENS[token])
+            balance = await self.get_balance(ZKSYNC_TOKENS[token])
 
             if balance["balance_wei"] > 0:
                 swap_module = self.get_swap_module(use_dex)(self.account_id, self.private_key, self.proxy)
-                swap_module.swap(
+                await swap_module.swap(
                     token,
                     "ETH",
                     balance["balance"],
@@ -68,4 +67,4 @@ class SwapTokens(Account):
                 )
 
             if _ != len(tokens):
-                sleep(sleep_from, sleep_to)
+                await sleep(sleep_from, sleep_to)

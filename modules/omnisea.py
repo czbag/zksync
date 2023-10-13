@@ -14,12 +14,15 @@ class Omnisea(Account):
         super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.contract = self.get_contract(OMNISEA_CONTRACT, OMNISEA_ABI)
-        self.tx = {
-            "chainId": self.w3.eth.chain_id,
+
+    async def get_tx_data(self):
+        tx = {
+            "chainId": await self.w3.eth.chain_id,
             "from": self.address,
-            "gasPrice": self.w3.eth.gas_price,
-            "nonce": self.w3.eth.get_transaction_count(self.address)
+            "gasPrice": await self.w3.eth.gas_price,
+            "nonce": await self.w3.eth.get_transaction_count(self.address),
         }
+        return tx
 
     @staticmethod
     def generate_collection_data():
@@ -29,12 +32,14 @@ class Omnisea(Account):
 
     @retry
     @check_gas
-    def create(self):
+    async def create(self):
         logger.info(f"[{self.account_id}][{self.address}] Create NFT collection on Omnisea")
 
         title, symbol = self.generate_collection_data()
 
-        transaction = self.contract.functions.create([
+        tx_data = await self.get_tx_data()
+
+        transaction = await self.contract.functions.create([
             title,
             symbol,
             "",
@@ -43,10 +48,10 @@ class Omnisea(Account):
             True,
             0,
             int(time.time()) + 1000000]
-        ).build_transaction(self.tx)
+        ).build_transaction(tx_data)
 
-        signed_txn = self.sign(transaction)
+        signed_txn = await self.sign(transaction)
 
-        txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = await self.send_raw_transaction(signed_txn)
 
-        self.wait_until_tx_finished(txn_hash.hex())
+        await self.wait_until_tx_finished(txn_hash.hex())

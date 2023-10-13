@@ -1,8 +1,8 @@
 import random
-from typing import Union
+from typing import Union, List
 
 from loguru import logger
-from config import MINTER_ABI, MINTER_CONTRACT
+from config import MINTER_ABI
 from utils.gas_checker import check_gas
 from utils.helpers import retry
 from .account import Account
@@ -12,23 +12,28 @@ class Minter(Account):
     def __init__(self, account_id: int, private_key: str, proxy: Union[None, str]) -> None:
         super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
-        self.contract = self.get_contract(MINTER_CONTRACT, MINTER_ABI)
-        self.tx = {
-            "chainId": self.w3.eth.chain_id,
+    async def get_tx_data(self):
+        tx = {
+            "chainId": await self.w3.eth.chain_id,
             "from": self.address,
-            "gasPrice": self.w3.eth.gas_price,
-            "nonce": self.w3.eth.get_transaction_count(self.address)
+            "gasPrice": await self.w3.eth.gas_price,
+            "nonce": await self.w3.eth.get_transaction_count(self.address),
         }
+        return tx
 
     @retry
     @check_gas
-    def mint(self):
-        logger.info(f"[{self.account_id}][{self.address}] Mint NFT")
+    async def mint_nft(self, contracts: List):
+        logger.info(f"[{self.account_id}][{self.address}] Mint NFT on NFTS2ME")
 
-        transaction = self.contract.functions.mint().build_transaction(self.tx)
+        contract = self.get_contract(random.choice(contracts), MINTER_ABI)
 
-        signed_txn = self.sign(transaction)
+        tx_data = await self.get_tx_data()
 
-        txn_hash = self.send_raw_transaction(signed_txn)
+        transaction = await contract.functions.mint(1).build_transaction(tx_data)
 
-        self.wait_until_tx_finished(txn_hash.hex())
+        signed_txn = await self.sign(transaction)
+
+        txn_hash = await self.send_raw_transaction(signed_txn)
+
+        await self.wait_until_tx_finished(txn_hash.hex())

@@ -1,5 +1,5 @@
 import random
-from typing import Union
+from typing import Union, Dict
 
 from loguru import logger
 from web3 import Web3
@@ -17,14 +17,19 @@ class Stargate(Account):
         self.proxy = proxy
 
         self.brdige_contract = self.get_contract(STARGATE_CONTRACT, STARGATE_ABI)
-        self.tx = {
-            "chainId": self.w3.eth.chain_id,
+
+    async def get_tx_data(self) -> Dict:
+        tx = {
+            "chainId": await self.w3.eth.chain_id,
             "from": self.address,
-            "gasPrice": self.w3.eth.gas_price
+            "gasPrice": await self.w3.eth.gas_price,
+            "nonce": await self.w3.eth.get_transaction_count(self.address),
         }
 
-    def get_lz_estimate_fee(self, amount: int):
-        get_fee = self.brdige_contract.functions.estimateSendFee(
+        return tx
+
+    async def get_lz_estimate_fee(self, amount: int):
+        get_fee = await self.brdige_contract.functions.estimateSendFee(
             Web3.to_checksum_address(ZKSYNC_TOKENS["MAV"]),
             102,
             self.address,
@@ -40,7 +45,7 @@ class Stargate(Account):
 
         return get_fee[0]
 
-    def swap(
+    async def swap(
             self,
             min_amount: float,
             max_amount: float,
@@ -51,7 +56,7 @@ class Stargate(Account):
             max_percent: int
     ):
         syncswap = SyncSwap(self.account_id, self.private_key, self.proxy)
-        syncswap.swap(
+        await syncswap.swap(
             "ETH",
             "MAV",
             min_amount,
@@ -63,14 +68,14 @@ class Stargate(Account):
             max_percent
         )
 
-        balance = self.get_balance(ZKSYNC_TOKENS["MAV"])
+        balance = await self.get_balance(ZKSYNC_TOKENS["MAV"])
 
         if balance["balance_wei"] > 0:
             return True
         return False
 
     @check_gas
-    def bridge(
+    async def bridge(
             self,
             min_amount: float,
             max_amount: float,
@@ -82,19 +87,20 @@ class Stargate(Account):
             min_percent: int,
             max_percent: int
     ):
-        balance = self.get_balance(ZKSYNC_TOKENS["MAV"])
+        balance = await self.get_balance(ZKSYNC_TOKENS["MAV"])
 
         logger.info(f"[{self.account_id}][{self.address}] Make stargate bridge {balance['balance']} MAV to BNB")
 
         if balance["balance_wei"] > 0:
-            self.approve(balance["balance_wei"], ZKSYNC_TOKENS["MAV"], STARGATE_CONTRACT)
+            await self.approve(balance["balance_wei"], ZKSYNC_TOKENS["MAV"], STARGATE_CONTRACT)
 
-            fee = self.get_lz_estimate_fee(balance["balance_wei"])
+            fee = await self.get_lz_estimate_fee(balance["balance_wei"])
 
-            self.tx.update({"value": fee})
-            self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
+            tx_data = await self.get_tx_data()
+            tx_data.update({"value": fee})
+            tx_data.update({"nonce": await self.w3.eth.get_transaction_count(self.address)})
 
-            transaction = self.brdige_contract.functions.sendOFT(
+            transaction = await self.brdige_contract.functions.sendOFT(
                 Web3.to_checksum_address(ZKSYNC_TOKENS["MAV"]),
                 102,
                 self.address,
@@ -108,22 +114,22 @@ class Stargate(Account):
                     "caller": "0x0000000000000000000000000000000000000000",
                     "partnerId": "0x0000",
                 }
-            ).build_transaction(self.tx)
+            ).build_transaction(tx_data)
 
-            signed_txn = self.sign(transaction)
+            signed_txn = await self.sign(transaction)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+            txn_hash = await self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
+            await self.wait_until_tx_finished(txn_hash.hex())
         else:
             logger.error(f"[{self.account_id}][{self.address}] Insufficient funds!")
 
-            result_swap = self.swap(min_amount, max_amount, decimal, slippage, all_amount, min_percent, max_percent)
+            result_swap = await self.swap(min_amount, max_amount, decimal, slippage, all_amount, min_percent, max_percent)
 
             if result_swap:
-                sleep(sleep_from, sleep_to)
+                await sleep(sleep_from, sleep_to)
 
-                self.bridge(
+                await self.bridge(
                     min_amount,
                     max_amount,
                     decimal,

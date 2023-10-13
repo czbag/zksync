@@ -1,15 +1,12 @@
 import random
 from typing import Union
 
-from loguru import logger
-
 from config import (
     SYNCSWAP_CONTRACTS,
     MUTE_CONTRACTS,
     SPACEFI_CONTRACTS,
     PANCAKE_CONTRACTS,
     WOOFI_CONTRACTS,
-    VELOCORE_CONTRACTS,
     ZKSYNC_TOKENS
 )
 from utils.gas_checker import check_gas
@@ -24,14 +21,13 @@ class MultiApprove(Account):
 
     @retry
     @check_gas
-    def start(self, amount: int, sleep_from: int, sleep_to: int):
+    async def start(self, amount: int, sleep_from: int, sleep_to: int):
         contract_list = [
             SYNCSWAP_CONTRACTS["router"],
             MUTE_CONTRACTS["router"],
             SPACEFI_CONTRACTS["router"],
             PANCAKE_CONTRACTS["router"],
             WOOFI_CONTRACTS["router"],
-            VELOCORE_CONTRACTS["router"]
         ]
         token_list = list(ZKSYNC_TOKENS)
 
@@ -43,6 +39,6 @@ class MultiApprove(Account):
                 if token in ["ETH", "WETH"]:
                     continue
 
-                self.approve(amount, ZKSYNC_TOKENS[token], contract_address)
+                await self.approve(amount, ZKSYNC_TOKENS[token], contract_address)
 
-                sleep(sleep_from, sleep_to)
+                await sleep(sleep_from, sleep_to)

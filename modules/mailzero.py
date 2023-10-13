@@ -13,22 +13,27 @@ class MailZero(Account):
         super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.contract = self.get_contract(MAILZERO_CONTRACT, MAILZERO_ABI)
-        self.tx = {
-            "chainId": self.w3.eth.chain_id,
+
+    async def get_tx_data(self):
+        tx = {
+            "chainId": await self.w3.eth.chain_id,
             "from": self.address,
-            "gasPrice": self.w3.eth.gas_price,
-            "nonce": self.w3.eth.get_transaction_count(self.address)
+            "gasPrice": await self.w3.eth.gas_price,
+            "nonce": await self.w3.eth.get_transaction_count(self.address),
         }
+        return tx
 
     @retry
     @check_gas
-    def mint(self):
+    async def mint(self):
         logger.info(f"[{self.account_id}][{self.address}] Mint MailZero NFT")
 
-        transaction = self.contract.functions.mint(196264).build_transaction(self.tx)
+        tx_data = await self.get_tx_data()
 
-        signed_txn = self.sign(transaction)
+        transaction = await self.contract.functions.mint(196264).build_transaction(tx_data)
 
-        txn_hash = self.send_raw_transaction(signed_txn)
+        signed_txn = await self.sign(transaction)
 
-        self.wait_until_tx_finished(txn_hash.hex())
+        txn_hash = await self.send_raw_transaction(signed_txn)
+
+        await self.wait_until_tx_finished(txn_hash.hex())

@@ -18,7 +18,6 @@ class Multiswap(Account):
             "mute": Mute,
             "spacefi": SpaceFi,
             "pancake": Pancake,
-            "velocore": Velocore,
             "woofi": WooFi,
             "odos": Odos,
             "zkswap": ZKSwap,
@@ -33,7 +32,7 @@ class Multiswap(Account):
         swap_module = random.choice(use_dex)
         return self.swap_modules[swap_module]
 
-    def swap(
+    async def swap(
             self,
             use_dex: list,
             sleep_from: int,
@@ -49,7 +48,8 @@ class Multiswap(Account):
 
         if random_swap_token:
             path = [random.choice(["ETH", "USDC"]) for _ in range(0, quantity_swap)]
-            if path[0] == "USDC" and self.get_balance(ZKSYNC_TOKENS["USDC"])["balance"] <= 1:
+            usdc_balance = await self.get_balance(ZKSYNC_TOKENS["USDC"])
+            if path[0] == "USDC" and usdc_balance["balance"] <= 1:
                 path[0] = "ETH"
         else:
             path = ["ETH" if _ % 2 == 0 else "USDC" for _ in range(0, quantity_swap)]
@@ -61,7 +61,7 @@ class Multiswap(Account):
                 decimal = 6
                 to_token = "USDC"
 
-                balance = self.w3.eth.get_balance(self.address)
+                balance = await self.w3.eth.get_balance(self.address)
 
                 min_amount = float(Web3.from_wei(int(balance / 100 * min_percent), "ether"))
                 max_amount = float(Web3.from_wei(int(balance / 100 * max_percent), "ether"))
@@ -69,13 +69,13 @@ class Multiswap(Account):
                 decimal = 18
                 to_token = "ETH"
 
-                balance = self.get_balance(ZKSYNC_TOKENS["USDC"])
+                balance = await self.get_balance(ZKSYNC_TOKENS["USDC"])
 
                 min_amount = balance["balance"] if balance["balance"] <= 1 else balance["balance"] / 100 * min_percent
                 max_amount = balance["balance"] if balance["balance"] <= 1 else balance["balance"] / 100 * max_percent
 
             swap_module = self.get_swap_module(use_dex)(self.account_id, self.private_key, self.proxy)
-            swap_module.swap(
+            await swap_module.swap(
                 token,
                 to_token,
                 min_amount,
@@ -88,4 +88,4 @@ class Multiswap(Account):
             )
 
             if _ + 1 != len(path):
-                sleep(sleep_from, sleep_to)
+                await sleep(sleep_from, sleep_to)

@@ -26,43 +26,56 @@ class Orbiter(Account):
             "zkevm": 9017,
         }
 
-    def get_tx_data(self, value: float, destination_chain: str):
+    async def get_tx_data(self, value: float, destination_chain: str):
         amount = int(Web3.to_wei(value, "ether") + self.bridge_codes[destination_chain])
 
         tx = {
-            "chainId": self.w3.eth.chain_id,
-            "nonce": self.w3.eth.get_transaction_count(self.address),
+            "chainId": await self.w3.eth.chain_id,
+            "nonce": await self.w3.eth.get_transaction_count(self.address),
             "to": Web3.to_checksum_address(ORBITER_CONTRACT),
             "value": amount,
-            "gasPrice": self.w3.eth.gas_price,
-            "from": self.address
+            "from": self.address,
+            "gasPrice": await self.w3.eth.gas_price,
         }
         return tx
 
     @retry
     @check_gas
-    def bridge(self, destination_chain: str, min_bridge: float, max_bridge: float, decimal: int):
-        amount = round(random.uniform(min_bridge, max_bridge), decimal)
+    async def bridge(
+            self,
+            destination_chain: str,
+            min_amount: float,
+            max_amount: float,
+            decimal: int,
+            all_amount: bool,
+            min_percent: int,
+            max_percent: int
+    ):
+        amount_wei, amount, balance = await self.get_amount(
+            "ETH",
+            min_amount,
+            max_amount,
+            decimal,
+            all_amount,
+            min_percent,
+            max_percent
+        )
 
         if amount < 0.005 or amount > 5:
             logger.error(
                 f"[{self.account_id}][{self.address}] Limit range amount for bridge 0.005 – 5 ETH | {amount} ETH"
             )
-            sys.exit()
-
-        logger.info(f"[{self.account_id}][{self.address}] Bridge {self.chain} –> {destination_chain} | {amount} ETH")
-
-        tx_data = self.get_tx_data(amount, destination_chain)
-        balance = self.w3.eth.get_balance(self.address)
-
-        if tx_data["value"] >= balance:
-            logger.error(f"[{self.account_id}][{self.address}] Insufficient funds!")
         else:
-            gas_limit = self.w3.eth.estimate_gas(tx_data)
-            tx_data.update({'gas': gas_limit})
+            logger.info(f"[{self.account_id}][{self.address}] Bridge {self.chain} –> {destination_chain} | {amount} ETH")
 
-            signed_txn = self.sign(tx_data)
+            tx_data = await self.get_tx_data(amount, destination_chain)
+            balance = await self.w3.eth.get_balance(self.address)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+            if tx_data["value"] >= balance:
+                logger.error(f"[{self.account_id}][{self.address}] Insufficient funds!")
+            else:
+                signed_txn = await self.sign(tx_data)
 
-            self.wait_until_tx_finished(txn_hash.hex())
+                txn_hash = await self.send_raw_transaction(signed_txn)
+
+                await self.wait_until_tx_finished(txn_hash.hex())

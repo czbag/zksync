@@ -1,10 +1,12 @@
-import requests
+import aiohttp
 
 
-def get_bungee_data():
-    url = "https://refuel.socket.tech/chains"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()["result"]
-        return data
-    return False
+async def get_bungee_data():
+    async with aiohttp.ClientSession() as session:
+        url = "https://refuel.socket.tech/chains"
+        response = await session.get(url)
+        response_data = await response.json()
+        if response.status == 200:
+            data = response_data["result"]
+            return data
+        return False

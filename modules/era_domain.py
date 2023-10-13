@@ -14,40 +14,44 @@ class EraDomain(Account):
         super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.contract = self.get_contract(ENS_CONTRACT, ENS_ABI)
-        self.tx = {
-            "chainId": self.w3.eth.chain_id,
+        
+    async def get_tx_data(self):
+        tx = {
+            "chainId": await self.w3.eth.chain_id,
             "from": self.address,
-            "gasPrice": self.w3.eth.gas_price,
-            "nonce": self.w3.eth.get_transaction_count(self.address)
+            "gasPrice": await self.w3.eth.gas_price,
+            "nonce": await self.w3.eth.get_transaction_count(self.address),
         }
+        return tx
 
-    def get_random_name(self):
+    async def get_random_name(self):
         domain_name = "".join(random.sample([chr(i) for i in range(97, 123)], random.randint(7, 15)))
 
         logger.info(f"[{self.account_id}][{self.address}] Mint {domain_name}.era domain")
 
-        check_name = self.contract.functions._checkName(domain_name).call()
+        check_name = await self.contract.functions._checkName(domain_name).call()
 
         if check_name:
             return domain_name
 
         logger.info(f"[{self.account_id}][{self.address}] {domain_name}.era is unavailable, try another domain")
 
-        self.get_random_name()
+        await self.get_random_name()
 
     @retry
     @check_gas
-    def mint(self):
+    async def mint(self):
         logger.info(f"[{self.account_id}][{self.address}] Mint Era Domain")
 
-        domain_name = self.get_random_name()
+        domain_name = await self.get_random_name()
+        
+        tx_data = await self.get_tx_data()
+        tx_data.update({"value": Web3.to_wei(0.003, "ether")})
 
-        self.tx.update({"value": Web3.to_wei(0.003, "ether")})
+        transaction = await self.contract.functions.Register(domain_name).build_transaction(tx_data)
 
-        transaction = self.contract.functions.Register(domain_name).build_transaction(self.tx)
+        signed_txn = await self.sign(transaction)
 
-        signed_txn = self.sign(transaction)
+        txn_hash = await self.send_raw_transaction(signed_txn)
 
-        txn_hash = self.send_raw_transaction(signed_txn)
-
-        self.wait_until_tx_finished(txn_hash.hex())
+        await self.wait_until_tx_finished(txn_hash.hex())

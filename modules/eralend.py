@@ -16,13 +16,13 @@ class Eralend(Account):
 
         self.contract = self.get_contract(ERALEND_CONTRACTS["landing"], ERALEND_ABI)
 
-    def get_deposit_amount(self):
-        amount = self.contract.functions.balanceOfUnderlying(self.address).call()
+    async def get_deposit_amount(self):
+        amount = await self.contract.functions.balanceOfUnderlying(self.address).call()
         return amount
 
     @retry
     @check_gas
-    def deposit(
+    async def deposit(
             self,
             min_amount: float,
             max_amount: float,
@@ -34,7 +34,7 @@ class Eralend(Account):
             min_percent: int,
             max_percent: int
     ):
-        amount_wei, amount, balance = self.get_amount(
+        amount_wei, amount, balance = await self.get_amount(
             "ETH",
             min_amount,
             max_amount,
@@ -45,32 +45,32 @@ class Eralend(Account):
         )
 
         tx = {
-            "chainId": self.w3.eth.chain_id,
+            "chainId": await self.w3.eth.chain_id,
             "from": self.address,
             "to": Web3.to_checksum_address(ERALEND_CONTRACTS["landing"]),
-            "gasPrice": self.w3.eth.gas_price,
-            "nonce": self.w3.eth.get_transaction_count(self.address),
+            "gasPrice": await self.w3.eth.gas_price,
+            "nonce": await self.w3.eth.get_transaction_count(self.address),
             "value": amount_wei,
             "data": "0x1249c58b"
         }
 
         logger.info(f"[{self.account_id}][{self.address}] Make deposit on Eralend | {amount} ETH")
 
-        signed_txn = self.sign(tx)
+        signed_txn = await self.sign(tx)
 
-        txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = await self.send_raw_transaction(signed_txn)
 
-        self.wait_until_tx_finished(txn_hash.hex())
+        await self.wait_until_tx_finished(txn_hash.hex())
 
         if make_withdraw:
-            sleep(sleep_from, sleep_to)
+            await sleep(sleep_from, sleep_to)
 
-            self.withdraw()
+            await self.withdraw()
 
     @retry
     @check_gas
-    def withdraw(self):
-        amount = self.get_deposit_amount()
+    async def withdraw(self):
+        amount = await self.get_deposit_amount()
 
         if amount > 0:
             logger.info(
@@ -79,66 +79,66 @@ class Eralend(Account):
             )
 
             tx = {
-                "chainId": self.w3.eth.chain_id,
+                "chainId": await self.w3.eth.chain_id,
                 "from": self.address,
-                "gasPrice": self.w3.eth.gas_price,
-                "nonce": self.w3.eth.get_transaction_count(self.address)
+                "gasPrice": await self.w3.eth.gas_price,
+                "nonce": await self.w3.eth.get_transaction_count(self.address)
             }
 
-            transaction = self.contract.functions.redeemUnderlying(amount).build_transaction(tx)
+            transaction = await self.contract.functions.redeemUnderlying(amount).build_transaction(tx)
 
-            signed_txn = self.sign(transaction)
+            signed_txn = await self.sign(transaction)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+            txn_hash = await self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
+            await self.wait_until_tx_finished(txn_hash.hex())
         else:
             logger.error(f"[{self.account_id}][{self.address}] Deposit not found")
 
     @retry
     @check_gas
-    def enable_collateral(self):
+    async def enable_collateral(self):
         logger.info(f"[{self.account_id}][{self.address}] Enable collateral on Eralend")
 
         contract = self.get_contract(ERALEND_CONTRACTS["collateral"], ERALEND_ABI)
 
         tx = {
-            "chainId": self.w3.eth.chain_id,
+            "chainId": await self.w3.eth.chain_id,
             "from": self.address,
-            "gasPrice": self.w3.eth.gas_price,
-            "nonce": self.w3.eth.get_transaction_count(self.address)
+            "gasPrice": await self.w3.eth.gas_price,
+            "nonce": await self.w3.eth.get_transaction_count(self.address)
         }
 
-        transaction = contract.functions.enterMarkets(
+        transaction = await contract.functions.enterMarkets(
             [Web3.to_checksum_address(ERALEND_CONTRACTS["landing"])]
         ).build_transaction(tx)
 
-        signed_txn = self.sign(transaction)
+        signed_txn = await self.sign(transaction)
 
-        txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = await self.send_raw_transaction(signed_txn)
 
-        self.wait_until_tx_finished(txn_hash.hex())
+        await self.wait_until_tx_finished(txn_hash.hex())
 
     @retry
     @check_gas
-    def disable_collateral(self):
+    async def disable_collateral(self):
         logger.info(f"[{self.account_id}][{self.address}] Disable collateral on Eralend")
 
         contract = self.get_contract(ERALEND_CONTRACTS["collateral"], ERALEND_ABI)
 
         tx = {
-            "chainId": self.w3.eth.chain_id,
+            "chainId": await self.w3.eth.chain_id,
             "from": self.address,
-            "gasPrice": self.w3.eth.gas_price,
-            "nonce": self.w3.eth.get_transaction_count(self.address)
+            "gasPrice": await self.w3.eth.gas_price,
+            "nonce": await self.w3.eth.get_transaction_count(self.address)
         }
 
-        transaction = contract.functions.exitMarket(
+        transaction = await contract.functions.exitMarket(
             Web3.to_checksum_address(ERALEND_CONTRACTS["landing"])
         ).build_transaction(tx)
 
-        signed_txn = self.sign(transaction)
+        signed_txn = await self.sign(transaction)
 
-        txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = await self.send_raw_transaction(signed_txn)
 
-        self.wait_until_tx_finished(txn_hash.hex())
+        await self.wait_until_tx_finished(txn_hash.hex())

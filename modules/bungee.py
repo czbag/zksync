@@ -10,8 +10,8 @@ from .account import Account
 from utils.bungee_data import get_bungee_data
 
 
-def get_bungee_limits() -> Union[dict, bool]:
-    bungee_data = get_bungee_data()
+async def get_bungee_limits() -> Union[dict, bool]:
+    bungee_data = await get_bungee_data()
 
     try:
         limits = [chain_data for chain_data in bungee_data if chain_data["name"] == "zkSync"][0]["limits"]
@@ -38,19 +38,20 @@ class Bungee(Account):
             "ZK_EVM": 1101,
         }
 
-    def get_tx_data(self, amount: int):
+    async def get_tx_data(self, amount: int):
         tx = {
+            "chainId": await self.w3.eth.chain_id,
             "from": self.address,
-            "gasPrice": self.w3.eth.gas_price,
-            "nonce": self.w3.eth.get_transaction_count(self.address),
+            "gasPrice": await self.w3.eth.gas_price,
+            "nonce": await self.w3.eth.get_transaction_count(self.address),
             "value": amount
         }
         return tx
 
     @retry
     @check_gas
-    def refuel(self, chain_list: list, random_amount: bool):
-        limits = get_bungee_limits()
+    async def refuel(self, chain_list: list, random_amount: bool):
+        limits = await get_bungee_limits()
 
         to_chain = random.choice(chain_list)
 
@@ -69,15 +70,17 @@ class Bungee(Account):
                 f"{to_chain.title()} | {Web3.from_wei(amount, 'ether')} ETH"
             )
 
-            transaction = self.contract.functions.depositNativeToken(
+            tx_data = await self.get_tx_data(amount)
+
+            transaction = await self.contract.functions.depositNativeToken(
                 self.chain_ids[to_chain],
                 self.address
-            ).build_transaction(self.get_tx_data(amount))
+            ).build_transaction(tx_data)
 
-            signed_txn = self.sign(transaction)
+            signed_txn = await self.sign(transaction)
 
-            txn_hash = self.send_raw_transaction(signed_txn)
+            txn_hash = await self.send_raw_transaction(signed_txn)
 
-            self.wait_until_tx_finished(txn_hash.hex())
+            await self.wait_until_tx_finished(txn_hash.hex())
         else:
             logger.error(f"[{self.account_id}][{self.address}] Bungee refuel destination chain inactive!")

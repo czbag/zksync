@@ -1,5 +1,5 @@
 import random
-from typing import Union
+from typing import Union, Dict
 
 from loguru import logger
 from web3 import Web3
@@ -15,14 +15,18 @@ class WooFi(Account):
 
         self.swap_contract = self.get_contract(WOOFI_CONTRACTS["router"], WOOFI_ROUTER_ABI)
 
-        self.tx = {
+    async def get_tx_data(self) -> Dict:
+        tx = {
+            "chainId": await self.w3.eth.chain_id,
             "from": self.address,
-            "gasPrice": self.w3.eth.gas_price,
-            "nonce": self.w3.eth.get_transaction_count(self.address)
+            "gasPrice": await self.w3.eth.gas_price,
+            "nonce": await self.w3.eth.get_transaction_count(self.address),
         }
 
-    def get_min_amount_out(self, from_token: str, to_token: str, amount: int, slippage: float):
-        min_amount_out = self.swap_contract.functions.querySwap(
+        return tx
+
+    async def get_min_amount_out(self, from_token: str, to_token: str, amount: int, slippage: float):
+        min_amount_out = await self.swap_contract.functions.querySwap(
             Web3.to_checksum_address(from_token),
             Web3.to_checksum_address(to_token),
             amount
@@ -31,7 +35,7 @@ class WooFi(Account):
 
     @retry
     @check_gas
-    def swap(
+    async def swap(
             self,
             from_token: str,
             to_token: str,
@@ -43,7 +47,7 @@ class WooFi(Account):
             min_percent: int,
             max_percent: int
     ):
-        amount_wei, amount, balance = self.get_amount(
+        amount_wei, amount, balance = await self.get_amount(
             from_token,
             min_amount,
             max_amount,
@@ -57,30 +61,34 @@ class WooFi(Account):
             f"[{self.account_id}][{self.address}] Swap on WooFi – {from_token} -> {to_token} | {amount} {from_token}"
         )
 
+        tx_data = await self.get_tx_data()
+
         if from_token == "ETH":
             from_token_address = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
             to_token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[to_token])
-            self.tx.update({"value": amount_wei})
+            
+            tx_data.update({"value": amount_wei})
         else:
             from_token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[from_token])
             to_token_address = "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE"
 
-            self.approve(amount_wei, from_token_address, WOOFI_CONTRACTS["router"])
-            self.tx.update({"nonce": self.w3.eth.get_transaction_count(self.address)})
+            await self.approve(amount_wei, from_token_address, WOOFI_CONTRACTS["router"])
+            
+            tx_data.update({"nonce": await self.w3.eth.get_transaction_count(self.address)})
 
-        min_amount_out = self.get_min_amount_out(from_token_address, to_token_address, amount_wei, slippage)
+        min_amount_out = await self.get_min_amount_out(from_token_address, to_token_address, amount_wei, slippage)
 
-        contract_txn = self.swap_contract.functions.swap(
+        contract_txn = await self.swap_contract.functions.swap(
             from_token_address,
             to_token_address,
             amount_wei,
             min_amount_out,
             self.address,
             self.address
-        ).build_transaction(self.tx)
+        ).build_transaction(tx_data)
 
-        signed_txn = self.sign(contract_txn)
+        signed_txn = await self.sign(contract_txn)
 
-        txn_hash = self.send_raw_transaction(signed_txn)
+        txn_hash = await self.send_raw_transaction(signed_txn)
 
-        self.wait_until_tx_finished(txn_hash.hex())
+        await self.wait_until_tx_finished(txn_hash.hex())

@@ -6,7 +6,6 @@ from .mute import Mute
 from .spacefi import SpaceFi
 from .pancake import Pancake
 from .woofi import WooFi
-from .velocore import Velocore
 from .odos import Odos
 from .zkswap import ZKSwap
 from .xyswap import XYSwap
@@ -31,7 +30,6 @@ from .tx_checker import check_tx
 from .multi_approve import MultiApprove
 from .zks_domain import ZKSDomain
 from .era_domain import EraDomain
-from .zk_soul import ZkSoulId
 from .omnisea import Omnisea
 from .swap_tokens import SwapTokens
 from .safe import GnosisSafe
