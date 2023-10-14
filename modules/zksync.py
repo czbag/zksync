@@ -1,5 +1,3 @@
-import json
-import os
 import random
 from typing import Union, Dict
 
@@ -54,7 +52,7 @@ class ZkSync(Account):
         gas_limit = random.randint(700000, 1000000)
 
         contract = self.get_contract(ZKSYNC_BRIDGE_CONTRACT, ZKSYNC_DEPOSIT_ABI)
-        base_cost = await contract.functions.l2TransactionBaseCost(self.w3.eth.gas_price, gas_limit, 800).call()
+        base_cost = await contract.functions.l2TransactionBaseCost(await self.w3.eth.gas_price, gas_limit, 800).call()
 
         tx_data = await self.get_tx_data(amount_wei + base_cost)
 
