@@ -17,10 +17,10 @@ class Inch(Account):
 
         self.headers = {"Authorization": f"Bearer {INCH_API_KEY}", "accept": "application/json"}
 
-        self.proxies = {}
+        self.proxy = ""
 
         if proxy:
-            self.proxies.update({"http": f"http://{proxy}", "https": f"http://{proxy}"})
+            self.proxy = f"http://{proxy}"
 
     async def get_tx_data(self) -> Dict:
         tx = {
@@ -50,7 +50,7 @@ class Inch(Account):
             })
 
         async with aiohttp.ClientSession() as session:
-            response = await session.get(url, params=params, headers=self.headers)
+            response = await session.get(url, params=params, headers=self.headers, proxy=self.proxy)
 
             transaction_data = await response.json()
 

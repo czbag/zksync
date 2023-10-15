@@ -25,7 +25,7 @@ class Account:
         request_kwargs = {}
         
         if proxy:
-            request_kwargs = {"proxies": {"https": f"http://{proxy}"}}
+            request_kwargs = {"proxy": f"http://{proxy}"}
 
         self.w3 = Web3(
             Web3.AsyncHTTPProvider(

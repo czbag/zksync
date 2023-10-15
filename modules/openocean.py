@@ -14,10 +14,10 @@ class OpenOcean(Account):
     def __init__(self, account_id: int, private_key: str, proxy: Union[None, str]) -> None:
         super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
-        self.proxies = {}
+        self.proxy = ""
 
         if proxy:
-            self.proxies.update({"http": f"http://{proxy}", "https": f"http://{proxy}"})
+            self.proxy = f"http://{proxy}"
 
     async def get_tx_data(self) -> Dict:
         tx = {
@@ -48,7 +48,7 @@ class OpenOcean(Account):
             })
 
         async with aiohttp.ClientSession() as session:
-            response = await session.get(url=url, params=params)
+            response = await session.get(url=url, params=params, proxy=self.proxy)
 
             transaction_data = await response.json()
 
