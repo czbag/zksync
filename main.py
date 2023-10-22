@@ -6,9 +6,7 @@ from loguru import logger
 from questionary import Choice
 
 from config import ACCOUNTS, PROXIES
-from utils.get_proxy import check_proxy
 from utils.helpers import get_run_accounts, update_run_accounts
-from utils.sleeping import sleep
 from settings import USE_PROXY, RANDOM_WALLET, SLEEP_FROM, SLEEP_TO, QUANTITY_RUN_ACCOUNTS
 from modules_settings import *
 
@@ -143,6 +141,8 @@ async def main(module):
 
 if __name__ == '__main__':
     print("❤️ Subscribe to me – https://t.me/sybilwave\n")
+
+    update_run_accounts(0, "new")
 
     module = get_module()
     if module == "tx_checker":

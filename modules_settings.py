@@ -173,8 +173,8 @@ async def swap_mute(account_id, key, proxy):
 
     all_amount = True
 
-    min_percent = 100
-    max_percent = 100
+    min_percent = 10
+    max_percent = 10
 
     mute = Mute(account_id, key, proxy)
     await mute.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount, min_percent,
@@ -299,18 +299,18 @@ async def swap_odos(account_id, key, proxy):
     all_amount - swap from min_percent to max_percent
     """
 
-    from_token = "WETH"
-    to_token = "ETH"
+    from_token = "ETH"
+    to_token = "WETH"
 
     min_amount = 0.0001
     max_amount = 0.0002
     decimal = 6
     slippage = 1
 
-    all_amount = False
+    all_amount = True
 
-    min_percent = 100
-    max_percent = 100
+    min_percent = 1
+    max_percent = 1
 
     odos = Odos(account_id, key, proxy)
     await odos.swap(
@@ -361,8 +361,8 @@ async def swap_xyswap(account_id, key, proxy):
     all_amount - swap from min_percent to max_percent
     """
 
-    from_token = "WETH"
-    to_token = "ETH"
+    from_token = "ETH"
+    to_token = "WETH"
 
     min_amount = 0.0001
     max_amount = 0.0002
@@ -371,8 +371,8 @@ async def swap_xyswap(account_id, key, proxy):
 
     all_amount = True
 
-    min_percent = 100
-    max_percent = 100
+    min_percent = 1
+    max_percent = 1
 
     xyswap = XYSwap(account_id, key, proxy)
     await xyswap.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount, min_percent,
@@ -391,8 +391,8 @@ async def swap_openocean(account_id, key, proxy):
     all_amount - swap from min_percent to max_percent
     """
 
-    from_token = "WETH"
-    to_token = "ETH"
+    from_token = "ETH"
+    to_token = "WETH"
 
     min_amount = 0.0001
     max_amount = 0.0002
@@ -401,8 +401,8 @@ async def swap_openocean(account_id, key, proxy):
 
     all_amount = True
 
-    min_percent = 100
-    max_percent = 100
+    min_percent = 1
+    max_percent = 1
 
     openocean = OpenOcean(account_id, key, proxy)
     await openocean.swap(
@@ -422,7 +422,7 @@ async def swap_inch(account_id, key, proxy):
     all_amount - swap from min_percent to max_percent
     """
 
-    from_token = "WETH"
+    from_token = "USDC"
     to_token = "ETH"
 
     min_amount = 0.0001
@@ -432,8 +432,8 @@ async def swap_inch(account_id, key, proxy):
 
     all_amount = True
 
-    min_percent = 100
-    max_percent = 100
+    min_percent = 1
+    max_percent = 1
 
     inch_dex = Inch(account_id, key, proxy)
     await inch_dex.swap(from_token, to_token, min_amount, max_amount, decimal, slippage, all_amount, min_percent,
@@ -685,14 +685,13 @@ async def swap_tokens(account_id, key, proxy):
     SwapTokens module: Automatically swap tokens to ETH
     ______________________________________________________
     use_dex - Choose any dex:
-    syncswap, mute, spacefi, pancake, woofi, maverick, velocore, odos, zkswap, xyswap, openocean, inch, vesync
+    syncswap, mute, spacefi, pancake, woofi, maverick, odos, zkswap, xyswap, openocean, inch, vesync
     """
 
     use_dex = [
         "maverick", "mute", "pancake", "syncswap",
         "woofi", "spacefi", "odos", "zkswap",
-        "velocore", "xyswap", "openocean", "inch",
-        "vesync"
+        "xyswap", "openocean", "inch", "vesync"
     ]
 
     use_tokens = ["USDC"]
@@ -714,7 +713,7 @@ async def swap_multiswap(account_id, key, proxy):
     Multi-Swap module: Automatically performs the specified number of swaps in one of the dexes.
     ______________________________________________________
     use_dex - Choose any dex:
-    syncswap, mute, spacefi, pancake, woofi, maverick, velocore, odos, zkswap, xyswap, openocean, inch, vesync
+    syncswap, mute, spacefi, pancake, woofi, maverick, odos, zkswap, xyswap, openocean, inch, vesync
 
     quantity_swap - Quantity swaps
     ______________________________________________________
@@ -725,8 +724,7 @@ async def swap_multiswap(account_id, key, proxy):
     use_dex = [
         "maverick", "mute", "pancake", "syncswap",
         "woofi", "spacefi", "odos", "zkswap",
-        "velocore", "xyswap", "openocean", "inch",
-        "vesync"
+        "xyswap", "openocean", "inch", "vesync"
     ]
 
     min_swap = 1
@@ -779,7 +777,6 @@ async def custom_routes(account_id, key, proxy):
         – swap_spacefi
         – swap_pancake
         – swap_woofi
-        – swap_velocore
         – swap_odos
         – swap_zkswap
         – swap_xyswap
@@ -815,11 +812,13 @@ async def custom_routes(account_id, key, proxy):
     Disclaimer - You can add modules to [] to select random ones,
     example [module_1, module_2, [module_3, module_4], module 5]
     The script will start with module 1, 2, 5 and select a random one from module 3 and 4
+
+    You can also specify None in [], and if None is selected by random, this module will be skipped
     """
 
     use_modules = [
         swap_multiswap,
-        [mint_tavaera, create_omnisea],
+        [mint_tavaera, create_omnisea, None],
         [deposit_eralend, deposit_basilisk, deposit_reactorfusion],
         [mint_era_domain, mint_zks_domain]
     ]

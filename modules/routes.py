@@ -25,6 +25,10 @@ class Routes(Account):
 
             module = random.choice(module) if type(module) is list else module
 
+            if module is None:
+                logger.info(f"[{self.account_id}][{self.address}] Skip module")
+                continue
+
             await module(self.account_id, self.private_key, self.proxy)
 
             await sleep(sleep_from, sleep_to)

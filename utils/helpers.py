@@ -32,8 +32,10 @@ def update_run_accounts(_id: int, method: str):
         try:
             if method == "add":
                 run_accounts["accounts"].append(_id)
-            else:
+            elif method == "remove":
                 run_accounts["accounts"].remove(_id)
+            else:
+                run_accounts["accounts"] = []
 
             json.dump(run_accounts, data)
         except:
