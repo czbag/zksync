@@ -16,24 +16,24 @@ class Orbiter(Account):
         super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain=chain)
 
         self.bridge_codes = {
-            "ethereum": 9001,
-            "arbitrum": 9002,
-            "polygon": 9006,
-            "optimism": 9007,
-            "zksync": 9014,
-            "bsc": 9015,
-            "nova": 9016,
-            "zkevm": 9017,
+            "ethereum": "9001",
+            "arbitrum": "9002",
+            "polygon": "9006",
+            "optimism": "9007",
+            "zksync": "9014",
+            "nova": "9016",
+            "zkevm": "9017",
+            "scroll": "9019",
+            "base": "9021",
+            "linea": "9023",
+            "zora": "9030",
         }
 
-    async def get_tx_data(self, value: float, destination_chain: str):
-        amount = int(Web3.to_wei(value, "ether") + self.bridge_codes[destination_chain])
-
+    async def get_tx_data(self, value: int):
         tx = {
             "chainId": await self.w3.eth.chain_id,
             "nonce": await self.w3.eth.get_transaction_count(self.address),
-            "to": Web3.to_checksum_address(ORBITER_CONTRACT),
-            "value": amount,
+            "value": value,
             "from": self.address,
             "gasPrice": await self.w3.eth.gas_price,
         }
@@ -61,14 +61,24 @@ class Orbiter(Account):
             max_percent
         )
 
+        if ORBITER_CONTRACT == "":
+            logger.error(f"[{self.account_id}][{self.address}] Don't have orbiter contract")
+            return
+
         if amount < 0.005 or amount > 5:
             logger.error(
                 f"[{self.account_id}][{self.address}] Limit range amount for bridge 0.005 – 5 ETH | {amount} ETH"
             )
         else:
-            logger.info(f"[{self.account_id}][{self.address}] Bridge {self.chain} –> {destination_chain} | {amount} ETH")
+            logger.info(
+                f"[{self.account_id}][{self.address}] Bridge {self.chain} –> {destination_chain} | {amount} ETH"
+            )
 
-            tx_data = await self.get_tx_data(amount, destination_chain)
+            amount_to_bridge = str(amount_wei).replace(str(amount_wei)[-4:], self.bridge_codes[destination_chain])
+
+            tx_data = await self.get_tx_data(int(amount_to_bridge))
+            tx_data.update({"to": ORBITER_CONTRACT})
+
             balance = await self.w3.eth.get_balance(self.address)
 
             if tx_data["value"] >= balance:
