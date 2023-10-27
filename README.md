@@ -1,13 +1,17 @@
-<h1 align="center">ZkSync</h1>
+<div align="center">
+  <img src="https://i.imgur.com/tqA3f3O.png"  />
+  <h1>ZkSync Soft</h1>
+  <p>This software simplifies wallet management on the ZkSync network, providing access to a variety of features and a high level of randomization for enhanced security.</p>
+</div>
 
-📍 Данный скрипт облегчает работу с фермой для ZkSync Era
+---
 
 🔔 <b>Subscribe to me:</b> https://t.me/sybilwave
 
 🤑 <b>Donate me:</b> 0x00000b0ddce0bfda4531542ad1f2f5fad7b9cde9
 
 ---
-<h2>🚀 Запуск</h2>
+<h2>🚀 Installation</h2>
 
 ```
 git clone https://github.com/czbag/zksync.git
@@ -16,96 +20,108 @@ cd zksync
 
 pip install -r requirements.txt
 
+# Before you start, configure the required modules in modules_settings.py
+
 python main.py
 ```
 ---
-<h2>🚨 Возможности</h2>
+<h2>🚨 Modules</h2>
 
-1) Бридж через официальный мост (ввод/вывод)
+1) Make deposit/withdraw with official bridge
 
-2) Бридж через Orbiter
+2) Make deposit/withdraw with Orbiter bridge
 
 3) Wrap/Unwrap ETH
 
-5) Свапы через SyncSwap (+ ликвидность)
+4) Swap on SyncSwap (+ add liqudity)
 
-6) Свапы через Mute
+5) Swap on Mute
 
-7) Свапы через SpaceFi (+ ликвидность)
+6) Swap on SpaceFi (+ add liqudity)
 
-8) Свапы через PancakeSwap
+7) Swap on PancakeSwap
 
-9) Свапы через WooFi
+8) Swap on WooFi
 
-10) Свапы через Velocore
+9) Swap on Odos (my ref code is enabled, 1% of the transaction amount goes to me, come not from you, but from the Odos contract! can be turned off in config.py)
 
-11) Свапы через Odos (включен мой реф код, 1% от суммы транзы идет мне, приходят не от вас, а от контракта одоса! можно выключить в конфиге)
+10) Swap on ZkSwap
 
-12) Свапы через ZkSwap
+11) Swap on XY.Finance (my ref code is enabled, 1% of the transaction amount goes to me, come not from you, but from the XY contract! can be turned off in config.py)
 
-13) Свапы через XY.Finance (включен мой реф код, 1% от суммы транзы идет мне, приходят не от вас, а от контракта xy! можно выключить в конфиге)
+12) Swap on OpenOcean (my ref code is enabled, 1% of the transaction amount goes to me, come not from you, but from the OpenOcean contract! can be turned off in config.py)
 
-14) Свапы через OpenOcean (включен мой реф код, 1% от суммы транзы идет мне, приходят не от вас, а от контракта OO! можно выключить в конфиге)
+13) Swap on 1inch (my ref code is enabled, 1% of the transaction amount goes to me, come not from you, but from the 1inch contract! can be turned off in config.py)
 
-15) Свапы через 1inch (включен мой реф код, 1% от суммы транзы идет мне, приходят не от вас, а от контракта 1inch! можно выключить в конфиге)
+14) Swap on Maverick
 
-16) Bungee refuel
+15) Swap on VeSync
 
-17) Stargate бридж токена MAV в BSC сеть
+16) Stargate bridge $MAV token in BSC network
 
-18) Депозит в Eralend (+ возможность вывода после депа)
+17) Bungee refuel
 
-19) Вывод с Eralend (если хотите оставить средства в Eralend на какое-то время)
+18) Landing protocol Eralend (deposit/withdraw/enable_collateral)
 
-20) Депозит в Basilisk (+ возможность вывода после депа)
+19) Withdraw from Eralend landing protocol
 
-21) Вывод с Basilisk (если хотите оставить средства в Basilisk на какое-то время)
+20) Landing protocol Basilisk (deposit/withdraw/enable_collateral)
 
-22) Депозит в ReactFusion (+ возможность вывода после депа)
+21) Withdraw from Basilisk landing protocol
 
-23) Вывод с ReactFusion (если хотите оставить средства в ReactFusion на какое-то время)
+22) Landing protocol ReactFusion (deposit/withdraw/enable_collateral)
 
-24) Создание NFT коллекции в Omnisea
+23) Withdraw from ReactFusion landing protocol
 
-25) Mint + Brdige NFT через L2Telegraph (только в arb nova)
+24) Landing protocol ZeroLend (deposit/withdraw)
 
-26) Отправка месседжей через L2Telegraph (только в arb nova)
+25) Withdraw from ZeroLend landing protocol
 
-27) Минт пустой NFT
+26) Create onchain NFT collection on Omnisea
 
-28) Минт Tavaera ID + NFT
+27) Mint + Brdige NFT with L2Telegraph (LayerZero protocol) (only in arb nova network)
 
-29) Минт zks.network домена
+28) Send messages with L2Telegraph (LayerZero protocol) (only in arb nova network)
 
-30) Минт era.name домена
+29) Mint free NFT on NFTS2ME
 
-31) Dmail
+30) Mint Tavaera ID + NFT
 
-32) Возможность мультисвапов - совершает указанное количество обменов в указанных дексах
+31) Mint free NFT on MailZero
 
-33) Кастомные роуты - действия которые будут выполняться последовательно, либо в рандомном порядке
+32) Mint zks.network domain
 
-34) Мультиапрув - апрув либо отмена апрува для всех токенов, во всех дексах
+33) Mint era.name domain
 
-35) Деплой контракта токена и минт его же
+34) Dmail - send mails (onchain)
 
-36) Чекер транз
+35) Create Gnosis Safe
 
-37) Использование прокси, 1 акк - 1 прокси, если акков 10, а прокси 5, будет прокручено 5 акков
+36) Swap all tokens to ETH
 
-38) Логирование через logger
+37) Multi-swap capability - makes the specified number of swaps in the specified dexes
 
-39) Чекер газа перед стартом модуля
+38) Custom routes - actions to be performed sequentially or randomly
+
+39) Multi-approve - make approve or undo approve to any dexes
+
+40) Check gas before starting the module, if gas > specified, the software will wait for
+
+41) Using a proxy (http/s only), 1 account - 1 proxy, if you have 10 accounts and 5 proxy, software run 5 accounts only
+
+42) Logging via logger module
+
+43) Transaction count checker
 
 ---
-<h2>⚙️ Настройка</h2>
+<h2>⚙️ Settings</h2>
 
-1) Все основные настройки производятся в файле settings.py, внутри присутствует информация, что и где писать
+1) All basic settings are made in settings.py and modules_settings.py, inside there is information about what and where to write
 
-2) В файле accounts.txt указываем свои приватные ключи, которые я потом украду и сладко покушаю
+2) In the accounts.txt file, specify your private keys
 
-3) В файле proxy.txt указываем список прокси, каждая прокси с новой строки, формат http, пример в файле указан
+3) In the file proxy.txt specify the list of proxies, each proxy with a new line, format http/s, example in the file is specified
 
-4) В файле rpc.json по пути zksync/data/rpc.json можем менять rpc на свои
+4) In the rpc.json file at the path zksync/data/rpc.json we can change the rpc to ours
 
-Инфа по апдейтам да и просто лайф блог –– https://t.me/sybilwave
+Info on updates and just a life blog –– https://t.me/sybilwave
