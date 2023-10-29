@@ -1,9 +1,7 @@
-import random
 import time
 from typing import Union, Dict
 
 from loguru import logger
-from web3 import Web3
 from config import (
     ZKSYNC_TOKENS,
     SYNCSWAP_CLASSIC_POOL_ABI,
@@ -24,22 +22,12 @@ class SyncSwap(Account):
 
         self.swap_contract = self.get_contract(SYNCSWAP_CONTRACTS["router"], SYNCSWAP_ROUTER_ABI)
 
-    async def get_tx_data(self) -> Dict:
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address),
-        }
-
-        return tx
-
     async def get_pool(self, from_token: str, to_token: str):
         contract = self.get_contract(SYNCSWAP_CONTRACTS["classic_pool"], SYNCSWAP_CLASSIC_POOL_ABI)
 
         pool_address = await contract.functions.getPool(
-            Web3.to_checksum_address(ZKSYNC_TOKENS[from_token]),
-            Web3.to_checksum_address(ZKSYNC_TOKENS[to_token])
+            self.w3.to_checksum_address(ZKSYNC_TOKENS[from_token]),
+            self.w3.to_checksum_address(ZKSYNC_TOKENS[to_token])
         ).call()
 
         return pool_address
@@ -69,7 +57,7 @@ class SyncSwap(Account):
             min_percent: int,
             max_percent: int
     ):
-        token_address = Web3.to_checksum_address(ZKSYNC_TOKENS[from_token])
+        token_address = self.w3.to_checksum_address(ZKSYNC_TOKENS[from_token])
 
         amount_wei, amount, balance = await self.get_amount(
             from_token,
@@ -93,8 +81,7 @@ class SyncSwap(Account):
             if from_token == "ETH":
                 tx_data.update({"value": amount_wei})
             else:
-                await self.approve(amount_wei, token_address, Web3.to_checksum_address(SYNCSWAP_CONTRACTS["router"]))
-                tx_data.update({"nonce": await self.w3.eth.get_transaction_count(self.address)})
+                await self.approve(amount_wei, token_address, self.w3.to_checksum_address(SYNCSWAP_CONTRACTS["router"]))
 
             min_amount_out = await self.get_min_amount_out(pool_address, token_address, amount_wei, slippage)
 
@@ -145,14 +132,13 @@ class SyncSwap(Account):
 
         pool_address = await self.get_pool("ETH", "USDC")
 
-        tx_data = await self.get_tx_data()
-        tx_data.update({"value": amount_wei})
+        tx_data = await self.get_tx_data(amount_wei)
 
         transaction = await self.swap_contract.functions.addLiquidity2(
             pool_address,
             [
-                (Web3.to_checksum_address(ZERO_ADDRESS), amount_wei),
-                (Web3.to_checksum_address(ZKSYNC_TOKENS["USDC"]), 0)
+                (self.w3.to_checksum_address(ZERO_ADDRESS), amount_wei),
+                (self.w3.to_checksum_address(ZKSYNC_TOKENS["USDC"]), 0)
             ],
             abi.encode(["address"], [self.address]),
             0,

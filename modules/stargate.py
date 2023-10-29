@@ -1,8 +1,6 @@
-import random
 from typing import Union, Dict
 
 from loguru import logger
-from web3 import Web3
 from config import STARGATE_CONTRACT, STARGATE_ABI, ZKSYNC_TOKENS
 from utils.gas_checker import check_gas
 from utils.sleeping import sleep
@@ -18,19 +16,9 @@ class Stargate(Account):
 
         self.brdige_contract = self.get_contract(STARGATE_CONTRACT, STARGATE_ABI)
 
-    async def get_tx_data(self) -> Dict:
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address),
-        }
-
-        return tx
-
     async def get_lz_estimate_fee(self, amount: int):
         get_fee = await self.brdige_contract.functions.estimateSendFee(
-            Web3.to_checksum_address(ZKSYNC_TOKENS["MAV"]),
+            self.w3.to_checksum_address(ZKSYNC_TOKENS["MAV"]),
             102,
             self.address,
             amount,
@@ -96,12 +84,10 @@ class Stargate(Account):
 
             fee = await self.get_lz_estimate_fee(balance["balance_wei"])
 
-            tx_data = await self.get_tx_data()
-            tx_data.update({"value": fee})
-            tx_data.update({"nonce": await self.w3.eth.get_transaction_count(self.address)})
+            tx_data = await self.get_tx_data(fee)
 
             transaction = await self.brdige_contract.functions.sendOFT(
-                Web3.to_checksum_address(ZKSYNC_TOKENS["MAV"]),
+                self.w3.to_checksum_address(ZKSYNC_TOKENS["MAV"]),
                 102,
                 self.address,
                 balance["balance_wei"],
@@ -124,7 +110,15 @@ class Stargate(Account):
         else:
             logger.error(f"[{self.account_id}][{self.address}] Insufficient funds!")
 
-            result_swap = await self.swap(min_amount, max_amount, decimal, slippage, all_amount, min_percent, max_percent)
+            result_swap = await self.swap(
+                min_amount,
+                max_amount,
+                decimal,
+                slippage,
+                all_amount,
+                min_percent,
+                max_percent
+            )
 
             if result_swap:
                 await sleep(sleep_from, sleep_to)

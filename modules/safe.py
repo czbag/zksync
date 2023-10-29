@@ -2,7 +2,6 @@ import time
 from typing import Union, Dict
 
 from loguru import logger
-from web3 import Web3
 from config import SAFE_ABI, SAFE_CONTRACT, ZERO_ADDRESS
 from utils.gas_checker import check_gas
 from utils.helpers import retry
@@ -14,16 +13,6 @@ class GnosisSafe(Account):
         super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.contract = self.get_contract(SAFE_CONTRACT, SAFE_ABI)
-
-    async def get_tx_data(self) -> Dict:
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address),
-        }
-
-        return tx
 
     @retry
     @check_gas
@@ -37,7 +26,7 @@ class GnosisSafe(Account):
                 1,
                 ZERO_ADDRESS,
                 "0x",
-                Web3.to_checksum_address("0x2f870a80647BbC554F3a0EBD093f11B4d2a7492A"),
+                self.w3.to_checksum_address("0x2f870a80647BbC554F3a0EBD093f11B4d2a7492A"),
                 ZERO_ADDRESS,
                 0,
                 ZERO_ADDRESS
@@ -47,7 +36,7 @@ class GnosisSafe(Account):
         tx_data = await self.get_tx_data()
 
         transaction = await self.contract.functions.createProxyWithNonce(
-            Web3.to_checksum_address("0x1727c2c531cf966f902E5927b98490fDFb3b2b70"),
+            self.w3.to_checksum_address("0x1727c2c531cf966f902E5927b98490fDFb3b2b70"),
             setup_data,
             int(time.time()*1000)
         ).build_transaction(tx_data)

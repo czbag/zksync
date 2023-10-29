@@ -12,15 +12,6 @@ class Minter(Account):
     def __init__(self, account_id: int, private_key: str, proxy: Union[None, str]) -> None:
         super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
-    async def get_tx_data(self):
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address),
-        }
-        return tx
-
     @retry
     @check_gas
     async def mint_nft(self, contracts: List):

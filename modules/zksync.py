@@ -1,7 +1,6 @@
 import random
-from typing import Union, Dict
+from typing import Union
 
-from web3 import Web3
 from loguru import logger
 
 from config import ZKSYNC_DEPOSIT_ABI, ZKSYNC_WITHDRAW_ABI, ZKSYNC_BRIDGE_CONTRACT, ZKSYNC_TOKENS, WETH_ABI
@@ -13,18 +12,6 @@ from .account import Account
 class ZkSync(Account):
     def __init__(self, account_id: int, private_key: str, proxy: Union[None, str], chain: str) -> None:
         super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain=chain)
-
-    async def get_tx_data(self, value: Union[int, None] = None) -> Dict:
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address),
-        }
-        if value:
-            tx.update({"value": value})
-
-        return tx
 
     @retry
     @check_gas
@@ -58,7 +45,7 @@ class ZkSync(Account):
 
         transaction = await contract.functions.requestL2Transaction(
             self.address,
-            Web3.to_wei(amount, "ether"),
+            self.w3.to_wei(amount, "ether"),
             "0x",
             gas_limit,
             800,
@@ -100,8 +87,7 @@ class ZkSync(Account):
         if amount_wei < balance:
             contract = self.get_contract("0x000000000000000000000000000000000000800A", ZKSYNC_WITHDRAW_ABI)
 
-            tx_data = await self.get_tx_data()
-            tx_data.update({"value": amount_wei})
+            tx_data = await self.get_tx_data(amount_wei)
 
             contract_txn = await contract.functions.withdraw(
                 self.address,
@@ -140,8 +126,7 @@ class ZkSync(Account):
 
         logger.info(f"[{self.account_id}][{self.address}] Wrap {amount} ETH")
 
-        tx_data = await self.get_tx_data()
-        tx_data.update({"value": amount_wei})
+        tx_data = await self.get_tx_data(amount_wei)
 
         transaction = await weth_contract.functions.deposit().build_transaction(tx_data)
 

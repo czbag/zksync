@@ -14,16 +14,6 @@ class ZKSDomain(Account):
 
         self.contract = self.get_contract(ZKS_CONTRACT, ZKS_ABI)
 
-    async def get_tx_data(self) -> Dict:
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address),
-        }
-
-        return tx
-
     async def get_random_name(self):
         domain_name = "".join(random.sample([chr(i) for i in range(97, 123)], random.randint(7, 15)))
 

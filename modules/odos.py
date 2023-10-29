@@ -1,9 +1,7 @@
 import aiohttp
-import requests
 
 from typing import Union, Dict
 from loguru import logger
-from web3 import Web3
 
 from config import ZERO_ADDRESS, ZKSYNC_TOKENS, ODOS_CONTRACT
 from utils.gas_checker import check_gas
@@ -20,16 +18,6 @@ class Odos(Account):
         if proxy:
             self.proxy = f"http://{proxy}"
 
-    async def get_tx_data(self) -> Dict:
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address),
-        }
-
-        return tx
-
     async def quote(self, from_token: str, to_token: str, amount: int, slippage: float):
         url = "https://api.odos.xyz/sor/quote/v2"
 
@@ -37,13 +25,13 @@ class Odos(Account):
             "chainId": await self.w3.eth.chain_id,
             "inputTokens": [
                 {
-                    "tokenAddress": Web3.to_checksum_address(from_token),
+                    "tokenAddress": self.w3.to_checksum_address(from_token),
                     "amount": f"{amount}"
                 }
             ],
             "outputTokens": [
                 {
-                    "tokenAddress": Web3.to_checksum_address(to_token),
+                    "tokenAddress": self.w3.to_checksum_address(to_token),
                     "proportion": 1
                 }
             ],
@@ -124,7 +112,7 @@ class Odos(Account):
         to_token = ZERO_ADDRESS if to_token == "ETH" else ZKSYNC_TOKENS[to_token]
 
         if from_token != ZERO_ADDRESS:
-            await self.approve(amount_wei, from_token, Web3.to_checksum_address(ODOS_CONTRACT["router"]))
+            await self.approve(amount_wei, from_token, self.w3.to_checksum_address(ODOS_CONTRACT["router"]))
 
         quote_data = await self.quote(from_token, to_token, amount_wei, slippage)
 
@@ -135,7 +123,7 @@ class Odos(Account):
         tx_data = await self.get_tx_data()
         tx_data.update(
             {
-                "to": Web3.to_checksum_address(transaction["to"]),
+                "to": self.w3.to_checksum_address(transaction["to"]),
                 "data": transaction["data"],
                 "value": int(transaction["value"]),
             }

@@ -1,7 +1,6 @@
 from typing import Union, Dict
 
 from loguru import logger
-from web3 import Web3
 from config import REACTORFUSION_CONTRACTS, REACTORFUSION_ABI
 from utils.gas_checker import check_gas
 from utils.helpers import retry
@@ -14,16 +13,6 @@ class ReactorFusion(Account):
         super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.contract = self.get_contract(REACTORFUSION_CONTRACTS["landing"], REACTORFUSION_ABI)
-
-    async def get_tx_data(self) -> Dict:
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address),
-        }
-
-        return tx
 
     async def get_deposit_amount(self):
         amount = await self.contract.functions.balanceOf(self.address).call()
@@ -55,8 +44,7 @@ class ReactorFusion(Account):
 
         logger.info(f"[{self.account_id}][{self.address}] Make deposit on ReactorFusion | {amount} ETH")
 
-        tx_data = await self.get_tx_data()
-        tx_data.update({"value": amount_wei})
+        tx_data = await self.get_tx_data(amount_wei)
 
         transaction = await self.contract.functions.mint().build_transaction(tx_data)
 
@@ -79,11 +67,10 @@ class ReactorFusion(Account):
         if amount > 0:
             logger.info(
                 f"[{self.account_id}][{self.address}] Make withdraw from ReactorFusion | " +
-                f"{Web3.from_wei(amount, 'ether')} ETH"
+                f"{self.w3.from_wei(amount, 'ether')} ETH"
             )
 
             tx_data = await self.get_tx_data()
-            tx_data.update({"value": 0, "nonce": await self.w3.eth.get_transaction_count(self.address)})
 
             transaction = await self.contract.functions.redeem(amount).build_transaction(tx_data)
 
@@ -105,7 +92,7 @@ class ReactorFusion(Account):
         tx_data = await self.get_tx_data()
 
         transaction = await contract.functions.enterMarkets(
-            [Web3.to_checksum_address(REACTORFUSION_CONTRACTS["landing"])]
+            [self.w3.to_checksum_address(REACTORFUSION_CONTRACTS["landing"])]
         ).build_transaction(tx_data)
 
         signed_txn = await self.sign(transaction)
@@ -124,7 +111,7 @@ class ReactorFusion(Account):
         tx_data = await self.get_tx_data()
 
         transaction = await contract.functions.exitMarket(
-            Web3.to_checksum_address(REACTORFUSION_CONTRACTS["landing"])
+            self.w3.to_checksum_address(REACTORFUSION_CONTRACTS["landing"])
         ).build_transaction(tx_data)
 
         signed_txn = await self.sign(transaction)

@@ -1,9 +1,7 @@
 from typing import Union, Dict
 
 import aiohttp
-import requests
 from loguru import logger
-from web3 import Web3
 from config import OPENOCEAN_CONTRACT, ZKSYNC_TOKENS
 from utils.gas_checker import check_gas
 from utils.helpers import retry
@@ -19,31 +17,21 @@ class OpenOcean(Account):
         if proxy:
             self.proxy = f"http://{proxy}"
 
-    async def get_tx_data(self) -> Dict:
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address),
-        }
-
-        return tx
-
     async def build_transaction(self, from_token: str, to_token: str, amount: int, slippage: float):
         url = "https://open-api.openocean.finance/v3/324/swap_quote"
 
         params = {
-            "inTokenAddress": Web3.to_checksum_address(from_token),
-            "outTokenAddress": Web3.to_checksum_address(to_token),
+            "inTokenAddress": self.w3.to_checksum_address(from_token),
+            "outTokenAddress": self.w3.to_checksum_address(to_token),
             "amount": float(amount),
-            "gasPrice": float(Web3.from_wei(await self.w3.eth.gas_price, "gwei")),
+            "gasPrice": float(self.w3.from_wei(await self.w3.eth.gas_price, "gwei")),
             "slippage": slippage,
             "account": self.address,
         }
 
         if OPENOCEAN_CONTRACT["use_ref"]:
             params.update({
-                "referrer": Web3.to_checksum_address("0x1c7ff320ae4327784b464eed07714581643b36a7"),
+                "referrer": self.w3.to_checksum_address("0x1c7ff320ae4327784b464eed07714581643b36a7"),
                 "referrerFee": 1
             })
 
@@ -98,7 +86,7 @@ class OpenOcean(Account):
         tx_data = await self.get_tx_data()
         tx_data.update(
             {
-                "to": Web3.to_checksum_address(transaction_data["data"]["to"]),
+                "to": self.w3.to_checksum_address(transaction_data["data"]["to"]),
                 "data": transaction_data["data"]["data"],
                 "value": int(transaction_data["data"]["value"]),
             }

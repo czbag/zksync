@@ -2,7 +2,6 @@ import random
 from typing import Union
 
 from loguru import logger
-from web3 import Web3
 from config import ENS_CONTRACT, ENS_ABI
 from utils.gas_checker import check_gas
 from utils.helpers import retry
@@ -14,15 +13,6 @@ class EraDomain(Account):
         super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.contract = self.get_contract(ENS_CONTRACT, ENS_ABI)
-        
-    async def get_tx_data(self):
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address),
-        }
-        return tx
 
     async def get_random_name(self):
         domain_name = "".join(random.sample([chr(i) for i in range(97, 123)], random.randint(7, 15)))
@@ -45,8 +35,7 @@ class EraDomain(Account):
 
         domain_name = await self.get_random_name()
         
-        tx_data = await self.get_tx_data()
-        tx_data.update({"value": Web3.to_wei(0.003, "ether")})
+        tx_data = await self.get_tx_data(self.w3.to_wei(0.003, "ether"))
 
         transaction = await self.contract.functions.Register(domain_name).build_transaction(tx_data)
 

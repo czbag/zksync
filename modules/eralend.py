@@ -1,8 +1,6 @@
-import random
 from typing import Union
 
 from loguru import logger
-from web3 import Web3
 from config import ERALEND_CONTRACTS, ERALEND_ABI
 from utils.gas_checker import check_gas
 from utils.helpers import retry
@@ -47,7 +45,7 @@ class Eralend(Account):
         tx = {
             "chainId": await self.w3.eth.chain_id,
             "from": self.address,
-            "to": Web3.to_checksum_address(ERALEND_CONTRACTS["landing"]),
+            "to": self.w3.to_checksum_address(ERALEND_CONTRACTS["landing"]),
             "gasPrice": await self.w3.eth.gas_price,
             "nonce": await self.w3.eth.get_transaction_count(self.address),
             "value": amount_wei,
@@ -75,17 +73,12 @@ class Eralend(Account):
         if amount > 0:
             logger.info(
                 f"[{self.account_id}][{self.address}] Make withdraw from Eralend | " +
-                f"{Web3.from_wei(amount, 'ether')} ETH"
+                f"{self.w3.from_wei(amount, 'ether')} ETH"
             )
 
-            tx = {
-                "chainId": await self.w3.eth.chain_id,
-                "from": self.address,
-                "gasPrice": await self.w3.eth.gas_price,
-                "nonce": await self.w3.eth.get_transaction_count(self.address)
-            }
+            tx_data = await self.get_tx_data()
 
-            transaction = await self.contract.functions.redeemUnderlying(amount).build_transaction(tx)
+            transaction = await self.contract.functions.redeemUnderlying(amount).build_transaction(tx_data)
 
             signed_txn = await self.sign(transaction)
 
@@ -102,16 +95,11 @@ class Eralend(Account):
 
         contract = self.get_contract(ERALEND_CONTRACTS["collateral"], ERALEND_ABI)
 
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address)
-        }
+        tx_data = await self.get_tx_data()
 
         transaction = await contract.functions.enterMarkets(
-            [Web3.to_checksum_address(ERALEND_CONTRACTS["landing"])]
-        ).build_transaction(tx)
+            [self.w3.to_checksum_address(ERALEND_CONTRACTS["landing"])]
+        ).build_transaction(tx_data)
 
         signed_txn = await self.sign(transaction)
 
@@ -126,16 +114,11 @@ class Eralend(Account):
 
         contract = self.get_contract(ERALEND_CONTRACTS["collateral"], ERALEND_ABI)
 
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address)
-        }
+        tx_data = await self.get_tx_data()
 
         transaction = await contract.functions.exitMarket(
-            Web3.to_checksum_address(ERALEND_CONTRACTS["landing"])
-        ).build_transaction(tx)
+            self.w3.to_checksum_address(ERALEND_CONTRACTS["landing"])
+        ).build_transaction(tx_data)
 
         signed_txn = await self.sign(transaction)
 

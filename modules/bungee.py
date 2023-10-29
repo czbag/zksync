@@ -2,7 +2,6 @@ import random
 from typing import Union
 
 from loguru import logger
-from web3 import Web3
 from config import BUNGEE_ABI, BUNGEE_CONTRACT
 from utils.gas_checker import check_gas
 from utils.helpers import retry
@@ -38,16 +37,6 @@ class Bungee(Account):
             "ZK_EVM": 1101,
         }
 
-    async def get_tx_data(self, amount: int):
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address),
-            "value": amount
-        }
-        return tx
-
     @retry
     @check_gas
     async def refuel(self, chain_list: list, random_amount: bool):
@@ -67,7 +56,7 @@ class Bungee(Account):
 
             logger.info(
                 f"[{self.account_id}][{self.address}] Make refuel to " +
-                f"{to_chain.title()} | {Web3.from_wei(amount, 'ether')} ETH"
+                f"{to_chain.title()} | {self.w3.from_wei(amount, 'ether')} ETH"
             )
 
             tx_data = await self.get_tx_data(amount)

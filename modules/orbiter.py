@@ -1,9 +1,6 @@
-import random
-import sys
 from typing import Union
 
 from loguru import logger
-from web3 import Web3
 
 from utils.gas_checker import check_gas
 from utils.helpers import retry
@@ -28,16 +25,6 @@ class Orbiter(Account):
             "linea": "9023",
             "zora": "9030",
         }
-
-    async def get_tx_data(self, value: int):
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "nonce": await self.w3.eth.get_transaction_count(self.address),
-            "value": value,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-        }
-        return tx
 
     @retry
     @check_gas
@@ -77,7 +64,7 @@ class Orbiter(Account):
             amount_to_bridge = str(amount_wei).replace(str(amount_wei)[-4:], self.bridge_codes[destination_chain])
 
             tx_data = await self.get_tx_data(int(amount_to_bridge))
-            tx_data.update({"to": ORBITER_CONTRACT})
+            tx_data.update({"to": self.w3.to_checksum_address(ORBITER_CONTRACT)})
 
             balance = await self.w3.eth.get_balance(self.address)
 

@@ -15,15 +15,6 @@ class Omnisea(Account):
 
         self.contract = self.get_contract(OMNISEA_CONTRACT, OMNISEA_ABI)
 
-    async def get_tx_data(self):
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address),
-        }
-        return tx
-
     @staticmethod
     def generate_collection_data():
         title = "".join(random.sample([chr(i) for i in range(97, 123)], random.randint(5, 15)))

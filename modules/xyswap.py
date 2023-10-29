@@ -1,9 +1,7 @@
 from typing import Union, Dict
 
 import aiohttp
-import requests
 from loguru import logger
-from web3 import Web3
 from config import XYSWAP_CONTRACT, ZKSYNC_TOKENS
 from utils.gas_checker import check_gas
 from utils.helpers import retry
@@ -19,25 +17,15 @@ class XYSwap(Account):
         if proxy:
             self.proxy = f"http://{proxy}"
 
-    async def get_tx_data(self) -> Dict:
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address),
-        }
-
-        return tx
-
     async def get_quote(self, from_token: str, to_token: str, amount: int, slippage: float):
         url = "https://aggregator-api.xy.finance/v1/quote"
 
         params = {
             "srcChainId": await self.w3.eth.chain_id,
-            "srcQuoteTokenAddress": Web3.to_checksum_address(from_token),
+            "srcQuoteTokenAddress": self.w3.to_checksum_address(from_token),
             "srcQuoteTokenAmount": amount,
             "dstChainId": await self.w3.eth.chain_id,
-            "dstQuoteTokenAddress": Web3.to_checksum_address(to_token),
+            "dstQuoteTokenAddress": self.w3.to_checksum_address(to_token),
             "slippage": slippage
         }
 
@@ -53,10 +41,10 @@ class XYSwap(Account):
 
         params = {
             "srcChainId": await self.w3.eth.chain_id,
-            "srcQuoteTokenAddress": Web3.to_checksum_address(from_token),
+            "srcQuoteTokenAddress": self.w3.to_checksum_address(from_token),
             "srcQuoteTokenAmount": amount,
             "dstChainId": await self.w3.eth.chain_id,
-            "dstQuoteTokenAddress": Web3.to_checksum_address(to_token),
+            "dstQuoteTokenAddress": self.w3.to_checksum_address(to_token),
             "slippage": slippage,
             "receiver": self.address,
             "srcSwapProvider": swap_provider,
@@ -64,7 +52,7 @@ class XYSwap(Account):
 
         if XYSWAP_CONTRACT["use_ref"]:
             params.update({
-                "affiliate": Web3.to_checksum_address("0x1c7ff320ae4327784b464eed07714581643b36a7"),
+                "affiliate": self.w3.to_checksum_address("0x1c7ff320ae4327784b464eed07714581643b36a7"),
                 "commissionRate": 10000
             })
 
@@ -124,7 +112,7 @@ class XYSwap(Account):
         tx_data = await self.get_tx_data()
         tx_data.update(
             {
-                "to": Web3.to_checksum_address(transaction_data["tx"]["to"]),
+                "to": self.w3.to_checksum_address(transaction_data["tx"]["to"]),
                 "data": transaction_data["tx"]["data"],
                 "value": transaction_data["tx"]["value"],
             }

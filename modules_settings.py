@@ -51,14 +51,19 @@ async def bridge_orbiter(account_id, key, proxy):
     """
 
     from_chain = "zksync"
-    to_chain = "ethereum"
+    to_chain = "base"
 
-    min_amount = 1
-    max_amount = 3
+    min_amount = 0.005
+    max_amount = 0.0051
     decimal = 4
 
+    all_amount = False
+
+    min_percent = 5
+    max_percent = 10
+
     orbiter = Orbiter(account_id, key, from_chain, proxy)
-    await orbiter.bridge(to_chain, min_amount, max_amount, decimal)
+    await orbiter.bridge(to_chain, min_amount, max_amount, decimal, all_amount, min_percent, max_percent)
 
 
 async def wrap_eth(account_id, key, proxy):
@@ -144,8 +149,8 @@ async def liquidity_syncswap(account_id, key, proxy):
 
     all_amount = True
 
-    min_percent = 5
-    max_percent = 10
+    min_percent = 50
+    max_percent = 50
 
     syncswap = SyncSwap(account_id, key, proxy)
     await syncswap.add_liquidity(min_amount, max_amount, decimal, all_amount, min_percent, max_percent)

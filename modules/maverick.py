@@ -1,9 +1,7 @@
-import random
 import time
 from typing import Union, Dict
 
 from loguru import logger
-from web3 import Web3
 from config import MAVERICK_CONTRACTS, MAVERICK_POSITION_ABI, ZKSYNC_TOKENS, MAVERICK_ROUTER_ABI, ZERO_ADDRESS
 from utils.gas_checker import check_gas
 from utils.helpers import retry
@@ -16,21 +14,11 @@ class Maverick(Account):
 
         self.swap_contract = self.get_contract(MAVERICK_CONTRACTS["router"], MAVERICK_ROUTER_ABI)
 
-    async def get_tx_data(self) -> Dict:
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address),
-        }
-
-        return tx
-
     async def get_min_amount_out(self, amount: int, token_a_in: bool, slippage: float):
         contract = self.get_contract(MAVERICK_CONTRACTS["pool_information"], MAVERICK_POSITION_ABI)
 
         amount = await contract.functions.calculateSwap(
-            Web3.to_checksum_address(MAVERICK_CONTRACTS["pool"]),
+            self.w3.to_checksum_address(MAVERICK_CONTRACTS["pool"]),
             amount,
             token_a_in,
             True,
@@ -41,9 +29,9 @@ class Maverick(Account):
 
     def get_path(self, from_token: str, to_token: str):
         path_data = [
-            Web3.to_checksum_address(ZKSYNC_TOKENS[from_token]),
-            Web3.to_checksum_address(MAVERICK_CONTRACTS["pool"]),
-            Web3.to_checksum_address(ZKSYNC_TOKENS[to_token]),
+            self.w3.to_checksum_address(ZKSYNC_TOKENS[from_token]),
+            self.w3.to_checksum_address(MAVERICK_CONTRACTS["pool"]),
+            self.w3.to_checksum_address(ZKSYNC_TOKENS[to_token]),
         ]
 
         path = b"".join([bytes.fromhex(address[2:]) for address in path_data])
@@ -51,8 +39,7 @@ class Maverick(Account):
         return path
 
     async def swap_to_token(self, from_token: str, to_token: str, amount: int, slippage: int):
-        tx_data = await self.get_tx_data()
-        tx_data.update({"value": amount})
+        tx_data = await self.get_tx_data(amount)
 
         deadline = int(time.time()) + 1000000
 
@@ -84,7 +71,6 @@ class Maverick(Account):
         await self.approve(amount, ZKSYNC_TOKENS[from_token], MAVERICK_CONTRACTS["router"])
 
         tx_data = await self.get_tx_data()
-        tx_data.update({"nonce": await self.w3.eth.get_transaction_count(self.address)})
 
         deadline = int(time.time()) + 1000000
 

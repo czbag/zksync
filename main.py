@@ -1,14 +1,23 @@
 import random
 import sys
+import time
+from concurrent.futures import ThreadPoolExecutor
 
 import questionary
-from loguru import logger
 from questionary import Choice
 
 from config import ACCOUNTS, PROXIES
-from utils.helpers import get_run_accounts, update_run_accounts
-from settings import USE_PROXY, RANDOM_WALLET, SLEEP_FROM, SLEEP_TO, QUANTITY_RUN_ACCOUNTS
 from modules_settings import *
+from utils.sleeping import sleep
+from settings import (
+    USE_PROXY,
+    RANDOM_WALLET,
+    SLEEP_FROM,
+    SLEEP_TO,
+    QUANTITY_THREADS,
+    THREAD_SLEEP_FROM,
+    THREAD_SLEEP_TO
+)
 
 
 def get_module():
@@ -99,56 +108,42 @@ def get_wallets():
     return wallets
 
 
-async def run_module(module, account_id, key, proxy, sleep_time, start_id):
-    if start_id != 1:
-        await asyncio.sleep(sleep_time)
+async def run_module(module, account_id, key, proxy):
+    await module(account_id, key, proxy)
 
-    while True:
-        run_accounts = get_run_accounts()
-
-        if len(run_accounts["accounts"]) < QUANTITY_RUN_ACCOUNTS:
-            update_run_accounts(account_id, "add")
-
-            await module(account_id, key, proxy)
-
-            update_run_accounts(account_id, "remove")
-
-            break
-        else:
-            logger.info(f'Current run accounts: {len(run_accounts["accounts"])}')
-            await asyncio.sleep(60)
+    await sleep(SLEEP_FROM, SLEEP_TO)
 
 
-async def main(module):
+def _async_run_module(module, account_id, key, recipient):
+    asyncio.run(run_module(module, account_id, key, recipient))
+
+
+def main(module):
     wallets = get_wallets()
-
-    tasks = []
 
     if RANDOM_WALLET:
         random.shuffle(wallets)
 
-    sleep_time = random.randint(SLEEP_FROM, SLEEP_TO)
-
-    for _, account in enumerate(wallets, start=1):
-        tasks.append(asyncio.create_task(
-            run_module(module, account["id"], account["key"], account["proxy"], sleep_time, _)
-        ))
-
-        sleep_time += random.randint(SLEEP_FROM, SLEEP_TO)
-
-    await asyncio.gather(*tasks)
+    with ThreadPoolExecutor(max_workers=QUANTITY_THREADS) as executor:
+        for _, account in enumerate(wallets, start=1):
+            executor.submit(
+                _async_run_module,
+                module,
+                account.get("id"),
+                account.get("key"),
+                account.get("proxy")
+            )
+            time.sleep(random.randint(THREAD_SLEEP_FROM, THREAD_SLEEP_TO))
 
 
 if __name__ == '__main__':
     print("❤️ Subscribe to me – https://t.me/sybilwave\n")
 
-    update_run_accounts(0, "new")
-
     module = get_module()
     if module == "tx_checker":
         get_tx_count()
     else:
-        asyncio.run(main(module))
+        main(module)
 
     print("\n❤️ Subscribe to me – https://t.me/sybilwave\n")
     print("🤑 Donate me: 0x00000b0ddce0bfda4531542ad1f2f5fad7b9cde9")

@@ -1,4 +1,3 @@
-import random
 from typing import Union
 
 from loguru import logger
@@ -13,15 +12,6 @@ class MailZero(Account):
         super().__init__(account_id=account_id, private_key=private_key, proxy=proxy, chain="zksync")
 
         self.contract = self.get_contract(MAILZERO_CONTRACT, MAILZERO_ABI)
-
-    async def get_tx_data(self):
-        tx = {
-            "chainId": await self.w3.eth.chain_id,
-            "from": self.address,
-            "gasPrice": await self.w3.eth.gas_price,
-            "nonce": await self.w3.eth.get_transaction_count(self.address),
-        }
-        return tx
 
     @retry
     @check_gas

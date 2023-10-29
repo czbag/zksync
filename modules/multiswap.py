@@ -2,7 +2,6 @@ import random
 from typing import Union
 
 from loguru import logger
-from web3 import Web3
 from config import ZKSYNC_TOKENS
 from modules import *
 from utils.sleeping import sleep
@@ -63,8 +62,8 @@ class Multiswap(Account):
 
                 balance = await self.w3.eth.get_balance(self.address)
 
-                min_amount = float(Web3.from_wei(int(balance / 100 * min_percent), "ether"))
-                max_amount = float(Web3.from_wei(int(balance / 100 * max_percent), "ether"))
+                min_amount = float(self.w3.from_wei(int(balance / 100 * min_percent), "ether"))
+                max_amount = float(self.w3.from_wei(int(balance / 100 * max_percent), "ether"))
             else:
                 decimal = 18
                 to_token = "ETH"
