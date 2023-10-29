@@ -116,7 +116,7 @@ class Account:
 
             approve_amount = 2 ** 128 if amount > allowance_amount else 0
 
-            tx_data = self.get_tx_data()
+            tx_data = await self.get_tx_data()
 
             transaction = await contract.functions.approve(
                 contract_address,
