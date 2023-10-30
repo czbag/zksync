@@ -15,16 +15,21 @@ class Routes(Account):
     async def start(self, use_modules: list, sleep_from: int, sleep_to: int, random_module: bool):
         logger.info(f"[{self.account_id}][{self.address}] Start using routes")
 
-        for _ in range(0, len(use_modules)):
-            if random_module:
-                module = random.choice(use_modules)
+        run_modules = []
 
-                use_modules.remove(module)
+        for module in use_modules:
+            if type(module) is list:
+                run_modules.append(random.choice(module))
+            elif type(module) is tuple:
+                for _ in range(random.randint(module[1], module[2])):
+                    run_modules.append(module[0])
             else:
-                module = use_modules[_]
+                run_modules.append(module)
 
-            module = random.choice(module) if type(module) is list else module
+        if random_module:
+            random.shuffle(run_modules)
 
+        for module in run_modules:
             if module is None:
                 logger.info(f"[{self.account_id}][{self.address}] Skip module")
                 continue
