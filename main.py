@@ -8,6 +8,7 @@ from questionary import Choice
 
 from config import ACCOUNTS, PROXIES
 from modules_settings import *
+from utils.helpers import remove_wallet
 from utils.sleeping import sleep
 from settings import (
     USE_PROXY,
@@ -16,7 +17,7 @@ from settings import (
     SLEEP_TO,
     QUANTITY_THREADS,
     THREAD_SLEEP_FROM,
-    THREAD_SLEEP_TO
+    THREAD_SLEEP_TO, REMOVE_WALLET
 )
 
 
@@ -110,6 +111,9 @@ def get_wallets():
 
 async def run_module(module, account_id, key, proxy):
     await module(account_id, key, proxy)
+
+    if REMOVE_WALLET:
+        remove_wallet(key)
 
     await sleep(SLEEP_FROM, SLEEP_TO)
 

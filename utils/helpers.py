@@ -16,3 +16,13 @@ def retry(func):
                 retries += 1
 
     return wrapper
+
+
+def remove_wallet(private_key: str):
+    with open("accounts.txt", "r") as file:
+        lines = file.readlines()
+
+    with open("accounts.txt", "w") as file:
+        for line in lines:
+            if private_key not in line:
+                file.write(line)
