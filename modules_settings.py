@@ -685,6 +685,46 @@ async def mint_tavaera(account_id, key, proxy):
     await tavaera_nft.mint(sleep_from, sleep_to)
 
 
+async def mint_zkstars(account_id, key, proxy):
+    """
+    Mint ZkStars NFT
+    """
+
+    contracts = [
+        "0xe7Ed1c47E1e2eA6e9126961df5d41798722A7656",
+        "0x53424440d0ead57e599529b42807a0ba1965dd66",
+        "0x406b1195f4916b13513fea102777df5bd4af06eb",
+        "0xf19b7027d37c3321194d6c5f34ea2e6cbc73fa25",
+        "0xd834c621dea708a21b05eaf181115793eaa2f9d9",
+        "0xafec8df7b10303c3514826c9e2222a16f1486bee",
+        "0x56bf83e598ce80299962be937fe0ba54f5d5e2b2",
+        "0x8595d989a96cdbdc1651e3c87ea3d945e0460097",
+        "0x945b1edcd03e1d1ad9255c2b28e1c22f2c819f0e",
+        "0xc92fc3f19645014c392825e3cfa3597412b0d913",
+        "0x808d59a747bfedd9bcb11a63b7e5748d460b614d",
+        "0x8dd8706cbc931c87694e452caa0a83a564753241",
+        "0x8dd3c29f039e932ebd8eac873b8b7a56d17e36c6",
+        "0xca0848cadb25e6fcd9c8ce15bcb8f8da6c1fc519",
+        "0x06d52c7e52e9f28e3ad889ab2083fe8dba735d52",
+        "0x86f39d51c06cac130ca59eabedc9233a49fcc22a",
+        "0xee0d4a8f649d83f6ba5e5c9e6c4d4f6ae846846a",
+        "0xfda7967c56ce80f74b06e14ab9c71c80cb78b466",
+        "0x0d99efcde08269e2941a5e8a0a02d8e5722403fc",
+        "0xf72cf790ac8d93ee823014484fc74f2f1e337bf6"
+    ]
+
+    mint_min = 1
+    mint_max = 1
+
+    mint_all = False
+
+    sleep_from = 5
+    sleep_to = 10
+
+    zkkstars = ZkStars(account_id, key, proxy)
+    await zkkstars.mint(contracts, mint_min, mint_max, mint_all, sleep_from, sleep_to)
+
+
 async def swap_tokens(account_id, key, proxy):
     """
     SwapTokens module: Automatically swap tokens to ETH
@@ -799,6 +839,7 @@ async def custom_routes(account_id, key, proxy):
         – deposit_zerolend
         – withdraw_zerolend
     NFT/DOMAIN:
+        – mint_zkstars
         – create_omnisea
         – bridge_nft
         – mint_tavaera
@@ -825,12 +866,12 @@ async def custom_routes(account_id, key, proxy):
     """
 
     use_modules = [
-        swap_multiswap,
-        [deposit_eralend, deposit_basilisk, deposit_reactorfusion, deposit_zerolend],
+        swap_tokens,
         [create_omnisea, None],
-        [mint_mailzero_nft, None],
+        swap_multiswap,
+        mint_zkstars,
+        [deposit_eralend, deposit_basilisk, deposit_reactorfusion, deposit_zerolend],
         [send_mail, None],
-        (create_safe, 1, 3),
     ]
 
     sleep_from = 300
