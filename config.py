@@ -115,6 +115,9 @@ with open("data/abi/gnosis/abi.json", "r") as file:
 with open("data/abi/zkstars/abi.json", "r") as file:
     ZKSTARS_ABI = json.load(file)
 
+with open("data/abi/rocketsam/abi.json", "r") as file:
+    ROCKETSAM_ABI = json.load(file)
+
 ZKSYNC_BRIDGE_CONTRACT = "0x32400084c286cf3e17e7b677ea9583e60a000324"
 
 ORBITER_CONTRACT = ""

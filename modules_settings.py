@@ -661,6 +661,72 @@ async def deposit_zerolend(account_id, key, proxy):
     )
 
 
+async def deposit_rocketsam(account_id, key, proxy):
+    """
+    Make deposit on RocketSam
+    ______________________________________________________
+    make_withdraw - True, if need withdraw after deposit
+
+    all_amount - deposit from min_percent to max_percent
+    """
+    contracts = [
+        "0xbc6C8BbBD06b6785cF898C3a69DbAE56527dEF10",
+        "0x267e930bb2cb5d3d62564c20b947ad8839c8f7b6",
+        "0xb959a457c54b03d8bf1d126c3baca8ee2cd967f2",
+        "0x5b35d48acdc790ebb94523a100a20e97c937de29",
+        "0x65b82bd5a83ff082f723ebf4187b7739ad13e230",
+        "0xe771b992d2af7d0d99bc93c83cc9c254787e47a8",
+        "0x0b6662b53560ca1b4b22e15bd3cf692e864a733c",
+        "0xe6bcb3c91982f5f63e4b19b8130a10767762e2a9",
+        "0x07068c8e44a4f4816b3921178ccec6cd4d9a4e14",
+        "0x59f6cef0843f3506b214055ad6fd3c385f83d1ad",
+    ]
+
+    min_amount = 0.0001
+    max_amount = 0.0002
+    decimal = 5
+
+    sleep_from = 30
+    sleep_to = 300
+
+    make_withdraw = False
+
+    all_amount = True
+
+    min_percent = 1
+    max_percent = 1
+
+    rocketsam = RocketSam(account_id, key, proxy)
+    await rocketsam.deposit(
+        contracts, min_amount, max_amount, decimal, sleep_from, sleep_to,
+        make_withdraw, all_amount, min_percent, max_percent
+    )
+
+
+async def withdraw_rocketsam(account_id, key, proxy):
+    """
+    Make withdraw from RocketSam
+    """
+    contracts = [
+        "0xbc6C8BbBD06b6785cF898C3a69DbAE56527dEF10",
+        "0x267e930bb2cb5d3d62564c20b947ad8839c8f7b6",
+        "0xb959a457c54b03d8bf1d126c3baca8ee2cd967f2",
+        "0x5b35d48acdc790ebb94523a100a20e97c937de29",
+        "0x65b82bd5a83ff082f723ebf4187b7739ad13e230",
+        "0xe771b992d2af7d0d99bc93c83cc9c254787e47a8",
+        "0x0b6662b53560ca1b4b22e15bd3cf692e864a733c",
+        "0xe6bcb3c91982f5f63e4b19b8130a10767762e2a9",
+        "0x07068c8e44a4f4816b3921178ccec6cd4d9a4e14",
+        "0x59f6cef0843f3506b214055ad6fd3c385f83d1ad",
+    ]
+
+    sleep_from = 10
+    sleep_to = 30
+
+    rocketsam = RocketSam(account_id, key, proxy)
+    await rocketsam.withdraw(contracts, sleep_from, sleep_to)
+
+
 async def bridge_nft(account_id, key, proxy):
     """
     Make mint NFT and bridge NFT on L2Telegraph
@@ -838,6 +904,8 @@ async def custom_routes(account_id, key, proxy):
         enable_collateral_reactorfusion, disable_collateral_reactorfusion
         – deposit_zerolend
         – withdraw_zerolend
+        – deposit_rocketsam
+        – withdraw_rocketsam
     NFT/DOMAIN:
         – mint_zkstars
         – create_omnisea

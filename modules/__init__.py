@@ -34,3 +34,4 @@ from .omnisea import Omnisea
 from .swap_tokens import SwapTokens
 from .safe import GnosisSafe
 from .zkstars import ZkStars
+from .rocketsam import RocketSam
